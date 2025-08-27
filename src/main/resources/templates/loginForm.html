@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{login.title}">Login Page</title>
+    <link rel="stylesheet" th:href="@{/css/login.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Position the toggle eye inside input */
+        .input-with-icon {
+            position: relative;
+        }
+        .input-with-icon .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<main class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-user-shield login-icon"></i>
+            <h1 th:text="#{login.heading}">Login</h1>
+            <p class="subtitle" th:text="#{login.subtitle}">Please enter your credentials</p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}">Error message</span>
+        </div>
+
+        <div th:if="${msg}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${msg}">Success message</span>
+        </div>
+
+        <form th:action="@{/login}" method="post" class="login-form">
+            <div class="form-group">
+                <label for="username" th:text="#{login.label.username}">Username</label>
+                <div class="input-with-icon">
+                    <!-- Left user icon -->
+                    <span class="input-left-icon">
+        <i class="fas fa-user"></i>
+    </span>
+                    <!-- Input -->
+                    <input type="text" id="username" name="username" th:placeholder="#{login.username.placeholder}" required>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="password" th:text="#{login.label.password}">Password</label>
+                <div class="input-with-icon">
+                    <!-- Left lock icon -->
+                    <span class="input-left-icon">
+        <i class="fas fa-lock"></i>
+    </span>
+                    <!-- Input -->
+                    <input type="password" id="password" name="password" th:placeholder="#{login.password.placeholder}" required>
+                    <!-- Toggle eye -->
+                    <span class="input-right-icon">
+        <i id="togglePassword" class="fas fa-eye"></i>
+    </span>
+                </div>
+
+
+            </div>
+
+            <button type="submit" class="btn-login">
+                <i class="fas fa-sign-in-alt"></i>
+                <span th:text="#{login.button.submit}">Login</span>
+            </button>
+
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+        </form>
+
+        <div class="login-footer">
+            <a href="#" th:text="#{login.link.forgot}">Forgot password?</a>
+            <span class="divider">|</span>
+            <a href="#" th:text="#{login.link.register}">Create account</a>
+        </div>
+    </div>
+</main>
+
+<!-- JavaScript to toggle password -->
+<script>
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+
+    togglePassword.addEventListener('click', () => {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+
+        // Toggle eye icon
+        togglePassword.classList.toggle('fa-eye');
+        togglePassword.classList.toggle('fa-eye-slash');
+    });
+</script>
+
+</body>
+</html>

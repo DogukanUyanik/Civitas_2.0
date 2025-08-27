@@ -1,0 +1,62 @@
+/* Page wrapper: sidebar + content */
+.page-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar styling should match your existing sidebar.css */
+.sidebar {
+    width: 250px; /* adjust as needed */
+    transition: width 0.3s ease;
+}
+
+/* Members container fills remaining space */
+.members-container {
+    flex-grow: 1;
+    padding: 2rem;
+    background-color: #f4f6f8;
+}
+
+/* Title */
+.title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+    font-size: 2rem;
+}
+
+/* Members grid layout */
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Member card */
+.member-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.member-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Member details */
+.member-card h2 {
+    margin: 0 0 0.5rem 0;
+    color: #0077cc;
+}
+
+.member-card p {
+    margin: 0.3rem 0;
+    color: #555;
+}
+
+.member-card strong {
+    color: #333;
+}

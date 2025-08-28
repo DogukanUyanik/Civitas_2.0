@@ -96,6 +96,7 @@
 
         <!-- User info + logout at the bottom -->
         <div class="sidebar-footer" th:if="${username != null and username != ''}">
+
             <div class="user-info">
                 <div class="user-avatar">
                     <span th:text="${username.substring(0,1).toUpperCase()}">U</span>
@@ -122,6 +123,18 @@
                 <span class="tooltip">Login</span>
             </a>
         </div>
+
+        <!-- Language switcher -->
+        <div class="sidebar-footer">
+            <form th:action="@{/changeLocale}" method="get">
+                <select name="lang" onchange="this.form.submit()" class="language-switcher">
+                    <option th:value="en" th:selected="${#locale.language == 'en'}">English</option>
+                    <option th:value="nl" th:selected="${#locale.language == 'nl'}">Nederlands</option>
+                </select>
+            </form>
+        </div>
+
+
     </div>
 </th:block>
 

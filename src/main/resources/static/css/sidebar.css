@@ -285,6 +285,33 @@ body {
     display: block;
 }
 
+/* Sidebar language switcher */
+.sidebar-footer .language-switcher {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    appearance: none; /* remove default arrow in some browsers */
+    transition: all 0.2s ease;
+}
+
+.sidebar-footer .language-switcher:hover {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.sidebar-footer .language-switcher option {
+    color: #374151;
+    background-color: #ffffff;
+}
+
+
 .logout-button {
     width: 100%;
     padding: 10px 16px;

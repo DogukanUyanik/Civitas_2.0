@@ -12,7 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class InitDataConfig implements CommandLineRunner {
@@ -45,39 +47,33 @@ public class InitDataConfig implements CommandLineRunner {
         userRepository.saveAll(Arrays.asList(admin1, admin2));
 
         // Seed Members
-        Member member1 = Member.builder()
-                .firstName("Ali")
-                .lastName("Khan")
-                .email("ali@example.com")
-                .phoneNumber("123456789")
-                .address("Street 1, City")
-                .dateOfBirth(LocalDate.of(1990, 5, 10))
-                .dateOfLastPayment(LocalDate.now())
-                .memberStatus(MemberStatus.ACTIVE)
-                .build();
+        List<Member> members = new ArrayList<>();
 
-        Member member2 = Member.builder()
-                .firstName("Fatima")
-                .lastName("Yildiz")
-                .email("fatima@example.com")
-                .phoneNumber("987654321")
-                .address("Street 2, City")
-                .dateOfBirth(LocalDate.of(1995, 8, 20))
-                .dateOfLastPayment(LocalDate.now().minusMonths(2))
-                .memberStatus(MemberStatus.INACTIVE)
-                .build();
+        String[][] names = {
+                {"Ali", "Khan"}, {"Fatima", "Yildiz"}, {"Doğukan", "Demir"}, {"Leyla", "Öztürk"},
+                {"Ahmet", "Yılmaz"}, {"Ayşe", "Kaya"}, {"Mehmet", "Şahin"}, {"Elif", "Demirtaş"},
+                {"Can", "Çelik"}, {"Zeynep", "Aksoy"}, {"Murat", "Koç"}, {"Seda", "Aydın"},
+                {"Emre", "Polat"}, {"Derya", "Kurt"}, {"Burak", "Erdem"}, {"Aslı", "Özdemir"},
+                {"Ozan", "Kara"}, {"Selin", "Çetin"}, {"Hakan", "Güneş"}, {"Deniz", "Kılıç"},
+                {"Cem", "Arslan"}, {"Ebru", "Taş"}, {"Serkan", "Yavuz"}, {"Melis", "Özcan"},
+                {"Tunahan", "Karaca"}, {"Gamze", "Demirci"}, {"Furkan", "Koçak"}, {"Merve", "Bulut"},
+                {"Yusuf", "Doğan"}, {"İrem", "Öztürk"}
+        };
 
-        Member member3 = Member.builder()
-                .firstName("Doğukan")
-                .lastName("Demir")
-                .email("dogukan@example.com")
-                .phoneNumber("555123456")
-                .address("Street 3, City")
-                .dateOfBirth(LocalDate.of(1998, 2, 15))
-                .dateOfLastPayment(LocalDate.now())
-                .memberStatus(MemberStatus.ACTIVE)
-                .build();
+        for (int i = 0; i < names.length; i++) {
+            Member member = Member.builder()
+                    .firstName(names[i][0])
+                    .lastName(names[i][1])
+                    .email(names[i][0].toLowerCase() + "." + names[i][1].toLowerCase() + "@example.com")
+                    .phoneNumber("555000" + (100 + i))
+                    .address("Street " + (i + 1) + ", City")
+                    .dateOfBirth(LocalDate.of(1990 + (i % 10), (i % 12) + 1, (i % 28) + 1))
+                    .dateOfLastPayment(LocalDate.now().minusMonths(i % 6))
+                    .memberStatus(i % 3 == 0 ? MemberStatus.INACTIVE : MemberStatus.ACTIVE)
+                    .build();
+            members.add(member);
+        }
 
-        memberRepository.saveAll(Arrays.asList(member1, member2, member3));
+        memberRepository.saveAll(members);
     }
 }

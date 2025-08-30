@@ -15,6 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
+
 @Controller
 @RequestMapping("/members")
 public class MemberController {
@@ -66,20 +68,16 @@ public class MemberController {
                              Model model,
                              RedirectAttributes redirectAttributes) {
 
-        // Custom email validation
         memberEmailValidator.validate(member, result);
 
-        // Return to form if there are validation errors
         if (result.hasErrors()) {
             return "members/memberForm";
         }
 
         boolean isNew = member.getId() == null;
 
-        // Save member
         memberService.saveMember(member);
 
-        // Add flash message
         if (isNew) {
             String message = messageSource.getMessage(
                     "member.success.create",
@@ -96,8 +94,15 @@ public class MemberController {
             redirectAttributes.addFlashAttribute("success", message);
         }
 
-        // Redirect to member list
         return "redirect:/members";
+    }
+
+    @GetMapping("/view/{id}")
+    public String showMemberDetails(@PathVariable Long id, Model model) {
+        Member member = memberService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
+        model.addAttribute("member", member);
+        return "members/memberDetails";
     }
 
 

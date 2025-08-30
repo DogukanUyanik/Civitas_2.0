@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -44,4 +46,8 @@ public class Member {
     @NotNull(message = "Member status is required")
     @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Transaction> transactions = new ArrayList<>();
+
 }

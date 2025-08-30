@@ -1,9 +1,6 @@
 package org.example.civitaswebapp;
 
-import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.domain.MemberStatus;
-import org.example.civitaswebapp.domain.MyUser;
-import org.example.civitaswebapp.domain.MyUserRole;
+import org.example.civitaswebapp.domain.*;
 import org.example.civitaswebapp.repository.MemberRepository;
 import org.example.civitaswebapp.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +9,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Component
 public class InitDataConfig implements CommandLineRunner {
@@ -60,6 +59,8 @@ public class InitDataConfig implements CommandLineRunner {
                 {"Yusuf", "Doğan"}, {"İrem", "Öztürk"}
         };
 
+        Random random = new Random();
+
         for (int i = 0; i < names.length; i++) {
             Member member = Member.builder()
                     .firstName(names[i][0])
@@ -71,6 +72,26 @@ public class InitDataConfig implements CommandLineRunner {
                     .dateOfLastPayment(LocalDate.now().minusMonths(i % 6))
                     .memberStatus(i % 3 == 0 ? MemberStatus.INACTIVE : MemberStatus.ACTIVE)
                     .build();
+
+            // Create a few mock transactions per member
+            List<Transaction> transactions = new ArrayList<>();
+            int numTransactions = 2 + random.nextInt(3); // 2-4 transactions
+            TransactionType[] types = TransactionType.values();
+            for (int j = 0; j < numTransactions; j++) {
+                Transaction tx = Transaction.builder()
+                        .member(member)
+                        .amount(5.0 + random.nextInt(20)) // Random amount €5-€24
+                        .currency("EUR")
+                        .status(TransactionStatus.values()[random.nextInt(TransactionStatus.values().length)])
+                        .type(types[random.nextInt(types.length)]) // Random TransactionType
+                        .createdAt(LocalDateTime.now().minusDays(random.nextInt(60)))
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+                transactions.add(tx);
+            }
+            member.setTransactions(transactions);
+
+
             members.add(member);
         }
 

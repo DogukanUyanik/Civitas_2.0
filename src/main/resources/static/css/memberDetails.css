@@ -1,4 +1,4 @@
-    /* Members container */
+/* Members container */
 .members-container {
     flex-grow: 1;
     padding: 2rem;
@@ -43,6 +43,7 @@
             0 10px 10px -5px rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease forwards;
 }
 
 .panel:hover {
@@ -57,39 +58,252 @@
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
 }
 
-.member-info p {
+/* Profile section */
+.profile-section {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid rgba(103, 126, 234, 0.1);
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     align-items: center;
-    margin-bottom: 1.5rem;
-    font-size: 1.1rem;
-    color: #2d3748;
-    padding: 0.75rem;
-    border-radius: 12px;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
     transition: all 0.3s ease;
 }
 
-.member-info p:hover {
+.profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+}
+
+.profile-avatar i {
+    font-size: 3.5rem;
+    color: white;
+}
+
+.profile-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.profile-id {
+    font-size: 1rem;
+    color: #718096;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.profile-status {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    color: white;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Status-specific styling */
+.profile-status.ACTIVE,
+.profile-status[data-status="ACTIVE"] {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+.profile-status.INACTIVE,
+.profile-status[data-status="INACTIVE"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.profile-status.SUSPENDED,
+.profile-status[data-status="SUSPENDED"] {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.profile-status.PENDING,
+.profile-status[data-status="PENDING"] {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+/* Personal details section */
+.personal-details {
+    margin-top: 1rem;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #4a5568;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #667eea;
+    margin-right: 0.75rem;
+    font-size: 1.3rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: rgba(248, 250, 252, 0.5);
+}
+
+.detail-item:hover {
     background: rgba(99, 102, 241, 0.05);
     transform: translateX(5px);
 }
 
-.member-info p i {
+.detail-item i {
     color: #667eea;
     margin-right: 1rem;
     width: 20px;
     font-size: 1.2rem;
 }
 
-.member-info p strong {
+.detail-label {
     color: #4a5568;
-    margin-right: 0.5rem;
     font-weight: 600;
+    margin-right: 0.5rem;
+    min-width: 80px;
+}
+
+.detail-value {
+    color: #2d3748;
+    font-weight: 500;
+    flex: 1;
 }
 
 /* Transactions table styles */
 .transactions-table-wrapper {
     overflow: hidden;
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+    padding: 0;
+}
+
+/* Transactions Header */
+.transactions-header {
+    padding: 2rem 2rem 1.5rem;
+    border-bottom: 2px solid rgba(103, 126, 234, 0.1);
+    margin-bottom: 1rem;
+}
+
+.transactions-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.transactions-title i {
+    color: #667eea;
+    margin-right: 0.75rem;
+    font-size: 1.4rem;
+}
+
+/* Filter Controls */
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filter-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(103, 126, 234, 0.2);
+    border-radius: 12px;
+    background: white;
+    color: #2d3748;
+    font-weight: 500;
+    min-width: 140px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:hover {
+    border-color: rgba(103, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(103, 126, 234, 0.15);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-reset-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: fit-content;
+}
+
+.filter-reset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.filter-reset-btn:active {
+    transform: translateY(0);
+}
+
+/* Table Container */
+.table-container {
+    overflow-x: auto;
+    padding: 0 2rem 2rem;
 }
 
 .transactions-table {
@@ -111,6 +325,14 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border: none;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.transactions-table thead th.sortable:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .transactions-table thead th:first-child {
@@ -119,6 +341,27 @@
 
 .transactions-table thead th:last-child {
     border-top-right-radius: 12px;
+}
+
+/* Sort Icons */
+.sort-icon {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+.transactions-table thead th.sorted-asc .sort-icon {
+    opacity: 1;
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.transactions-table thead th.sorted-desc .sort-icon {
+    opacity: 1;
+    transform: translateY(-50%);
 }
 
 .transactions-table tbody tr {
@@ -145,6 +388,28 @@
     border-bottom-right-radius: 12px;
 }
 
+/* Hidden rows for filtering */
+.transactions-table tbody tr.hidden {
+    display: none;
+}
+
+/* No data row */
+.no-data-row {
+    display: none;
+}
+
+.no-data-row.show {
+    display: table-row;
+}
+
+.transactions-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
+}
+
+.transactions-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
+}
+
 /* Status pill styles */
 .status-pill {
     padding: 0.5rem 1rem;
@@ -156,6 +421,12 @@
     display: inline-block;
     min-width: 80px;
     text-align: center;
+}
+
+.status-pill.SUCCEEDED {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .status-pill.COMPLETED {
@@ -207,6 +478,32 @@
     .title {
         font-size: 2rem;
     }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-avatar i {
+        font-size: 3rem;
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-select {
+        min-width: 100%;
+    }
 }
 
 @media (max-width: 640px) {
@@ -215,15 +512,26 @@
         border-radius: 16px;
     }
 
-    .member-info p {
-        font-size: 1rem;
+    .detail-item {
         flex-direction: column;
         align-items: flex-start;
         text-align: left;
     }
 
-    .member-info p i {
+    .detail-item i {
         margin-bottom: 0.5rem;
+    }
+
+    .detail-label {
+        min-width: auto;
+    }
+
+    .transactions-header {
+        padding: 1.5rem 1.5rem 1rem;
+    }
+
+    .table-container {
+        padding: 0 1.5rem 1.5rem;
     }
 
     .transactions-table {
@@ -233,6 +541,20 @@
     .transactions-table thead th,
     .transactions-table tbody td {
         padding: 0.75rem 0.5rem;
+    }
+
+    .transactions-title {
+        font-size: 1.3rem;
+    }
+
+    .filter-controls {
+        gap: 1rem;
+    }
+
+    .filter-select,
+    .filter-reset-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
     }
 }
 
@@ -246,10 +568,6 @@
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.panel {
-    animation: fadeInUp 0.6s ease forwards;
 }
 
 .col-md-4 .panel {

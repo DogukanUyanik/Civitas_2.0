@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Member Details</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -9,12 +11,20 @@
     <link rel="stylesheet" th:href="@{/css/memberDetails.css}" />
 
     <script th:src="@{/js/sidebar.js}" defer></script>
+    <script th:src="@{/js/memberDetails.js}" defer></script>
+
 </head>
 <body>
 <div th:replace="~{fragments :: sidebar}"></div>
 
 <div class="members-container container">
-    <h1 class="title">Member Details</h1>
+    <div class="top-bar">
+        <a th:href="@{/members}" class="go-back-btn">
+            <i class="bi bi-arrow-left"></i> Go Back
+        </a>
+        <h1 class="title">Member Details</h1>
+    </div>
+
     <div class="row">
         <!-- Left Panel: Member Info -->
         <div class="col-md-4">
@@ -59,6 +69,64 @@
                         <span class="detail-label">Last Payment:</span>
                         <span class="detail-value" th:text="${member.dateOfLastPayment}">31 May, 2023</span>
                     </div>
+
+                    <!-- Add this inside the left panel, below the personal details -->
+                    <!-- Add data-member-id attribute here -->
+                    <!-- Send Payment Button -->
+                    <button class="send-payment-btn" id="sendPaymentBtn" th:data-member-id="${member.id}">
+                        <i class="bi bi-cash-stack"></i> Send Payment
+                    </button>
+
+                    <!-- Payment Modal -->
+                    <div class="modal-overlay hidden" id="paymentModal">
+                        <div class="modal-content">
+                            <h3>Send Payment</h3>
+                            <form id="paymentForm">
+                                <div class="form-group">
+                                    <label for="paymentType">Payment Type:</label>
+                                    <select id="paymentType" name="paymentType" required>
+                                        <option value="">-- Select --</option>
+                                        <option value="MEMBERSHIP_FEE">Membership Fee</option>
+                                        <option value="EVENT_PAYMENT">Event Payment</option>
+                                        <option value="DONATION">Donation</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="amount">Amount:</label>
+                                    <input type="number" id="amount" name="amount" placeholder="Enter amount" step="0.01" min="0.50" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="currency">Currency:</label>
+                                    <select id="currency" name="currency">
+                                        <option value="EUR">EUR</option>
+                                        <option value="USD">USD</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="note">Note (optional):</label>
+                                    <textarea id="note" name="note" placeholder="Add a note..."></textarea>
+                                </div>
+
+                                <div class="modal-actions">
+                                    <button type="button" class="btn-cancel" id="cancelPayment">Cancel</button>
+                                    <button type="submit" class="btn-send">Send Link</button>
+                                </div>
+                            </form>
+
+                            <!-- Payment Result -->
+                            <div id="paymentResult" class="hidden">
+                                <p>Payment link generated:</p>
+                                <a id="paymentLink" href="#" target="_blank"></a>
+                                <button id="closeResult" class="btn-send">Close</button>
+                            </div>
+
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -168,259 +236,5 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Script loaded'); // Debug log
-
-        const table = document.getElementById('transactionsTable');
-        const tbody = document.getElementById('transactionsBody');
-        const dateFilter = document.getElementById('dateFilter');
-        const statusFilter = document.getElementById('statusFilter');
-        const resetBtn = document.getElementById('resetFilters');
-        const noDataRow = document.querySelector('.no-data-row');
-
-        console.log('Elements found:', { table, tbody, dateFilter, statusFilter, resetBtn, noDataRow }); // Debug log
-
-        let currentSort = { column: 'date', direction: 'desc' };
-
-        // Check if elements exist before proceeding
-        if (!table || !tbody) {
-            console.error('Table elements not found');
-            return;
-        }
-
-        // Initialize - sort by date descending by default
-        setTimeout(() => {
-            sortTable('date', 'desc');
-        }, 100);
-
-        // Add click listeners to sortable headers
-        document.querySelectorAll('.sortable').forEach(header => {
-            header.addEventListener('click', function() {
-                console.log('Header clicked:', this.dataset.column); // Debug log
-                const column = this.dataset.column;
-                let direction = 'asc';
-
-                if (currentSort.column === column && currentSort.direction === 'asc') {
-                    direction = 'desc';
-                }
-
-                sortTable(column, direction);
-            });
-        });
-
-        // Add filter listeners
-        if (dateFilter) {
-            dateFilter.addEventListener('change', function() {
-                console.log('Date filter changed:', this.value); // Debug log
-                applyFilters();
-            });
-        }
-
-        if (statusFilter) {
-            statusFilter.addEventListener('change', function() {
-                console.log('Status filter changed:', this.value); // Debug log
-                applyFilters();
-            });
-        }
-
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                console.log('Reset button clicked'); // Debug log
-                resetFilters();
-            });
-        }
-
-        function sortTable(column, direction) {
-            console.log('Sorting by:', column, direction); // Debug log
-
-            const rows = Array.from(tbody.querySelectorAll('tr:not(.no-data-row)'));
-            console.log('Found rows:', rows.length); // Debug log
-
-            if (rows.length === 0) {
-                console.log('No rows to sort');
-                return;
-            }
-
-            rows.sort((a, b) => {
-                let aValue, bValue;
-
-                switch(column) {
-                    case 'date':
-                        // Get date from the actual cell text
-                        const aDateText = a.querySelector('.date-cell')?.textContent || '';
-                        const bDateText = b.querySelector('.date-cell')?.textContent || '';
-
-                        // Parse date in format dd/MM/yyyy HH:mm
-                        aValue = parseDateFromText(aDateText);
-                        bValue = parseDateFromText(bDateText);
-                        break;
-
-                    case 'amount':
-                        const aAmountText = a.querySelector('.amount-cell')?.textContent || '0';
-                        const bAmountText = b.querySelector('.amount-cell')?.textContent || '0';
-                        aValue = parseFloat(aAmountText.replace(/[^\d.-]/g, '')) || 0;
-                        bValue = parseFloat(bAmountText.replace(/[^\d.-]/g, '')) || 0;
-                        break;
-
-                    case 'type':
-                        aValue = (a.querySelector('.type-cell')?.textContent || '').toLowerCase().trim();
-                        bValue = (b.querySelector('.type-cell')?.textContent || '').toLowerCase().trim();
-                        break;
-
-                    case 'currency':
-                        aValue = (a.querySelector('.currency-cell')?.textContent || '').toLowerCase().trim();
-                        bValue = (b.querySelector('.currency-cell')?.textContent || '').toLowerCase().trim();
-                        break;
-
-                    case 'status':
-                        aValue = (a.querySelector('.status-cell .status-pill')?.textContent || '').toLowerCase().trim();
-                        bValue = (b.querySelector('.status-cell .status-pill')?.textContent || '').toLowerCase().trim();
-                        break;
-
-                    default:
-                        return 0;
-                }
-
-                console.log('Comparing:', aValue, 'vs', bValue); // Debug log
-
-                if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-                if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-                return 0;
-            });
-
-            // Update UI
-            updateSortUI(column, direction);
-            currentSort = { column, direction };
-
-            // Re-append sorted rows
-            rows.forEach(row => tbody.appendChild(row));
-            if (noDataRow) {
-                tbody.appendChild(noDataRow); // Keep no-data row at the end
-            }
-
-            console.log('Sort completed'); // Debug log
-        }
-
-        function parseDateFromText(dateText) {
-            if (!dateText) return new Date(0);
-
-            try {
-                // Parse format: dd/MM/yyyy HH:mm
-                const parts = dateText.split(' ');
-                const datePart = parts[0]; // dd/MM/yyyy
-                const timePart = parts[1] || '00:00'; // HH:mm
-
-                const dateComponents = datePart.split('/');
-                const timeComponents = timePart.split(':');
-
-                if (dateComponents.length === 3 && timeComponents.length === 2) {
-                    const day = parseInt(dateComponents[0]);
-                    const month = parseInt(dateComponents[1]) - 1; // Month is 0-indexed
-                    const year = parseInt(dateComponents[2]);
-                    const hour = parseInt(timeComponents[0]);
-                    const minute = parseInt(timeComponents[1]);
-
-                    return new Date(year, month, day, hour, minute);
-                }
-            } catch (e) {
-                console.error('Error parsing date:', dateText, e);
-            }
-
-            return new Date(0);
-        }
-
-        function updateSortUI(column, direction) {
-            // Remove all existing sort classes
-            document.querySelectorAll('.sortable').forEach(th => {
-                th.classList.remove('sorted-asc', 'sorted-desc');
-            });
-
-            // Add appropriate class to current sorted column
-            const currentHeader = document.querySelector(`[data-column="${column}"]`);
-            if (currentHeader) {
-                currentHeader.classList.add(direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
-            }
-        }
-
-        function applyFilters() {
-            if (!dateFilter || !statusFilter) return;
-
-            const dateValue = dateFilter.value;
-            const statusValue = statusFilter.value;
-            const rows = tbody.querySelectorAll('tr:not(.no-data-row)');
-            let visibleCount = 0;
-
-            console.log('Applying filters - Date:', dateValue, 'Status:', statusValue); // Debug log
-
-            rows.forEach(row => {
-                let showRow = true;
-
-                // Date filter
-                if (dateValue !== 'all') {
-                    const dateText = row.querySelector('.date-cell')?.textContent || '';
-                    const rowDate = parseDateFromText(dateText);
-                    const now = new Date();
-                    let cutoffDate;
-
-                    switch(dateValue) {
-                        case 'today':
-                            cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                            break;
-                        case 'week':
-                            cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                            break;
-                        case 'month':
-                            cutoffDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                            break;
-                        case 'quarter':
-                            cutoffDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-                            break;
-                        case 'year':
-                            cutoffDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-                            break;
-                    }
-
-                    if (cutoffDate && rowDate < cutoffDate) {
-                        showRow = false;
-                    }
-                }
-
-                // Status filter
-                if (statusValue !== 'all') {
-                    const rowStatus = row.querySelector('.status-cell .status-pill')?.textContent?.trim() || '';
-                    if (rowStatus.toUpperCase() !== statusValue.toUpperCase()) {
-                        showRow = false;
-                    }
-                }
-
-                if (showRow) {
-                    row.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-
-            console.log('Visible rows after filtering:', visibleCount); // Debug log
-
-            // Show/hide no data message
-            if (noDataRow) {
-                if (visibleCount === 0) {
-                    noDataRow.classList.add('show');
-                } else {
-                    noDataRow.classList.remove('show');
-                }
-            }
-        }
-
-        function resetFilters() {
-            if (dateFilter) dateFilter.value = 'all';
-            if (statusFilter) statusFilter.value = 'all';
-            applyFilters();
-            sortTable('date', 'desc'); // Reset to default sort
-        }
-    });
-</script>
 </body>
 </html>

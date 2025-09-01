@@ -2,6 +2,9 @@ package org.example.civitaswebapp.domain;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,10 +26,14 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
+    @NotNull(message = "Member is required")
     private Member member;
 
+    @NotNull(message = "Amount is required")
+    @DecimalMin(value = "0.49", message = "Amount must be greater than 0.49")
     private Double amount;
 
+    @NotBlank(message = "Currency is required")
     private String currency;
 
     private String paymentId;
@@ -35,9 +42,12 @@ public class Transaction {
     private TransactionStatus status;
 
     @Enumerated(EnumType.STRING)
+    @NotNull(message = "Transaction type is required")
     private TransactionType type;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private String note;
 }

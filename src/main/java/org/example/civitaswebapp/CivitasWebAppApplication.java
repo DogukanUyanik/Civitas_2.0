@@ -1,8 +1,6 @@
 package org.example.civitaswebapp;
 
-import org.example.civitaswebapp.service.MemberService;
-import org.example.civitaswebapp.service.MemberServiceImpl;
-import org.example.civitaswebapp.service.MyUserDetailsService;
+import org.example.civitaswebapp.service.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -61,6 +59,11 @@ public class CivitasWebAppApplication implements WebMvcConfigurer {
     @Bean
     MemberService memberService() {
         return new MemberServiceImpl();
+    }
+
+    @Bean
+    TransactionService  transactionService() {
+        return new TransactionServiceImpl();
     }
 
 }

@@ -7,7 +7,7 @@
 }
 
 .title {
-    color: #1a202c;
+    color: #1f2937;
     font-size: 2.5rem;
     font-weight: 700;
     margin-bottom: 2rem;
@@ -447,7 +447,7 @@
     box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
 
-.status-pill.CANCELLED {
+.status-pill.EXPIRED {
     background: linear-gradient(135deg, #6b7280, #4b5563);
     color: white;
     box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
@@ -577,3 +577,195 @@
 .col-md-8 .panel {
     animation-delay: 0.2s;
 }
+
+
+/* Send Payment Button */
+.send-payment-btn {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
+}
+
+.send-payment-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* Modal Content */
+.modal-content {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 16px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    gap: 1rem; /* Space between inputs */
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 0.75rem 1rem; /* inner spacing for the inputs */
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 14px;
+    box-sizing: border-box; /* make sure padding doesn't overflow */
+}
+
+.modal-content textarea {
+    resize: none;
+}
+
+.modal-content h3 {
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-cancel {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 12px;
+    background: #e5e7eb;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cancel:hover {
+    background: #d1d5db;
+}
+
+.btn-send {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-send:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+}
+/* Top bar container */
+.top-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Go Back Button (light grey) */
+.go-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    color: #374151; /* dark grey text */
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.go-back-btn:hover {
+    background: #e5e7eb; /* slightly darker grey on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Title aligned top-left */
+.title {
+    text-align: left;
+    margin: 0; /* remove default margin */
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 2px;
+}
+
+.hidden {
+    display: none;
+}
+

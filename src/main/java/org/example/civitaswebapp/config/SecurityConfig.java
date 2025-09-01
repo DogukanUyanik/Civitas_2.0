@@ -25,9 +25,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
+        http.csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/stripe/webhook")
+                        .csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/login**", "/css/**", "/js/**", "/error").permitAll()
+                        .requestMatchers("/", "/login**", "/css/**", "/js/**", "/error", "/stripe/webhook").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

@@ -1,6 +1,7 @@
 package org.example.civitaswebapp;
 
 import org.example.civitaswebapp.domain.*;
+import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.repository.MemberRepository;
 import org.example.civitaswebapp.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class InitDataConfig implements CommandLineRunner {
@@ -27,13 +25,49 @@ public class InitDataConfig implements CommandLineRunner {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    // Inside your InitDataConfig class
+    @Autowired
+    private EventRepository eventRepository;
+
     @Override
     public void run(String... args) throws Exception {
 
+        List<Event> events = new ArrayList<>();
+
+        events.add(new Event(
+                null,
+                "Board Meeting",
+                "Monthly board meeting to discuss union activities.",
+                LocalDateTime.now().plusDays(2).withHour(18).withMinute(0),
+                LocalDateTime.now().plusDays(2).withHour(20).withMinute(0),
+                new HashSet<>()
+        ));
+
+        events.add(new Event(
+                null,
+                "Community Clean-up",
+                "Join us to clean up the local park!",
+                LocalDateTime.now().plusDays(5).withHour(10).withMinute(0),
+                LocalDateTime.now().plusDays(5).withHour(13).withMinute(0),
+                new HashSet<>()
+        ));
+
+        events.add(new Event(
+                null,
+                "Annual General Meeting",
+                "Annual meeting for all members to review the year.",
+                LocalDateTime.now().plusWeeks(1).withHour(19).withMinute(0),
+                LocalDateTime.now().plusWeeks(1).withHour(21).withMinute(0),
+                new HashSet<>()
+        ));
+
+        eventRepository.saveAll(events);
+
+
         // Seed MyUsers (board/admins)
         MyUser admin1 = MyUser.builder()
-                .username("adminFatima")
-                .password(passwordEncoder.encode("adminpass1"))
+                .username("apo")
+                .password(passwordEncoder.encode("apo"))
                 .role(MyUserRole.ADMIN)
                 .build();
 

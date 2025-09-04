@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Union Events</title>
+
+    <!-- FullCalendar UMD CSS & JS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/eventsList.css}" />
+    <script th:src="@{/js/sidebar.js}" defer></script>
+</head>
+<body>
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<div class="events-container">
+    <!-- Header Section -->
+    <div class="events-header">
+        <h1 class="calendar-title">Union Events</h1>
+        <div class="header-actions">
+            <button class="add-event-btn" data-bs-toggle="modal" data-bs-target="#eventModal">
+                <i class="fas fa-plus"></i>
+                Create Event
+            </button>
+
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
+                Test Modal (Remove this button after testing)
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar Wrapper -->
+    <div class="calendar-wrapper">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- Enhanced Modal for creating a new event -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    Create New Event
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="title" class="form-label">
+                                <i class="fas fa-heading me-1"></i>
+                                Event Title
+                            </label>
+                            <input type="text" class="form-control" id="title" required placeholder="Enter event title">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="eventType" class="form-label">
+                                <i class="fas fa-tag me-1"></i>
+                                Event Type
+                            </label>
+                            <select class="form-control" id="eventType">
+                                <option value="general">General</option>
+                                <option value="meeting">Meeting</option>
+                                <option value="workshop">Workshop</option>
+                                <option value="social">Social</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>
+                            Description
+                        </label>
+                        <textarea class="form-control" id="description" rows="3" placeholder="Event description (optional)"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start" class="form-label">
+                                <i class="fas fa-play me-1"></i>
+                                Start Date & Time
+                            </label>
+                            <input type="datetime-local" class="form-control" id="start" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end" class="form-label">
+                                <i class="fas fa-stop me-1"></i>
+                                End Date & Time
+                            </label>
+                            <input type="datetime-local" class="form-control" id="end" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            Location
+                        </label>
+                        <input type="text" class="form-control" id="location" placeholder="Event location (optional)">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Create Event
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+
+        // Use FullCalendar from the UMD bundle
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: '/api/events',
+            selectable: true,
+            selectMirror: true,
+            dayMaxEvents: true,
+            weekends: true,
+
+            // Enhanced date click functionality
+            dateClick: function(info) {
+                const startDate = new Date(info.dateStr + 'T09:00:00');
+                const endDate = new Date(info.dateStr + 'T10:00:00');
+
+                document.getElementById('start').value = startDate.toISOString().slice(0, 16);
+                document.getElementById('end').value = endDate.toISOString().slice(0, 16);
+
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                modal.show();
+            },
+
+            // Enhanced event click functionality
+            eventClick: function(info) {
+                // Create a more detailed event popup
+                const event = info.event;
+                const eventDetails = `
+                <strong>${event.title}</strong><br>
+                <strong>Start:</strong> ${event.start.toLocaleDateString()} ${event.start.toLocaleTimeString()}<br>
+                <strong>End:</strong> ${event.end ? event.end.toLocaleDateString() + ' ' + event.end.toLocaleTimeString() : 'Not specified'}<br>
+                ${event.extendedProps.description ? '<strong>Description:</strong> ' + event.extendedProps.description + '<br>' : ''}
+                ${event.extendedProps.location ? '<strong>Location:</strong> ' + event.extendedProps.location : ''}
+            `;
+
+                // You can replace this with a more sophisticated modal
+                const eventModal = document.createElement('div');
+                eventModal.innerHTML = `
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    ${eventDetails}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+                document.querySelector('.events-container').insertBefore(eventModal, document.querySelector('.calendar-wrapper'));
+
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (eventModal.parentNode) {
+                        eventModal.remove();
+                    }
+                }, 5000);
+            },
+
+            // Enhanced select functionality for date ranges
+            select: function(info) {
+                document.getElementById('start').value = info.startStr.slice(0, 16);
+                document.getElementById('end').value = info.endStr.slice(0, 16);
+
+                // Clean up any existing modal issues before showing
+                cleanupModals();
+
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'), {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+                modal.show();
+            }
+        });
+
+        calendar.render();
+
+        // ADDED: Listen for sidebar toggle and resize calendar
+        const eventsContainer = document.querySelector('.events-container');
+        if (eventsContainer) {
+            // Use MutationObserver to watch for class changes
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        // Delay the resize slightly to allow CSS transition to complete
+                        setTimeout(() => {
+                            calendar.updateSize();
+                            console.log('Calendar resized after sidebar toggle');
+                        }, 350); // Slightly longer than CSS transition (0.3s)
+                    }
+                });
+            });
+
+            // Start observing
+            observer.observe(eventsContainer, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+
+        // ADDED: Also listen for window resize events
+        window.addEventListener('resize', function() {
+            calendar.updateSize();
+        });
+
+        // Enhanced event creation form
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const event = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                start: document.getElementById('start').value,
+                end: document.getElementById('end').value,
+                location: document.getElementById('location').value,
+                eventType: document.getElementById('eventType').value,
+                attendees: []
+            };
+
+            // Add event type class for styling
+            const eventData = {
+                ...event,
+                className: `event-type-${event.eventType}`
+            };
+
+            fetch('/api/events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(event)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to create event');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Add the className for proper styling
+                    data.className = `event-type-${data.eventType || 'general'}`;
+                    calendar.addEvent(data);
+
+                    bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+                    document.getElementById('eventForm').reset();
+
+                    // Show success message
+                    showNotification('Event created successfully!', 'success');
+                })
+                .catch(err => {
+                    console.error('Error creating event:', err);
+                    showNotification('Failed to create event. Please try again.', 'error');
+                });
+        });
+
+        // Notification function
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+            notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+            document.querySelector('.events-container').insertBefore(notification, document.querySelector('.events-header').nextSibling);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Reset form when modal is hidden - REMOVED duplicate, handled above
+        // document.getElementById('eventModal').addEventListener('hidden.bs.modal', function() {
+        //     document.getElementById('eventForm').reset();
+        // });
+
+        // ADDED: Function to clean up modals (if needed)
+        function cleanupModals() {
+            // Clean up any existing modal backdrop issues
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+        }
+    });
+</script>
+
+</body>
+</html>

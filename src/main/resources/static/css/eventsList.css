@@ -1,0 +1,554 @@
+/* Events container - similar structure to members container */
+.events-container {
+    flex-grow: 1;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+}
+
+/* FIXED: When sidebar is collapsed - this was commented out or missing */
+.events-container.sidebar-collapsed {
+    margin-left: 70px;
+    transition: margin-left 0.3s ease;
+}
+
+/* Calendar title with modern styling */
+.calendar-title {
+    text-align: left;
+    margin-bottom: 2rem;
+    color: #1f2937;
+    font-size: 2.5rem;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+.calendar-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 2px;
+}
+
+/* Header section with actions */
+.events-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.add-event-btn {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    text-decoration: none;
+}
+
+.add-event-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+/* Calendar wrapper with enhanced styling */
+.calendar-wrapper {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+/* FullCalendar styling overrides */
+.fc {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 1.5rem;
+}
+
+/* FIXED: Make calendar responsive to container size changes */
+#calendar {
+    height: auto;
+    min-height: 600px;
+    width: 100%; /* Ensure it takes full width of container */
+}
+
+/* Force calendar to recalculate size when sidebar changes */
+.events-container.sidebar-collapsed #calendar {
+    width: 100%;
+}
+
+/* Header toolbar styling */
+.fc .fc-toolbar {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1f2937;
+    background: linear-gradient(135deg, #1f2937, #374151);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fc .fc-button-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.fc .fc-button {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.fc .fc-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.3s;
+}
+
+.fc .fc-button:hover::before {
+    left: 100%;
+}
+
+.fc .fc-button:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(107, 114, 128, 0.4);
+}
+
+.fc .fc-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.2);
+}
+
+.fc .fc-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Active button state */
+.fc .fc-button-active {
+    background: linear-gradient(135deg, #374151, #1f2937) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Calendar grid styling */
+.fc-theme-standard .fc-scrollgrid {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.fc .fc-col-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    position: relative;
+}
+
+.fc .fc-col-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.fc .fc-col-header-cell {
+    padding: 1rem 0.5rem;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 11px;
+}
+
+.fc .fc-daygrid-day {
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.fc .fc-daygrid-day:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+}
+
+.fc .fc-daygrid-day-number {
+    padding: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+/* Today highlight with enhanced styling */
+.fc .fc-day-today {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    position: relative;
+}
+
+.fc .fc-day-today::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    color: #047857;
+    font-weight: 700;
+}
+
+/* Event styling with enhanced effects */
+.fc-event {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.fc-event::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.3s;
+}
+
+.fc-event:hover::before {
+    left: 100%;
+}
+
+.fc-event:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+/* Different event colors */
+.fc-event.event-type-meeting {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.fc-event.event-type-workshop {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.fc-event.event-type-social {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+/* Modal styling with enhanced design */
+.modal-content {
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-bottom: none;
+    padding: 1.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+    opacity: 0.3;
+}
+
+.modal-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-close {
+    filter: brightness(0) invert(1);
+    position: relative;
+    z-index: 1;
+}
+
+.modal-body {
+    padding: 2rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+/* Enhanced form styling */
+#eventForm .form-label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 14px;
+}
+
+#eventForm input,
+#eventForm textarea,
+#eventForm select {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    font-size: 14px;
+    width: 100%;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-weight: 500;
+}
+
+#eventForm input:focus,
+#eventForm textarea:focus,
+#eventForm select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    background: #fefffe;
+}
+
+#eventForm textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Enhanced submit button */
+#eventForm button[type="submit"] {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+#eventForm button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.3s;
+}
+
+#eventForm button[type="submit"]:hover::before {
+    left: 100%;
+}
+
+#eventForm button[type="submit"]:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* View-specific styling */
+.fc-dayGridMonth-view .fc-daygrid-day {
+    min-height: 120px;
+}
+
+.fc-timeGridWeek-view .fc-timegrid-slot,
+.fc-timeGridDay-view .fc-timegrid-slot {
+    height: 60px;
+}
+
+/* Loading animation */
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+.loading-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .events-container {
+        margin-left: 70px !important; /* Force collapsed sidebar space on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .events-container {
+        margin-left: 0 !important;
+        padding: 1rem;
+    }
+
+    .calendar-title {
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .events-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .fc .fc-button-group {
+        justify-content: center;
+    }
+
+    .fc .fc-button {
+        padding: 0.5rem 0.75rem;
+        font-size: 12px;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    #calendar {
+        min-height: 400px;
+    }
+
+    .fc-dayGridMonth-view .fc-daygrid-day {
+        min-height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .events-container {
+        padding: 0.5rem;
+    }
+
+    .calendar-title {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .fc {
+        padding: 1rem;
+    }
+
+    .fc .fc-col-header-cell {
+        padding: 0.5rem 0.25rem;
+        font-size: 10px;
+    }
+
+    .fc .fc-daygrid-day-number {
+        font-size: 12px;
+        padding: 0.25rem;
+    }
+
+    .fc-event {
+        font-size: 11px;
+        padding: 0.125rem 0.25rem;
+    }
+}
+
+/* Custom scrollbar for webkit browsers */
+.fc-scroller::-webkit-scrollbar {
+    width: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* Force remove stuck modal backdrops */
+.modal-backdrop.show {
+    opacity: 0.5 !important;
+}
+
+body.modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}

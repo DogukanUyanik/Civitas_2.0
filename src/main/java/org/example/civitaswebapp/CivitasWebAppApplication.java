@@ -66,4 +66,9 @@ public class CivitasWebAppApplication implements WebMvcConfigurer {
         return new TransactionServiceImpl();
     }
 
+    @Bean
+    EventService eventService() {
+        return new EventServiceImpl();
+    }
+
 }

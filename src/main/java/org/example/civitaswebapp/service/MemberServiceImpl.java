@@ -60,38 +60,4 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
-
-
-    /*
-    @Override
-    public Page<Member> getMembers(Pageable pageable, String search, String status) {
-
-        boolean hasSearch = search != null && !search.isBlank();
-        boolean hasStatus = status != null && !status.isBlank();
-
-        if (hasSearch && hasStatus) {
-            MemberStatus memberStatus = MemberStatus.valueOf(status.toUpperCase());
-            return memberRepository
-                    .findByMemberStatusAndFirstNameContainingIgnoreCaseOrMemberStatusAndLastNameContainingIgnoreCaseOrMemberStatusAndEmailContainingIgnoreCase(
-                            memberStatus, search,
-                            memberStatus, search,
-                            memberStatus, search,
-                            pageable
-                    );
-        } else if (hasSearch) {
-            return memberRepository
-                    .findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                            search, search, search, pageable
-                    );
-        } else if (hasStatus) {
-            MemberStatus memberStatus = MemberStatus.valueOf(status.toUpperCase());
-            return memberRepository.findByMemberStatus(memberStatus, pageable);
-        } else {
-            return memberRepository.findAll(pageable);
-        }
-    }
-
-    */
-
-
 }

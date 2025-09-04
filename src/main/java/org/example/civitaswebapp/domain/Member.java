@@ -7,7 +7,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -49,5 +51,9 @@ public class Member {
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Transaction> transactions = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "attendees")
+    private Set<Event> events = new HashSet<>();
+
 
 }

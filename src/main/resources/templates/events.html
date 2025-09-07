@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Union Events</title>
 
     <!-- FullCalendar UMD CSS & JS -->
@@ -33,9 +35,21 @@
                 Create Event
             </button>
 
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eventModal">
-                Test Modal (Remove this button after testing)
-            </button>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <span class="filter-label">
+            <i class="fas fa-filter me-1"></i>
+            Filter Events:
+        </span>
+        <div class="filter-buttons">
+            <button class="filter-btn all active" data-filter="all">All Events</button>
+            <button class="filter-btn general" data-filter="general">General</button>
+            <button class="filter-btn meeting" data-filter="meeting">Meetings</button>
+            <button class="filter-btn workshop" data-filter="workshop">Workshops</button>
+            <button class="filter-btn social" data-filter="social">Social</button>
         </div>
     </div>
 
@@ -126,17 +140,142 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const calendarEl = document.getElementById('calendar');
+        let currentModal = null; // Track the current modal instance
+        let allEvents = []; // Store all events for filtering
+        let currentFilter = 'all'; // Track current filter
+
+        // Function to properly close any existing modal
+        function closeExistingModal() {
+            if (currentModal) {
+                currentModal.hide();
+                currentModal = null;
+            }
+            // Clean up any stuck backdrops
+            cleanupModals();
+        }
+
+        // Function to properly open modal
+        function openEventModal() {
+            // First close any existing modal
+            closeExistingModal();
+
+            // Small delay to ensure cleanup is complete
+            setTimeout(() => {
+                const modalElement = document.getElementById('eventModal');
+                currentModal = new bootstrap.Modal(modalElement, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+                currentModal.show();
+            }, 50);
+        }
+
+        // Function to normalize event type and create proper className
+        function processEventForCalendar(eventData) {
+            // Normalize eventType to lowercase for consistent handling
+            const normalizedType = (eventData.eventType || 'general').toLowerCase();
+
+            return {
+                ...eventData,
+                eventType: normalizedType, // Store normalized version
+                className: [`event-type-${normalizedType}`], // FullCalendar expects array of classNames
+                extendedProps: {
+                    ...eventData.extendedProps,
+                    eventType: normalizedType,
+                    description: eventData.description,
+                    location: eventData.location
+                }
+            };
+        }
+
+        // Function to filter events based on type
+        function filterEvents(filterType) {
+            currentFilter = filterType;
+
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filterType}"]`).classList.add('active');
+
+            // Filter and display events
+            if (filterType === 'all') {
+                // Show all events
+                calendar.removeAllEvents();
+                allEvents.forEach(event => {
+                    calendar.addEvent(event);
+                });
+            } else {
+                // Show only events of selected type
+                calendar.removeAllEvents();
+                const filteredEvents = allEvents.filter(event => {
+                    const eventType = event.extendedProps?.eventType || event.eventType || 'general';
+                    return eventType.toLowerCase() === filterType.toLowerCase();
+                });
+                filteredEvents.forEach(event => {
+                    calendar.addEvent(event);
+                });
+            }
+        }
+
+        // Function to add event to both calendar and allEvents array
+        function addEventToCalendar(eventData) {
+            // Process the event to ensure proper formatting
+            const processedEvent = processEventForCalendar(eventData);
+
+            console.log('Adding processed event:', processedEvent); // Debug log
+
+            // Add to our events storage
+            allEvents.push(processedEvent);
+
+            // Only add to calendar if it matches current filter
+            const eventType = processedEvent.eventType;
+            if (currentFilter === 'all' || eventType === currentFilter) {
+                calendar.addEvent(processedEvent);
+            }
+        }
 
         // Use FullCalendar from the UMD bundle
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             height: 'auto',
             headerToolbar: {
-                left: 'prev,next today',
+                left: 'prev,next,today',
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: '/api/events',
+            events: function(info, successCallback, failureCallback) {
+                // Fetch events from server
+                fetch('/api/events')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Raw server data:', data); // Debug log
+
+                        // Process events and add correct className
+                        const processedEvents = data.map(event => processEventForCalendar(event));
+
+                        console.log('Processed events:', processedEvents); // Debug log
+
+                        // Store all events for filtering
+                        allEvents = processedEvents;
+
+                        // Apply current filter
+                        let eventsToShow = processedEvents;
+                        if (currentFilter !== 'all') {
+                            eventsToShow = processedEvents.filter(event => {
+                                const eventType = event.extendedProps?.eventType || event.eventType || 'general';
+                                return eventType.toLowerCase() === currentFilter.toLowerCase();
+                            });
+                        }
+
+                        successCallback(eventsToShow);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching events:', error);
+                        failureCallback(error);
+                    });
+            },
             selectable: true,
             selectMirror: true,
             dayMaxEvents: true,
@@ -150,16 +289,17 @@
                 document.getElementById('start').value = startDate.toISOString().slice(0, 16);
                 document.getElementById('end').value = endDate.toISOString().slice(0, 16);
 
-                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
-                modal.show();
+                openEventModal();
             },
 
             // Enhanced event click functionality
             eventClick: function(info) {
                 // Create a more detailed event popup
                 const event = info.event;
+                const eventType = event.extendedProps.eventType || event.eventType || 'general';
                 const eventDetails = `
                 <strong>${event.title}</strong><br>
+                <strong>Type:</strong> <span style="text-transform: capitalize;">${eventType}</span><br>
                 <strong>Start:</strong> ${event.start.toLocaleDateString()} ${event.start.toLocaleTimeString()}<br>
                 <strong>End:</strong> ${event.end ? event.end.toLocaleDateString() + ' ' + event.end.toLocaleTimeString() : 'Not specified'}<br>
                 ${event.extendedProps.description ? '<strong>Description:</strong> ' + event.extendedProps.description + '<br>' : ''}
@@ -175,7 +315,7 @@
                 </div>
             `;
 
-                document.querySelector('.events-container').insertBefore(eventModal, document.querySelector('.calendar-wrapper'));
+                document.querySelector('.events-container').insertBefore(eventModal, document.querySelector('.filter-section'));
 
                 // Auto-remove after 5 seconds
                 setTimeout(() => {
@@ -190,21 +330,21 @@
                 document.getElementById('start').value = info.startStr.slice(0, 16);
                 document.getElementById('end').value = info.endStr.slice(0, 16);
 
-                // Clean up any existing modal issues before showing
-                cleanupModals();
-
-                const modal = new bootstrap.Modal(document.getElementById('eventModal'), {
-                    backdrop: true,
-                    keyboard: true,
-                    focus: true
-                });
-                modal.show();
+                openEventModal();
             }
         });
 
         calendar.render();
 
-        // ADDED: Listen for sidebar toggle and resize calendar
+        // Set up filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const filterType = this.getAttribute('data-filter');
+                filterEvents(filterType);
+            });
+        });
+
+        // Listen for sidebar toggle and resize calendar
         const eventsContainer = document.querySelector('.events-container');
         if (eventsContainer) {
             // Use MutationObserver to watch for class changes
@@ -227,7 +367,7 @@
             });
         }
 
-        // ADDED: Also listen for window resize events
+        // Also listen for window resize events
         window.addEventListener('resize', function() {
             calendar.updateSize();
         });
@@ -242,19 +382,24 @@
                 start: document.getElementById('start').value,
                 end: document.getElementById('end').value,
                 location: document.getElementById('location').value,
-                eventType: document.getElementById('eventType').value,
+                eventType: document.getElementById('eventType').value.toUpperCase(), // Send as uppercase to match server expectations
                 attendees: []
             };
 
-            // Add event type class for styling
-            const eventData = {
-                ...event,
-                className: `event-type-${event.eventType}`
-            };
+            console.log('Sending event to server:', event); // Debug log
+
+            // Get CSRF token for Spring Security
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
 
             fetch('/api/events', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(event)
             })
                 .then(response => {
@@ -264,11 +409,14 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Add the className for proper styling
-                    data.className = `event-type-${data.eventType || 'general'}`;
-                    calendar.addEvent(data);
+                    console.log('Event creation response:', data); // DEBUG: See server response
+                    // Add the new event using our helper function
+                    addEventToCalendar(data);
 
-                    bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+                    if (currentModal) {
+                        currentModal.hide();
+                        currentModal = null;
+                    }
                     document.getElementById('eventForm').reset();
 
                     // Show success message
@@ -278,6 +426,13 @@
                     console.error('Error creating event:', err);
                     showNotification('Failed to create event. Please try again.', 'error');
                 });
+        });
+
+        // Listen for modal hidden event to clean up
+        document.getElementById('eventModal').addEventListener('hidden.bs.modal', function() {
+            currentModal = null;
+            document.getElementById('eventForm').reset();
+            cleanupModals(); // Extra cleanup
         });
 
         // Notification function
@@ -299,17 +454,33 @@
             }, 3000);
         }
 
-        // Reset form when modal is hidden - REMOVED duplicate, handled above
-        // document.getElementById('eventModal').addEventListener('hidden.bs.modal', function() {
-        //     document.getElementById('eventForm').reset();
-        // });
-
-        // ADDED: Function to clean up modals (if needed)
+        // Enhanced cleanup function
         function cleanupModals() {
             // Clean up any existing modal backdrop issues
             const backdrops = document.querySelectorAll('.modal-backdrop');
-            backdrops.forEach(backdrop => backdrop.remove());
+            backdrops.forEach(backdrop => {
+                backdrop.remove();
+            });
+
+            // Ensure body classes are cleaned up
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+
+            // Clean up any modal-open class from html
+            document.documentElement.classList.remove('modal-open');
         }
+
+        // Additional safety: Clean up on window focus (in case something goes wrong)
+        window.addEventListener('focus', function() {
+            // If there are stuck backdrops but no active modal, clean them up
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            const activeModals = document.querySelectorAll('.modal.show');
+
+            if (backdrops.length > 0 && activeModals.length === 0) {
+                cleanupModals();
+            }
+        });
     });
 </script>
 

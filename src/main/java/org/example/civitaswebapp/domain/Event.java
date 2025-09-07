@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -36,6 +37,13 @@ public class Event {
     @NotNull(message = "End date/time is required")
     private LocalDateTime end;
 
+    @Size(max = 100, message = "Location cannot exceed 100 characters")
+    private String location;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type")
+    private EventType eventType = EventType.GENERAL; // Default to GENERAL
+
     @ManyToMany
     @JoinTable(
             name = "event_members",
@@ -49,6 +57,11 @@ public class Event {
     private void validateDates() {
         if (end != null && start != null && end.isBefore(start)) {
             throw new IllegalArgumentException("End date/time cannot be before start date/time");
+        }
+
+        // Set default event type if null
+        if (eventType == null) {
+            eventType = EventType.GENERAL;
         }
     }
 }

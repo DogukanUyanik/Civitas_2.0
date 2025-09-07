@@ -40,6 +40,8 @@ public class InitDataConfig implements CommandLineRunner {
                 "Monthly board meeting to discuss union activities.",
                 LocalDateTime.now().plusDays(2).withHour(18).withMinute(0),
                 LocalDateTime.now().plusDays(2).withHour(20).withMinute(0),
+                "Union Office - Conference Room A",
+                EventType.MEETING,
                 new HashSet<>()
         ));
 
@@ -49,6 +51,8 @@ public class InitDataConfig implements CommandLineRunner {
                 "Join us to clean up the local park!",
                 LocalDateTime.now().plusDays(5).withHour(10).withMinute(0),
                 LocalDateTime.now().plusDays(5).withHour(13).withMinute(0),
+                "Central Park - Main Entrance",
+                EventType.SOCIAL,
                 new HashSet<>()
         ));
 
@@ -58,6 +62,41 @@ public class InitDataConfig implements CommandLineRunner {
                 "Annual meeting for all members to review the year.",
                 LocalDateTime.now().plusWeeks(1).withHour(19).withMinute(0),
                 LocalDateTime.now().plusWeeks(1).withHour(21).withMinute(0),
+                "Community Center - Main Hall",
+                EventType.MEETING,
+                new HashSet<>()
+        ));
+
+        events.add(new Event(
+                null,
+                "Leadership Workshop",
+                "Workshop on developing leadership skills for union representatives.",
+                LocalDateTime.now().plusDays(10).withHour(14).withMinute(0),
+                LocalDateTime.now().plusDays(10).withHour(17).withMinute(0),
+                "Training Center - Room 201",
+                EventType.WORKSHOP,
+                new HashSet<>()
+        ));
+
+        events.add(new Event(
+                null,
+                "Member Welcome Event",
+                "Welcome event for new members to meet the community.",
+                LocalDateTime.now().plusDays(7).withHour(16).withMinute(0),
+                LocalDateTime.now().plusDays(7).withHour(19).withMinute(0),
+                "Union Hall - Main Floor",
+                EventType.SOCIAL,
+                new HashSet<>()
+        ));
+
+        events.add(new Event(
+                null,
+                "Monthly Newsletter Planning",
+                "Planning session for next month's newsletter content.",
+                LocalDateTime.now().plusDays(14).withHour(15).withMinute(0),
+                LocalDateTime.now().plusDays(14).withHour(16).withMinute(30),
+                "Union Office - Meeting Room B",
+                EventType.GENERAL,
                 new HashSet<>()
         ));
 

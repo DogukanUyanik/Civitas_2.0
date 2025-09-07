@@ -1,6 +1,5 @@
 package org.example.civitaswebapp.controller;
 
-import jakarta.validation.Valid;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.Transaction;
 import org.example.civitaswebapp.domain.TransactionType;
@@ -8,7 +7,6 @@ import org.example.civitaswebapp.service.MemberService;
 import org.example.civitaswebapp.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,13 +14,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/transactions")
-public class TransactionController {
+public class TransactionRestController {
 
     @Autowired
     private TransactionService transactionService;
 
     @Autowired
     private MemberService memberService;
+
 
     @PostMapping("/send-payment")
     public ResponseEntity<Map<String, Object>> sendPayment(

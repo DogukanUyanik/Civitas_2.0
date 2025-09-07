@@ -324,7 +324,7 @@
             params.append('currency', currency); // <-- add this
             if (note) params.append('note', note);
 
-            fetch('/transactions/send-payment', {
+            fetch('/api/transactions/send-payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

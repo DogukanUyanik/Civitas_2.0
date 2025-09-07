@@ -245,7 +245,7 @@
     font-weight: 700;
 }
 
-/* Event styling with enhanced effects */
+/* Event styling with enhanced effects - DEFAULT/GENERAL */
 .fc-event {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
@@ -283,16 +283,137 @@
 }
 
 /* Different event colors */
+.fc-event.event-type-general {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.fc-event.event-type-general:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
 .fc-event.event-type-meeting {
     background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.fc-event.event-type-meeting:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .fc-event.event-type-workshop {
     background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
+}
+
+.fc-event.event-type-workshop:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
 }
 
 .fc-event.event-type-social {
     background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+.fc-event.event-type-social:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Filter section styling */
+.filter-section {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    margin-right: 0.5rem;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid;
+    border-radius: 8px;
+    background: white;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: capitalize;
+}
+
+.filter-btn.all {
+    border-color: #6b7280;
+    color: #6b7280;
+}
+
+.filter-btn.all:hover,
+.filter-btn.all.active {
+    background: #6b7280;
+    color: white;
+}
+
+.filter-btn.general {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.filter-btn.general:hover,
+.filter-btn.general.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.filter-btn.meeting {
+    border-color: #f59e0b;
+    color: #f59e0b;
+}
+
+.filter-btn.meeting:hover,
+.filter-btn.meeting.active {
+    background: #f59e0b;
+    color: white;
+}
+
+.filter-btn.workshop {
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+}
+
+.filter-btn.workshop:hover,
+.filter-btn.workshop.active {
+    background: #8b5cf6;
+    color: white;
+}
+
+.filter-btn.social {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.filter-btn.social:hover,
+.filter-btn.social.active {
+    background: #ef4444;
+    color: white;
 }
 
 /* Modal styling with enhanced design */
@@ -551,4 +672,70 @@
 body.modal-open {
     overflow: auto !important;
     padding-right: 0 !important;
+}
+
+
+/* Additional CSS to handle both uppercase and lowercase event type classes */
+
+/* Handle uppercase class names that might slip through */
+.fc-event.event-type-GENERAL,
+.fc-event.event-type-general {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2) !important;
+}
+
+.fc-event.event-type-GENERAL:hover,
+.fc-event.event-type-general:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+}
+
+.fc-event.event-type-MEETING,
+.fc-event.event-type-meeting {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+}
+
+.fc-event.event-type-MEETING:hover,
+.fc-event.event-type-meeting:hover {
+    background: linear-gradient(135deg, #d97706, #b45309) !important;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+}
+
+.fc-event.event-type-WORKSHOP,
+.fc-event.event-type-workshop {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2) !important;
+}
+
+.fc-event.event-type-WORKSHOP:hover,
+.fc-event.event-type-workshop:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+}
+
+.fc-event.event-type-SOCIAL,
+.fc-event.event-type-social {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2) !important;
+}
+
+.fc-event.event-type-SOCIAL:hover,
+.fc-event.event-type-social:hover {
+    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Force event styling - sometimes FullCalendar's default styles override */
+.fc-event {
+    border: none !important;
+}
+
+/* Ensure event colors are properly applied */
+.fc-daygrid-event {
+    border: none !important;
+}
+
+.fc-daygrid-event .fc-event-main {
+    color: white !important;
 }

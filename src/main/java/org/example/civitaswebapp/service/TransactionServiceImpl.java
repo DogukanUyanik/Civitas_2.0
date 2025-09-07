@@ -10,10 +10,15 @@ import org.example.civitaswebapp.domain.TransactionType;
 import org.example.civitaswebapp.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.criteria.Predicate;
 
 
 @Service
@@ -131,6 +136,75 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         System.out.println("=== TRANSACTION UPDATE DEBUG END ===");
+    }
+
+
+    public Page<Transaction> getTransactions(Pageable pageable, String search,
+                                             TransactionStatus status, TransactionType type) {
+
+        Specification<Transaction> spec = (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Search filter - search in member name, payment ID, and note
+            if (search != null && !search.trim().isEmpty()) {
+                String searchTerm = "%" + search.toLowerCase().trim() + "%";
+                Predicate memberSearch = criteriaBuilder.or(
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("member").get("firstName")),
+                                searchTerm
+                        ),
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(root.get("member").get("lastName")),
+                                searchTerm
+                        ),
+                        criteriaBuilder.like(
+                                criteriaBuilder.lower(
+                                        criteriaBuilder.concat(
+                                                criteriaBuilder.concat(root.get("member").get("firstName"), " "),
+                                                root.get("member").get("lastName")
+                                        )
+                                ),
+                                searchTerm
+                        )
+                );
+
+                if (root.get("paymentId") != null) {
+                    memberSearch = criteriaBuilder.or(
+                            memberSearch,
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get("paymentId")),
+                                    searchTerm
+                            )
+                    );
+                }
+
+                if (root.get("note") != null) {
+                    memberSearch = criteriaBuilder.or(
+                            memberSearch,
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get("note")),
+                                    searchTerm
+                            )
+                    );
+                }
+
+                predicates.add(memberSearch);
+            }
+
+            // Status filter
+            if (status != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), status));
+            }
+
+            // Type filter
+            if (type != null) {
+                predicates.add(criteriaBuilder.equal(root.get("type"), type));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return transactionRepository.findAll(spec, pageable);
     }
 
 

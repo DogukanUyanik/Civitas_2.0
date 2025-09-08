@@ -34,7 +34,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/members", true) // redirect here after successful login
+                        .defaultSuccessUrl("/dashboard", true) // redirect here after successful login
                         .usernameParameter("username")
                         .passwordParameter("password")
                 )

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script th:src="@{/js/sidebar.js}" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div th:replace="~{fragments :: sidebar}"></div>
+
+<!-- Main content -->
+<main class="dashboard-container">
+    <!-- Header section -->
+    <div class="dashboard-header">
+        <h1 class="title">Dashboard</h1>
+        <div class="header-actions">
+            <button class="customize-btn" onclick="toggleCustomization()">
+                <i class="fas fa-cog"></i>
+                Customize Dashboard
+            </button>
+            <button class="save-layout-btn" onclick="saveLayout()" style="display: none;">
+                <i class="fas fa-save"></i>
+                Save Layout
+            </button>
+        </div>
+    </div>
+
+    <!-- Available KPI Tiles Panel (hidden by default) -->
+    <div id="kpiPanel" class="kpi-panel" style="display: none;">
+        <h3>Available KPI Tiles</h3>
+        <div class="available-tiles">
+            <div class="tile-option" data-type="total-members">
+                <i class="fas fa-users"></i>
+                <span>Total Members</span>
+            </div>
+            <div class="tile-option" data-type="payments-received">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Payments Received</span>
+            </div>
+            <div class="tile-option" data-type="pending-payments">
+                <i class="fas fa-clock"></i>
+                <span>Pending Payments</span>
+            </div>
+            <div class="tile-option" data-type="upcoming-events">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Upcoming Events</span>
+            </div>
+            <div class="tile-option" data-type="recent-transactions">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Recent Transactions</span>
+            </div>
+            <div class="tile-option" data-type="member-status">
+                <i class="fas fa-chart-pie"></i>
+                <span>Member Status</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div id="dashboardGrid" class="dashboard-grid">
+        <!-- KPI tiles will be dynamically added here -->
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading dashboard...</p>
+    </div>
+</main>
+
+<script>
+    // Global variables
+    let isCustomizing = false;
+    let sortable = null;
+    let currentTiles = [];
+
+    // Initialize dashboard on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadDashboard();
+        setupEventListeners();
+    });
+
+    // Load dashboard tiles from server
+    async function loadDashboard() {
+        try {
+            console.log('Loading dashboard...');
+            showLoading(true);
+            const response = await fetch('/api/dashboard-tiles');
+            console.log('Response:', response);
+            const tiles = await response.json();
+            console.log('Tiles fetched:', tiles);
+
+            if (tiles.length === 0) {
+                // If no tiles exist, create default layout
+                await createDefaultLayout();
+            } else {
+                renderTiles(tiles);
+            }
+
+            currentTiles = tiles;
+            showLoading(false);
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            showLoading(false);
+            showErrorMessage('Failed to load dashboard');
+        }
+    }
+
+    // Create default dashboard layout
+    async function createDefaultLayout() {
+        const defaultTiles = [
+            { type: 'total-members', positionX: 0, positionY: 0, width: 1, height: 1 },
+            { type: 'payments-received', positionX: 1, positionY: 0, width: 1, height: 1 },
+            { type: 'pending-payments', positionX: 2, positionY: 0, width: 1, height: 1 },
+            { type: 'upcoming-events', positionX: 0, positionY: 1, width: 2, height: 1 },
+            { type: 'recent-transactions', positionX: 2, positionY: 1, width: 1, height: 2 },
+            { type: 'member-status', positionX: 0, positionY: 2, width: 2, height: 1 }
+        ];
+
+        for (const tileData of defaultTiles) {
+            await saveTileToServer(tileData);
+        }
+
+        // Reload to get the saved tiles with IDs
+        await loadDashboard();
+    }
+
+    // Render tiles on the grid
+    function renderTiles(tiles) {
+        const grid = document.getElementById('dashboardGrid');
+        grid.innerHTML = '';
+
+        tiles.forEach(tile => {
+            const tileElement = createTileElement(tile);
+            grid.appendChild(tileElement);
+        });
+
+        // Load actual KPI data
+        loadKPIData();
+    }
+
+    // Create individual tile element
+    function createTileElement(tile) {
+        const tileDiv = document.createElement('div');
+        tileDiv.className = `kpi-tile ${tile.type}`;
+        tileDiv.dataset.id = tile.id;
+        tileDiv.dataset.type = tile.type;
+        tileDiv.style.gridColumn = `${tile.positionX + 1} / span ${tile.width}`;
+        tileDiv.style.gridRow = `${tile.positionY + 1} / span ${tile.height}`;
+
+        const tileConfig = getTileConfig(tile.type);
+
+        tileDiv.innerHTML = `
+        <div class="tile-header">
+            <h3>${tileConfig.title}</h3>
+            <div class="tile-controls" style="display: none;">
+                <button onclick="resizeTile(${tile.id}, 'increase')" title="Increase Size">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+                <button onclick="resizeTile(${tile.id}, 'decrease')" title="Decrease Size">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                </button>
+                <button onclick="removeTile(${tile.id})" title="Remove Tile">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="tile-content">
+            <div class="tile-icon">
+                <i class="${tileConfig.icon}"></i>
+            </div>
+            <div class="tile-data">
+                <div class="main-value" id="value-${tile.type}">
+                    <div class="loading-shimmer">Loading...</div>
+                </div>
+                <div class="sub-value" id="sub-${tile.type}"></div>
+            </div>
+        </div>
+    `;
+
+        return tileDiv;
+    }
+
+    // Get tile configuration
+    function getTileConfig(type) {
+        const configs = {
+            'total-members': {
+                title: 'Total Members',
+                icon: 'fas fa-users',
+                color: '#10b981'
+            },
+            'payments-received': {
+                title: 'Payments Received',
+                icon: 'fas fa-money-bill-wave',
+                color: '#3b82f6'
+            },
+            'pending-payments': {
+                title: 'Pending Payments',
+                icon: 'fas fa-clock',
+                color: '#f59e0b'
+            },
+            'upcoming-events': {
+                title: 'Upcoming Events',
+                icon: 'fas fa-calendar-alt',
+                color: '#8b5cf6'
+            },
+            'recent-transactions': {
+                title: 'Recent Transactions',
+                icon: 'fas fa-exchange-alt',
+                color: '#ef4444'
+            },
+            'member-status': {
+                title: 'Member Status',
+                icon: 'fas fa-chart-pie',
+                color: '#06b6d4'
+            }
+        };
+        return configs[type] || { title: 'Unknown', icon: 'fas fa-question', color: '#6b7280' };
+    }
+
+    // Load KPI data from server
+    async function loadKPIData() {
+        try {
+            // For now, we'll use mock data but structure it to match the KPI service
+            // You can replace this with a call to /api/kpi/all when you implement the KPI service
+            const kpiData = await getMockKPIData();
+
+            // Update tile values
+            Object.keys(kpiData).forEach(type => {
+                const valueElement = document.getElementById(`value-${type}`);
+                const subElement = document.getElementById(`sub-${type}`);
+
+                if (valueElement) {
+                    const data = kpiData[type];
+                    valueElement.textContent = data.value;
+                    valueElement.classList.remove('loading-shimmer');
+
+                    // Add trend styling
+                    valueElement.classList.remove('success', 'warning', 'error');
+                    if (data.trend === 'up') {
+                        valueElement.classList.add('success');
+                    } else if (data.trend === 'down') {
+                        valueElement.classList.add('error');
+                    }
+                }
+                if (subElement && kpiData[type]) {
+                    const data = kpiData[type];
+                    subElement.innerHTML = data.subValue;
+
+                    // Add trend icon if available
+                    if (data.trend && data.trend !== 'neutral') {
+                        const trendIcon = data.trend === 'up' ?
+                            '<i class="fas fa-arrow-up" style="color: #10b981; margin-left: 0.25rem;"></i>' :
+                            '<i class="fas fa-arrow-down" style="color: #ef4444; margin-left: 0.25rem;"></i>';
+                        subElement.innerHTML += ' ' + trendIcon;
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error loading KPI data:', error);
+            // Fallback to show error state
+            document.querySelectorAll('.loading-shimmer').forEach(element => {
+                element.textContent = 'Error';
+                element.classList.remove('loading-shimmer');
+                element.classList.add('error');
+            });
+        }
+    }
+
+    // Mock KPI data function - replace this with actual API call later
+    async function getMockKPIData() {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        return {
+            'total-members': {
+                value: '1,247',
+                subValue: '+12 this month',
+                trend: 'up'
+            },
+            'payments-received': {
+                value: '€45,230',
+                subValue: '+8.5% from last month',
+                trend: 'up'
+            },
+            'pending-payments': {
+                value: '23',
+                subValue: '€3,450 total',
+                trend: 'down'
+            },
+            'upcoming-events': {
+                value: '5',
+                subValue: 'Next: Annual Meeting',
+                trend: 'neutral'
+            },
+            'recent-transactions': {
+                value: '€2,340',
+                subValue: 'Last 7 days',
+                trend: 'neutral'
+            },
+            'member-status': {
+                value: '89%',
+                subValue: 'Active members',
+                trend: 'up'
+            }
+        };
+    }
+
+    // Toggle customization mode
+    function toggleCustomization() {
+        isCustomizing = !isCustomizing;
+        const panel = document.getElementById('kpiPanel');
+        const saveBtn = document.querySelector('.save-layout-btn');
+        const customizeBtn = document.querySelector('.customize-btn');
+        const tileControls = document.querySelectorAll('.tile-controls');
+
+        if (isCustomizing) {
+            panel.style.display = 'block';
+            saveBtn.style.display = 'inline-flex';
+            customizeBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+            customizeBtn.classList.add('cancel-mode');
+
+            tileControls.forEach(control => {
+                control.style.display = 'flex';
+            });
+
+            setupDragAndDrop();
+        } else {
+            panel.style.display = 'none';
+            saveBtn.style.display = 'none';
+            customizeBtn.innerHTML = '<i class="fas fa-cog"></i> Customize Dashboard';
+            customizeBtn.classList.remove('cancel-mode');
+
+            tileControls.forEach(control => {
+                control.style.display = 'none';
+            });
+
+            if (sortable) {
+                sortable.destroy();
+            }
+        }
+    }
+
+    // Setup drag and drop functionality
+    function setupDragAndDrop() {
+        const grid = document.getElementById('dashboardGrid');
+        sortable = Sortable.create(grid, {
+            animation: 150,
+            ghostClass: 'tile-ghost',
+            chosenClass: 'tile-chosen',
+            dragClass: 'tile-drag',
+            onEnd: function(evt) {
+                updateTilePositions();
+            }
+        });
+
+        // Setup drag from panel
+        const availableTiles = document.querySelectorAll('.tile-option');
+        availableTiles.forEach(tile => {
+            tile.draggable = true;
+            tile.addEventListener('dragstart', handleTileOptionDrag);
+        });
+
+        grid.addEventListener('dragover', handleDragOver);
+        grid.addEventListener('drop', handleTileDrop);
+    }
+
+    // Handle dragging from tile options panel
+    function handleTileOptionDrag(e) {
+        e.dataTransfer.setData('text/plain', e.target.dataset.type);
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    function handleTileDrop(e) {
+        e.preventDefault();
+        const tileType = e.dataTransfer.getData('text/plain');
+        if (tileType) {
+            addNewTile(tileType);
+        }
+    }
+
+    // Add new tile to dashboard
+    async function addNewTile(type) {
+        const newTile = {
+            type: type,
+            positionX: 0,
+            positionY: 0,
+            width: 1,
+            height: 1
+        };
+
+        try {
+            const savedTile = await saveTileToServer(newTile);
+            const tileElement = createTileElement(savedTile);
+            document.getElementById('dashboardGrid').appendChild(tileElement);
+
+            if (isCustomizing) {
+                const controls = tileElement.querySelector('.tile-controls');
+                controls.style.display = 'flex';
+            }
+
+            // Load data for the new tile
+            loadKPIData();
+        } catch (error) {
+            console.error('Error adding tile:', error);
+            showErrorMessage('Failed to add tile');
+        }
+    }
+
+    // Remove tile
+    async function removeTile(tileId) {
+        if (confirm('Are you sure you want to remove this tile?')) {
+            try {
+                await fetch(`/api/dashboard-tiles/${tileId}`, { method: 'DELETE' });
+                const tileElement = document.querySelector(`[data-id="${tileId}"]`);
+                if (tileElement) {
+                    tileElement.remove();
+                }
+            } catch (error) {
+                console.error('Error removing tile:', error);
+                showErrorMessage('Failed to remove tile');
+            }
+        }
+    }
+
+    // Resize tile
+    async function resizeTile(tileId, action) {
+        const tileElement = document.querySelector(`[data-id="${tileId}"]`);
+        const currentTile = currentTiles.find(t => t.id == tileId);
+
+        if (!currentTile) return;
+
+        let newWidth = currentTile.width;
+        let newHeight = currentTile.height;
+
+        if (action === 'increase') {
+            if (newWidth < 3) newWidth++;
+            else if (newHeight < 2) newHeight++;
+        } else {
+            if (newWidth > 1) newWidth--;
+            else if (newHeight > 1) newHeight--;
+        }
+
+        currentTile.width = newWidth;
+        currentTile.height = newHeight;
+
+        tileElement.style.gridColumn = `${currentTile.positionX + 1} / span ${newWidth}`;
+        tileElement.style.gridRow = `${currentTile.positionY + 1} / span ${newHeight}`;
+
+        try {
+            await saveTileToServer(currentTile);
+        } catch (error) {
+            console.error('Error resizing tile:', error);
+        }
+    }
+
+    // Update tile positions after drag and drop
+    function updateTilePositions() {
+        const tiles = document.querySelectorAll('.kpi-tile');
+        tiles.forEach((tile, index) => {
+            const tileId = tile.dataset.id;
+            const currentTile = currentTiles.find(t => t.id == tileId);
+            if (currentTile) {
+                currentTile.positionX = index % 3;
+                currentTile.positionY = Math.floor(index / 3);
+            }
+        });
+    }
+
+    // Get CSRF token for Spring Security
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrfToken && csrfHeader) {
+        headers[csrfHeader] = csrfToken;
+    }
+
+    // Save layout to server
+    async function saveLayout() {
+        try {
+            showLoading(true);
+
+            for (const tile of currentTiles) {
+                await saveTileToServer(tile);
+            }
+
+            showLoading(false);
+            showSuccessMessage('Layout saved successfully!');
+        } catch (error) {
+            console.error('Error saving layout:', error);
+            showLoading(false);
+            showErrorMessage('Failed to save layout');
+        }
+    }
+
+
+    async function saveTileToServer(tile) {
+        console.log('Saving tile to server:', tile);
+        const response = await fetch('/api/dashboard-tiles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken // <-- add CSRF header here
+            },
+            body: JSON.stringify(tile)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to save tile');
+        }
+
+        return await response.json();
+    }
+
+
+    // Utility functions
+    function showLoading(show) {
+        document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+    }
+
+    function showSuccessMessage(message) {
+        // You can implement a toast notification here
+        alert(message);
+    }
+
+    function showErrorMessage(message) {
+        // You can implement a toast notification here
+        alert(message);
+    }
+
+    function setupEventListeners() {
+        // Refresh dashboard every 5 minutes
+        setInterval(() => {
+            if (!isCustomizing) {
+                loadKPIData();
+            }
+        }, 300000);
+    }
+</script>
+
+</body>
+</html>

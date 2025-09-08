@@ -26,4 +26,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // Optionally, just filter by status
     Page<Member> findByMemberStatus(MemberStatus status, Pageable pageable);
+
+
+    long countByMemberStatus(MemberStatus status);
 }

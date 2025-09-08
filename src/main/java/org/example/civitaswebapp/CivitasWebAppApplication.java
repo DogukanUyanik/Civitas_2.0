@@ -71,4 +71,19 @@ public class CivitasWebAppApplication implements WebMvcConfigurer {
         return new EventServiceImpl();
     }
 
+    @Bean
+    DashboardService dashboardService() {
+        return new DashboardServiceImpl();
+    }
+
+    @Bean
+    MyUserService myUserService() {
+        return new MyUserServiceImpl();
+    }
+
+    @Bean
+    KPIService kpiService() {
+        return new KPIServiceImpl();
+    }
+
 }

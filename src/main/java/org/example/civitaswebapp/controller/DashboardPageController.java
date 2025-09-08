@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/events")
-public class EventPageController {
+@RequestMapping("/dashboard")
+public class DashboardPageController {
 
     @GetMapping
-    public String listEvents() {
-        return "events";
+    public String showDashboard() {
+        return "dashboard";
     }
 }

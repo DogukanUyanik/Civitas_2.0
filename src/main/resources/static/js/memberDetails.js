@@ -324,7 +324,7 @@
             params.append('currency', currency); // <-- add this
             if (note) params.append('note', note);
 
-            fetch('/api/transactions/send-payment', {
+            fetch('/transactions/send-payment', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -336,9 +336,12 @@
                 .then(data => {
                     if (data.success) {
                         paymentModal.classList.add('hidden');
+
                         paymentResult.classList.remove('hidden');
-                        paymentLink.href = data.paymentLink;
-                        paymentLink.textContent = data.paymentLink;
+                        paymentResult.querySelector('p').textContent = '✅ Payment link sent to the user via WhatsApp!';
+                        paymentLink.style.display = 'none'; // hide the link
+
+
                     } else {
                         alert('Error: ' + data.message);
                     }

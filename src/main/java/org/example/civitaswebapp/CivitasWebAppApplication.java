@@ -72,18 +72,9 @@ public class CivitasWebAppApplication implements WebMvcConfigurer {
     }
 
     @Bean
-    DashboardService dashboardService() {
-        return new DashboardServiceImpl();
+    WhatsAppService whatsAppService() {
+        return new WhatsAppServiceImpl();
     }
 
-    @Bean
-    MyUserService myUserService() {
-        return new MyUserServiceImpl();
-    }
-
-    @Bean
-    KPIService kpiService() {
-        return new KPIServiceImpl();
-    }
 
 }

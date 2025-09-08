@@ -76,12 +76,18 @@ public class TransactionServiceImpl implements TransactionService {
                                     )
                                     .build()
                     )
-                    .putMetadata("transactionId", String.valueOf(transaction.getId()))
+                    .putMetadata("transactionId", String.valueOf(transaction.getId())) // session metadata
+                    .setPaymentIntentData(
+                            SessionCreateParams.PaymentIntentData.builder()
+                                    .putMetadata("transactionId", String.valueOf(transaction.getId())) // ⚠️ important!
+                                    .build()
+                    )
                     .build();
 
 
             Session session = Session.create(params);
             return session.getUrl();
+
 
         } catch (Exception e) {
             System.err.println("Stripe exception: " + e.getMessage());

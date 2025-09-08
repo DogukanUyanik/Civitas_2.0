@@ -83,6 +83,10 @@
     let sortable = null;
     let currentTiles = [];
 
+    // Get CSRF token for Spring Security
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
     // Initialize dashboard on page load
     document.addEventListener('DOMContentLoaded', function() {
         loadDashboard();
@@ -94,8 +98,14 @@
         try {
             console.log('Loading dashboard...');
             showLoading(true);
-            const response = await fetch('/api/dashboard-tiles');
-            console.log('Response:', response);
+            const response = await fetch('/api/dashboard-tiles', {
+                headers: getHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load tiles');
+            }
+
             const tiles = await response.json();
             console.log('Tiles fetched:', tiles);
 
@@ -104,9 +114,9 @@
                 await createDefaultLayout();
             } else {
                 renderTiles(tiles);
+                currentTiles = tiles;
             }
 
-            currentTiles = tiles;
             showLoading(false);
         } catch (error) {
             console.error('Error loading dashboard:', error);
@@ -132,6 +142,15 @@
 
         // Reload to get the saved tiles with IDs
         await loadDashboard();
+    }
+
+    // Get headers with CSRF token
+    function getHeaders() {
+        const headers = { 'Content-Type': 'application/json' };
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+        return headers;
     }
 
     // Render tiles on the grid
@@ -227,11 +246,281 @@
         return configs[type] || { title: 'Unknown', icon: 'fas fa-question', color: '#6b7280' };
     }
 
+    // Toggle customization mode
+    function toggleCustomization() {
+        isCustomizing = !isCustomizing;
+        const panel = document.getElementById('kpiPanel');
+        const saveBtn = document.querySelector('.save-layout-btn');
+        const customizeBtn = document.querySelector('.customize-btn');
+        const tileControls = document.querySelectorAll('.tile-controls');
+
+        if (isCustomizing) {
+            panel.style.display = 'block';
+            saveBtn.style.display = 'inline-flex';
+            customizeBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+            customizeBtn.classList.add('cancel-mode');
+
+            tileControls.forEach(control => {
+                control.style.display = 'flex';
+            });
+
+            setupDragAndDrop();
+        } else {
+            panel.style.display = 'none';
+            saveBtn.style.display = 'none';
+            customizeBtn.innerHTML = '<i class="fas fa-cog"></i> Customize Dashboard';
+            customizeBtn.classList.remove('cancel-mode');
+
+            tileControls.forEach(control => {
+                control.style.display = 'none';
+            });
+
+            if (sortable) {
+                sortable.destroy();
+            }
+        }
+    }
+
+    // Setup drag and drop functionality
+    function setupDragAndDrop() {
+        const grid = document.getElementById('dashboardGrid');
+        sortable = Sortable.create(grid, {
+            animation: 150,
+            ghostClass: 'tile-ghost',
+            chosenClass: 'tile-chosen',
+            dragClass: 'tile-drag',
+            onEnd: function(evt) {
+                updateTilePositions();
+            }
+        });
+
+        // Setup drag from panel
+        const availableTiles = document.querySelectorAll('.tile-option');
+        availableTiles.forEach(tile => {
+            tile.draggable = true;
+            tile.addEventListener('dragstart', handleTileOptionDrag);
+            tile.addEventListener('click', handleTileOptionClick); // Add click handler as alternative
+        });
+
+        grid.addEventListener('dragover', handleDragOver);
+        grid.addEventListener('drop', handleTileDrop);
+    }
+
+    // Handle dragging from tile options panel - FIXED
+    function handleTileOptionDrag(e) {
+        const tileType = e.target.closest('.tile-option').dataset.type;
+        e.dataTransfer.setData('text/plain', tileType);
+        console.log('Dragging tile type:', tileType);
+    }
+
+    // Handle clicking on tile option as alternative to drag
+    function handleTileOptionClick(e) {
+        const tileType = e.target.closest('.tile-option').dataset.type;
+        console.log('Clicked tile type:', tileType);
+        addNewTile(tileType);
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    function handleTileDrop(e) {
+        e.preventDefault();
+        const tileType = e.dataTransfer.getData('text/plain');
+        console.log('Dropped tile type:', tileType);
+        if (tileType && tileType.length < 50) { // Basic validation to ensure it's a tile type, not HTML
+            addNewTile(tileType);
+        }
+    }
+
+    // Add new tile to dashboard - FIXED position calculation
+    async function addNewTile(type) {
+        // Calculate next available position
+        const nextPosition = calculateNextPosition();
+
+        const newTile = {
+            type: type,
+            positionX: nextPosition.x,
+            positionY: nextPosition.y,
+            width: 1,
+            height: 1
+        };
+
+        try {
+            console.log('Adding new tile:', newTile);
+            const savedTile = await saveTileToServer(newTile);
+            const tileElement = createTileElement(savedTile);
+            document.getElementById('dashboardGrid').appendChild(tileElement);
+
+            // Update currentTiles array
+            currentTiles.push(savedTile);
+
+            if (isCustomizing) {
+                const controls = tileElement.querySelector('.tile-controls');
+                controls.style.display = 'flex';
+            }
+
+            // Load data for the new tile
+            loadKPIData();
+        } catch (error) {
+            console.error('Error adding tile:', error);
+            showErrorMessage('Failed to add tile');
+        }
+    }
+
+    // Calculate next available position
+    function calculateNextPosition() {
+        const gridColumns = 3; // Adjust based on your grid setup
+        let x = 0, y = 0;
+
+        // Find first available position
+        while (isPositionOccupied(x, y)) {
+            x++;
+            if (x >= gridColumns) {
+                x = 0;
+                y++;
+            }
+        }
+
+        return { x, y };
+    }
+
+    // Check if position is occupied
+    function isPositionOccupied(x, y) {
+        return currentTiles.some(tile =>
+            tile.positionX <= x && x < tile.positionX + tile.width &&
+            tile.positionY <= y && y < tile.positionY + tile.height
+        );
+    }
+
+    // Remove tile - FIXED CSRF handling
+    async function removeTile(tileId) {
+        if (confirm('Are you sure you want to remove this tile?')) {
+            try {
+                const response = await fetch(`/api/dashboard-tiles/${tileId}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete tile');
+                }
+
+                const tileElement = document.querySelector(`[data-id="${tileId}"]`);
+                if (tileElement) {
+                    tileElement.remove();
+                }
+
+                // Remove from currentTiles array
+                currentTiles = currentTiles.filter(tile => tile.id != tileId);
+
+            } catch (error) {
+                console.error('Error removing tile:', error);
+                showErrorMessage('Failed to remove tile');
+            }
+        }
+    }
+
+    // Resize tile
+    async function resizeTile(tileId, action) {
+        const tileElement = document.querySelector(`[data-id="${tileId}"]`);
+        const currentTile = currentTiles.find(t => t.id == tileId);
+
+        if (!currentTile) return;
+
+        let newWidth = currentTile.width;
+        let newHeight = currentTile.height;
+
+        if (action === 'increase') {
+            if (newWidth < 3) newWidth++;
+            else if (newHeight < 2) newHeight++;
+        } else {
+            if (newWidth > 1) newWidth--;
+            else if (newHeight > 1) newHeight--;
+        }
+
+        currentTile.width = newWidth;
+        currentTile.height = newHeight;
+
+        tileElement.style.gridColumn = `${currentTile.positionX + 1} / span ${newWidth}`;
+        tileElement.style.gridRow = `${currentTile.positionY + 1} / span ${newHeight}`;
+
+        try {
+            await saveTileToServer(currentTile);
+        } catch (error) {
+            console.error('Error resizing tile:', error);
+        }
+    }
+
+    // Update tile positions after drag and drop - FIXED
+    function updateTilePositions() {
+        const tiles = document.querySelectorAll('.kpi-tile');
+        const updates = [];
+
+        tiles.forEach((tile, index) => {
+            const tileId = tile.dataset.id;
+            const currentTile = currentTiles.find(t => t.id == tileId);
+            if (currentTile) {
+                const newX = index % 3;
+                const newY = Math.floor(index / 3);
+
+                if (currentTile.positionX !== newX || currentTile.positionY !== newY) {
+                    currentTile.positionX = newX;
+                    currentTile.positionY = newY;
+                    tile.style.gridColumn = `${newX + 1} / span ${currentTile.width}`;
+                    tile.style.gridRow = `${newY + 1} / span ${currentTile.height}`;
+                    updates.push(currentTile);
+                }
+            }
+        });
+
+        // Save all updated positions
+        updates.forEach(tile => {
+            saveTileToServer(tile).catch(error => {
+                console.error('Error saving tile position:', error);
+            });
+        });
+    }
+
+    // Save layout to server
+    async function saveLayout() {
+        try {
+            showLoading(true);
+
+            for (const tile of currentTiles) {
+                await saveTileToServer(tile);
+            }
+
+            showLoading(false);
+            showSuccessMessage('Layout saved successfully!');
+        } catch (error) {
+            console.error('Error saving layout:', error);
+            showLoading(false);
+            showErrorMessage('Failed to save layout');
+        }
+    }
+
+    // Save tile to server - FIXED
+    async function saveTileToServer(tile) {
+        console.log('Saving tile to server:', tile);
+        const response = await fetch('/api/dashboard-tiles', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(tile)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', response.status, errorText);
+            throw new Error('Failed to save tile');
+        }
+
+        return await response.json();
+    }
+
     // Load KPI data from server
     async function loadKPIData() {
         try {
-            // For now, we'll use mock data but structure it to match the KPI service
-            // You can replace this with a call to /api/kpi/all when you implement the KPI service
             const kpiData = await getMockKPIData();
 
             // Update tile values
@@ -314,217 +603,6 @@
             }
         };
     }
-
-    // Toggle customization mode
-    function toggleCustomization() {
-        isCustomizing = !isCustomizing;
-        const panel = document.getElementById('kpiPanel');
-        const saveBtn = document.querySelector('.save-layout-btn');
-        const customizeBtn = document.querySelector('.customize-btn');
-        const tileControls = document.querySelectorAll('.tile-controls');
-
-        if (isCustomizing) {
-            panel.style.display = 'block';
-            saveBtn.style.display = 'inline-flex';
-            customizeBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
-            customizeBtn.classList.add('cancel-mode');
-
-            tileControls.forEach(control => {
-                control.style.display = 'flex';
-            });
-
-            setupDragAndDrop();
-        } else {
-            panel.style.display = 'none';
-            saveBtn.style.display = 'none';
-            customizeBtn.innerHTML = '<i class="fas fa-cog"></i> Customize Dashboard';
-            customizeBtn.classList.remove('cancel-mode');
-
-            tileControls.forEach(control => {
-                control.style.display = 'none';
-            });
-
-            if (sortable) {
-                sortable.destroy();
-            }
-        }
-    }
-
-    // Setup drag and drop functionality
-    function setupDragAndDrop() {
-        const grid = document.getElementById('dashboardGrid');
-        sortable = Sortable.create(grid, {
-            animation: 150,
-            ghostClass: 'tile-ghost',
-            chosenClass: 'tile-chosen',
-            dragClass: 'tile-drag',
-            onEnd: function(evt) {
-                updateTilePositions();
-            }
-        });
-
-        // Setup drag from panel
-        const availableTiles = document.querySelectorAll('.tile-option');
-        availableTiles.forEach(tile => {
-            tile.draggable = true;
-            tile.addEventListener('dragstart', handleTileOptionDrag);
-        });
-
-        grid.addEventListener('dragover', handleDragOver);
-        grid.addEventListener('drop', handleTileDrop);
-    }
-
-    // Handle dragging from tile options panel
-    function handleTileOptionDrag(e) {
-        e.dataTransfer.setData('text/plain', e.target.dataset.type);
-    }
-
-    function handleDragOver(e) {
-        e.preventDefault();
-    }
-
-    function handleTileDrop(e) {
-        e.preventDefault();
-        const tileType = e.dataTransfer.getData('text/plain');
-        if (tileType) {
-            addNewTile(tileType);
-        }
-    }
-
-    // Add new tile to dashboard
-    async function addNewTile(type) {
-        const newTile = {
-            type: type,
-            positionX: 0,
-            positionY: 0,
-            width: 1,
-            height: 1
-        };
-
-        try {
-            const savedTile = await saveTileToServer(newTile);
-            const tileElement = createTileElement(savedTile);
-            document.getElementById('dashboardGrid').appendChild(tileElement);
-
-            if (isCustomizing) {
-                const controls = tileElement.querySelector('.tile-controls');
-                controls.style.display = 'flex';
-            }
-
-            // Load data for the new tile
-            loadKPIData();
-        } catch (error) {
-            console.error('Error adding tile:', error);
-            showErrorMessage('Failed to add tile');
-        }
-    }
-
-    // Remove tile
-    async function removeTile(tileId) {
-        if (confirm('Are you sure you want to remove this tile?')) {
-            try {
-                await fetch(`/api/dashboard-tiles/${tileId}`, { method: 'DELETE' });
-                const tileElement = document.querySelector(`[data-id="${tileId}"]`);
-                if (tileElement) {
-                    tileElement.remove();
-                }
-            } catch (error) {
-                console.error('Error removing tile:', error);
-                showErrorMessage('Failed to remove tile');
-            }
-        }
-    }
-
-    // Resize tile
-    async function resizeTile(tileId, action) {
-        const tileElement = document.querySelector(`[data-id="${tileId}"]`);
-        const currentTile = currentTiles.find(t => t.id == tileId);
-
-        if (!currentTile) return;
-
-        let newWidth = currentTile.width;
-        let newHeight = currentTile.height;
-
-        if (action === 'increase') {
-            if (newWidth < 3) newWidth++;
-            else if (newHeight < 2) newHeight++;
-        } else {
-            if (newWidth > 1) newWidth--;
-            else if (newHeight > 1) newHeight--;
-        }
-
-        currentTile.width = newWidth;
-        currentTile.height = newHeight;
-
-        tileElement.style.gridColumn = `${currentTile.positionX + 1} / span ${newWidth}`;
-        tileElement.style.gridRow = `${currentTile.positionY + 1} / span ${newHeight}`;
-
-        try {
-            await saveTileToServer(currentTile);
-        } catch (error) {
-            console.error('Error resizing tile:', error);
-        }
-    }
-
-    // Update tile positions after drag and drop
-    function updateTilePositions() {
-        const tiles = document.querySelectorAll('.kpi-tile');
-        tiles.forEach((tile, index) => {
-            const tileId = tile.dataset.id;
-            const currentTile = currentTiles.find(t => t.id == tileId);
-            if (currentTile) {
-                currentTile.positionX = index % 3;
-                currentTile.positionY = Math.floor(index / 3);
-            }
-        });
-    }
-
-    // Get CSRF token for Spring Security
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
-    const headers = { 'Content-Type': 'application/json' };
-    if (csrfToken && csrfHeader) {
-        headers[csrfHeader] = csrfToken;
-    }
-
-    // Save layout to server
-    async function saveLayout() {
-        try {
-            showLoading(true);
-
-            for (const tile of currentTiles) {
-                await saveTileToServer(tile);
-            }
-
-            showLoading(false);
-            showSuccessMessage('Layout saved successfully!');
-        } catch (error) {
-            console.error('Error saving layout:', error);
-            showLoading(false);
-            showErrorMessage('Failed to save layout');
-        }
-    }
-
-
-    async function saveTileToServer(tile) {
-        console.log('Saving tile to server:', tile);
-        const response = await fetch('/api/dashboard-tiles', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken // <-- add CSRF header here
-            },
-            body: JSON.stringify(tile)
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to save tile');
-        }
-
-        return await response.json();
-    }
-
 
     // Utility functions
     function showLoading(show) {

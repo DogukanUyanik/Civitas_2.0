@@ -4,4 +4,5 @@ import org.example.civitaswebapp.domain.MyUser;
 
 public interface MyUserService {
     MyUser getLoggedInUser();
+    MyUser findByUsername(String name);
 }

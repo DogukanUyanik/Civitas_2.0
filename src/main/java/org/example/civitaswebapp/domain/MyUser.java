@@ -30,10 +30,6 @@ public class MyUser {
     @Column(nullable = false)
     private MyUserRole role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<DashboardTile> dashboardTiles = new ArrayList<>();
-
 
 
 

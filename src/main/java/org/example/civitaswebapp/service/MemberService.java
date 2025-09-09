@@ -14,6 +14,9 @@ public interface MemberService {
 
     Page<Member> getMembers(Pageable pageable, String search, String status);
 
+    //needed for create event modal
+    List<Member> getAllMembers();
+
 
     @Transactional
     public void saveMember(Member member);

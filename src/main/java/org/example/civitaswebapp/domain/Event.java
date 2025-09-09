@@ -1,5 +1,7 @@
 package org.example.civitaswebapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -45,6 +47,7 @@ public class Event {
     private EventType eventType = EventType.GENERAL; // Default to GENERAL
 
     @ManyToMany
+    @JsonManagedReference
     @JoinTable(
             name = "event_members",
             joinColumns = @JoinColumn(name = "event_id"),

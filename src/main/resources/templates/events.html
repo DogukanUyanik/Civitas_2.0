@@ -95,6 +95,17 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="attendees" class="form-label">
+                            <i class="fas fa-users me-1"></i>
+                            Select Members
+                        </label>
+                        <select id="attendees" multiple class="form-control">
+                            <!-- Options populated dynamically via JS -->
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3">
                         <label for="description" class="form-label">
                             <i class="fas fa-align-left me-1"></i>
                             Description
@@ -386,6 +397,11 @@
                 attendees: []
             };
 
+            // ← Add this here
+            const selectedAttendees = Array.from(document.getElementById('attendees').selectedOptions)
+                .map(option => Number(option.value));
+            event.attendees = selectedAttendees;
+
             console.log('Sending event to server:', event); // Debug log
 
             // Get CSRF token for Spring Security
@@ -482,6 +498,20 @@
             }
         });
     });
+
+    // Fetch members from backend
+    fetch('/api/members')
+        .then(res => res.json())
+        .then(data => {
+            const attendeesSelect = document.getElementById('attendees');
+            data.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.firstName + ' ' + member.lastName;
+                attendeesSelect.appendChild(option);
+            });
+        });
+
 </script>
 
 </body>

@@ -1,5 +1,7 @@
 package org.example.civitaswebapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import jakarta.persistence.*;
@@ -53,6 +55,7 @@ public class Member {
     private List<Transaction> transactions = new ArrayList<>();
 
     @ManyToMany(mappedBy = "attendees")
+    @JsonBackReference
     private Set<Event> events = new HashSet<>();
 
 

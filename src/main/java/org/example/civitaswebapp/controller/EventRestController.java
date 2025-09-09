@@ -1,6 +1,7 @@
 package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.Event;
+import org.example.civitaswebapp.dto.EventRequest;
 import org.example.civitaswebapp.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,7 @@ public class EventRestController {
     }
 
     @PostMapping
-    public Event createEvent(@RequestBody Event event) {
+    public Event createEvent(@RequestBody EventRequest event) {
         System.out.println("Received event: " + event); // DEBUG: Print received event
         Event savedEvent = eventService.saveEvent(event);
         System.out.println("Saved event: " + savedEvent); // DEBUG: Print saved event

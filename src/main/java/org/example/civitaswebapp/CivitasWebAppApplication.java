@@ -76,5 +76,4 @@ public class CivitasWebAppApplication implements WebMvcConfigurer {
         return new WhatsAppServiceImpl();
     }
 
-
 }

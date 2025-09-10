@@ -6,16 +6,96 @@
     min-height: 100vh;
 }
 
+/* Top bar container - updated to flex row with space between */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Left section for go back and title */
+.top-bar-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+/* Right section for PDF button */
+.top-bar-right {
+    display: flex;
+    align-items: center;
+}
+
 .title {
     color: #1f2937;
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 2rem;
-    text-align: center;
+    margin: 0;
+    text-align: left;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* Go Back Button (light grey) */
+.go-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    color: #374151;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.go-back-btn:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* PDF Button styles */
+.btn {
+    padding: 0.75rem 1.5rem;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+.btn i {
+    font-size: 1rem;
 }
 
 .row {
@@ -460,125 +540,6 @@
     padding: 2rem;
 }
 
-/* Responsive design */
-@media (max-width: 968px) {
-    .row {
-        flex-direction: column;
-    }
-
-    .col-md-4, .col-md-8 {
-        flex: none;
-        width: 100%;
-    }
-
-    .members-container {
-        padding: 1rem;
-    }
-
-    .title {
-        font-size: 2rem;
-    }
-
-    .profile-avatar {
-        width: 100px;
-        height: 100px;
-    }
-
-    .profile-avatar i {
-        font-size: 3rem;
-    }
-
-    .profile-name {
-        font-size: 1.5rem;
-    }
-
-    .filter-controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .filter-group {
-        width: 100%;
-    }
-
-    .filter-select {
-        min-width: 100%;
-    }
-}
-
-@media (max-width: 640px) {
-    .panel {
-        padding: 1.5rem;
-        border-radius: 16px;
-    }
-
-    .detail-item {
-        flex-direction: column;
-        align-items: flex-start;
-        text-align: left;
-    }
-
-    .detail-item i {
-        margin-bottom: 0.5rem;
-    }
-
-    .detail-label {
-        min-width: auto;
-    }
-
-    .transactions-header {
-        padding: 1.5rem 1.5rem 1rem;
-    }
-
-    .table-container {
-        padding: 0 1.5rem 1.5rem;
-    }
-
-    .transactions-table {
-        font-size: 0.85rem;
-    }
-
-    .transactions-table thead th,
-    .transactions-table tbody td {
-        padding: 0.75rem 0.5rem;
-    }
-
-    .transactions-title {
-        font-size: 1.3rem;
-    }
-
-    .filter-controls {
-        gap: 1rem;
-    }
-
-    .filter-select,
-    .filter-reset-btn {
-        padding: 0.6rem 0.8rem;
-        font-size: 0.9rem;
-    }
-}
-
-/* Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.col-md-4 .panel {
-    animation-delay: 0.1s;
-}
-
-.col-md-8 .panel {
-    animation-delay: 0.2s;
-}
-
-
 /* Send Payment Button */
 .send-payment-btn {
     margin-top: 1.5rem;
@@ -625,17 +586,17 @@
     width: 400px;
     max-width: 90%;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-    gap: 1rem; /* Space between inputs */
+    gap: 1rem;
 }
 
 .modal-content input,
 .modal-content textarea {
     width: 100%;
-    padding: 0.75rem 1rem; /* inner spacing for the inputs */
+    padding: 0.75rem 1rem;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     font-size: 14px;
-    box-sizing: border-box; /* make sure padding doesn't overflow */
+    box-sizing: border-box;
 }
 
 .modal-content textarea {
@@ -707,65 +668,156 @@ textarea {
     background: linear-gradient(135deg, #059669, #047857);
 }
 
-/* Responsive */
+.hidden {
+    display: none;
+}
+
+/* Responsive design */
+@media (max-width: 968px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-4, .col-md-8 {
+        flex: none;
+        width: 100%;
+    }
+
+    .members-container {
+        padding: 1rem;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-avatar i {
+        font-size: 3rem;
+    }
+
+    .profile-name {
+        font-size: 1.5rem;
+    }
+
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        width: 100%;
+    }
+
+    .filter-select {
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .top-bar-right {
+        align-self: flex-end;
+    }
+
+    .title {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .panel {
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    .detail-item {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .detail-item i {
+        margin-bottom: 0.5rem;
+    }
+
+    .detail-label {
+        min-width: auto;
+    }
+
+    .transactions-header {
+        padding: 1.5rem 1.5rem 1rem;
+    }
+
+    .table-container {
+        padding: 0 1.5rem 1.5rem;
+    }
+
+    .transactions-table {
+        font-size: 0.85rem;
+    }
+
+    .transactions-table thead th,
+    .transactions-table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .transactions-title {
+        font-size: 1.3rem;
+    }
+
+    .filter-controls {
+        gap: 1rem;
+    }
+
+    .filter-select,
+    .filter-reset-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .top-bar-right {
+        align-self: flex-start;
+    }
+}
+
 @media (max-width: 500px) {
     .modal-content {
         width: 95%;
         padding: 1.5rem;
     }
 }
-/* Top bar container */
-.top-bar {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Go Back Button (light grey) */
-.go-back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: #f8fafc;
-    color: #374151; /* dark grey text */
-    font-weight: 600;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: all 0.2s ease;
+.col-md-4 .panel {
+    animation-delay: 0.1s;
 }
 
-.go-back-btn:hover {
-    background: #e5e7eb; /* slightly darker grey on hover */
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+.col-md-8 .panel {
+    animation-delay: 0.2s;
 }
-
-/* Title aligned top-left */
-.title {
-    text-align: left;
-    margin: 0; /* remove default margin */
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1f2937;
-    position: relative;
-    padding-bottom: 0.5rem;
-}
-
-.title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 60px;
-    height: 4px;
-    background: linear-gradient(90deg, #10b981, #059669);
-    border-radius: 2px;
-}
-
-.hidden {
-    display: none;
-}
-

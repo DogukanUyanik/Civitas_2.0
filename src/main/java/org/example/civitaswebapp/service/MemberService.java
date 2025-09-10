@@ -26,4 +26,5 @@ public interface MemberService {
 
     public Optional<Member> findById(Long id);
 
+    Member getIdForPdf(Long id);
 }

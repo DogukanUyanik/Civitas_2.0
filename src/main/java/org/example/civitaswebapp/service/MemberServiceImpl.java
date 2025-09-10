@@ -40,6 +40,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public Member getIdForPdf(Long id) {
+        return memberRepository.findById(id).get();
+    }
+
+    @Override
     public Page<Member> getMembers(Pageable pageable, String search, String status) {
         if ((search == null || search.isBlank()) && (status == null || status.isBlank())) {
             return memberRepository.findAll(pageable);

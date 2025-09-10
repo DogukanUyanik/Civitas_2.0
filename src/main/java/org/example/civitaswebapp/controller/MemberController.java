@@ -4,11 +4,15 @@ package org.example.civitaswebapp.controller;
 import jakarta.validation.Valid;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.service.MemberService;
+import org.example.civitaswebapp.service.PdfService;
 import org.example.civitaswebapp.validator.MemberEmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/members")
@@ -29,6 +34,9 @@ public class MemberController {
 
     @Autowired
     private MessageSource messageSource;
+
+    @Autowired
+    private PdfService pdfService;
 
     @GetMapping
     public String showMembersList(Model model,
@@ -104,6 +112,21 @@ public class MemberController {
         model.addAttribute("member", member);
         return "members/memberDetails";
     }
+
+    @GetMapping("/{id}/pdf")
+    public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) throws Exception {
+        Member member = memberService.getIdForPdf(id);
+        byte[] pdfBytes = pdfService.generateMemberPdf(member);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "member_" + id + ".pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(pdfBytes);
+    }
+
 
 
 

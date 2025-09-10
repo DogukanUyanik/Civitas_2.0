@@ -19,10 +19,17 @@
 
 <div class="members-container container">
     <div class="top-bar">
-        <a th:href="@{/members}" class="go-back-btn">
-            <i class="bi bi-arrow-left"></i> Go Back
-        </a>
-        <h1 class="title">Member Details</h1>
+        <div class="top-bar-left">
+            <a th:href="@{/members}" class="go-back-btn">
+                <i class="bi bi-arrow-left"></i> Go Back
+            </a>
+            <h1 class="title">Member Details</h1>
+        </div>
+        <div class="top-bar-right">
+            <a th:href="@{/members/{id}/pdf(id=${member.id})}" class="btn-generate-pdf">
+                <i class="bi bi-file-earmark-pdf"></i> Generate PDF
+            </a>
+        </div>
     </div>
 
     <div class="row">
@@ -172,6 +179,9 @@
                         </button>
                     </div>
                 </div>
+
+
+
 
                 <!-- Transactions Table -->
                 <div class="table-container">

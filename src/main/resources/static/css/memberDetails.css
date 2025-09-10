@@ -821,3 +821,29 @@ textarea {
 .col-md-8 .panel {
     animation-delay: 0.2s;
 }
+
+.btn-generate-pdf{
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #a240e4, #059669);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: #c1b428;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
+}
+
+
+
+.btn-generate-pdf:hover {
+    background: linear-gradient(135deg, #722ca0, #047452);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}

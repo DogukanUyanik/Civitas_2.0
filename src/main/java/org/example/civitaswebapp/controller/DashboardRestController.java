@@ -33,4 +33,14 @@ public class DashboardRestController {
     public void saveUserDashboard(@PathVariable Long userId, @RequestBody List<UserDashboardTile> tiles) {
         dashboardService.saveUserDashboard(userId, tiles);
     }
+
+    @PostMapping("/users/{userId}/tiles/{widgetKey}")
+    public void addTile(@PathVariable Long userId, @PathVariable String widgetKey) {
+        dashboardService.addTile(userId, widgetKey);
+    }
+
+    @DeleteMapping("/users/{userId}/tiles/{widgetKey}")
+    public void removeTile(@PathVariable Long userId, @PathVariable String widgetKey) {
+        dashboardService.removeTile(userId, widgetKey);
+    }
 }

@@ -13,4 +13,6 @@ public interface UserDashboardTileRepository extends JpaRepository<UserDashboard
     // Delete tile by user ID and widget key
     void deleteByUserIdAndWidgetKey(Long userId, String widgetKey);
 
+    boolean existsByUserIdAndWidgetKey(Long userId, String widgetKey);
+
 }

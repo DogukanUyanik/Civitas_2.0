@@ -17,4 +17,8 @@ public interface DashboardService {
     // Save or update user tile preferences
     void saveUserDashboard(Long userId, List<UserDashboardTile> tiles);
 
+    void addTile(Long userId, String widgetKey);
+
+    void removeTile(Long userId, String widgetKey);
+
 }

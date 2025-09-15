@@ -35,6 +35,7 @@ public class ActiveMembersCountKpiProvider implements KpiProvider {
     public KpiValueDto computeValue(Long userId) {
         long activeCount = memberRepository.countByMemberStatus(MemberStatus.ACTIVE);
         return KpiValueDto.builder()
+                .title("Active Members")
                 .value(activeCount)
                 .unit("members")
                 .formattedValue(activeCount + " Members")

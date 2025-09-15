@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class KpiValueDto {
+    private String title;
     private Object value;    // could be number, string, object depending on the tile
     private String unit;     // optional unit (e.g., "members", "€", "%")
     private String formattedValue; // optional pre-formatted string for display

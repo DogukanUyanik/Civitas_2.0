@@ -1,6 +1,5 @@
 package org.example.civitaswebapp.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
@@ -25,21 +24,21 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is required")
-    @Size(max = 100, message = "Title cannot exceed 100 characters")
+    @NotBlank(message = "{event.title.required}")
+    @Size(max = 100, message = "{event.title.size}")
     private String title;
 
-    @Size(max = 500, message = "Description cannot exceed 500 characters")
+    @Size(max = 500, message = "{event.description.size}")
     private String description;
 
-    @NotNull(message = "Start date/time is required")
-    @Future(message = "Start date/time must be in the future")
+    @NotNull(message = "{event.start.required}")
+    @Future(message = "{event.start.future}")
     private LocalDateTime start;
 
-    @NotNull(message = "End date/time is required")
+    @NotNull(message = "{event.end.required}")
     private LocalDateTime end;
 
-    @Size(max = 100, message = "Location cannot exceed 100 characters")
+    @Size(max = 100, message = "{event.location.size}")
     private String location;
 
     @Enumerated(EnumType.STRING)
@@ -59,10 +58,9 @@ public class Event {
     @PreUpdate
     private void validateDates() {
         if (end != null && start != null && end.isBefore(start)) {
-            throw new IllegalArgumentException("End date/time cannot be before start date/time");
+            throw new IllegalArgumentException("{event.end.before.start}");
         }
 
-        // Set default event type if null
         if (eventType == null) {
             eventType = EventType.GENERAL;
         }

@@ -1,6 +1,5 @@
 package org.example.civitaswebapp.domain;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -19,21 +18,20 @@ import java.time.LocalDateTime;
 @Builder
 public class Transaction {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
-    @NotNull(message = "Member is required")
+    @NotNull(message = "{transaction.member.required}")
     private Member member;
 
-    @NotNull(message = "Amount is required")
-    @DecimalMin(value = "0.49", message = "Amount must be greater than 0.49")
+    @NotNull(message = "{transaction.amount.required}")
+    @DecimalMin(value = "0.49", message = "{transaction.amount.min}")
     private Double amount;
 
-    @NotBlank(message = "Currency is required")
+    @NotBlank(message = "{transaction.currency.required}")
     private String currency;
 
     private String paymentId;
@@ -42,7 +40,7 @@ public class Transaction {
     private TransactionStatus status;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "Transaction type is required")
+    @NotNull(message = "{transaction.type.required}")
     private TransactionType type;
 
     private LocalDateTime createdAt;

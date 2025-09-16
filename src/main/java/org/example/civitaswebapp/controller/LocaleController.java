@@ -19,13 +19,16 @@ public class LocaleController {
 
     @GetMapping("/changeLocale")
     public String changeLocale(HttpServletRequest request, HttpServletResponse response, @RequestParam("lang") String lang) {
-        Locale locale = switch (lang) {
+        Locale locale = switch (lang.toLowerCase()) {
             case "nl" -> Locale.forLanguageTag("nl-NL");
+            case "tr" -> Locale.forLanguageTag("tr-TR");
             case "en" -> Locale.ENGLISH;
-            default -> Locale.ENGLISH;
+            default -> Locale.ENGLISH; // fallback
         };
 
         localeResolver.setLocale(request, response, locale);
-        return "redirect:" + request.getHeader("Referer");
+        // redirect back to the referring page
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/");
     }
 }

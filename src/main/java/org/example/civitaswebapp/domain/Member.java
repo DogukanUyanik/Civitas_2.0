@@ -1,7 +1,6 @@
 package org.example.civitaswebapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import jakarta.persistence.*;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -24,30 +24,30 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "First name is required")
+    @NotBlank(message = "{member.firstName.required}")
     private String firstName;
 
-    @NotBlank(message = "Last name is required")
+    @NotBlank(message = "{member.lastName.required}")
     private String lastName;
 
-    @Email(message = "Email should be valid")
-    @NotBlank(message = "Email is required")
+    @Email(message = "{member.email.valid}")
+    @NotBlank(message = "{member.email.required}")
     @Column(unique = true)
     private String email;
 
-    @NotBlank(message = "Phone number is required")
+    @NotBlank(message = "{member.phone.required}")
     private String phoneNumber;
 
-    @NotBlank(message = "Address is required")
+    @NotBlank(message = "{member.address.required}")
     private String address;
 
-    @Past(message = "Date of birth must be in the past")
+    @Past(message = "{member.dob.past}")
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate dateOfBirth;
 
     private LocalDate dateOfLastPayment;
 
-    @NotNull(message = "Member status is required")
+    @NotNull(message = "{member.status.required}")
     @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus;
 
@@ -58,7 +58,6 @@ public class Member {
     @JsonBackReference
     private Set<Event> events = new HashSet<>();
 
-    // new field to track creation timestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

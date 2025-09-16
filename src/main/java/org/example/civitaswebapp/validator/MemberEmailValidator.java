@@ -1,6 +1,5 @@
 package org.example.civitaswebapp.validator;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -25,13 +24,13 @@ public class MemberEmailValidator implements Validator {
         Member member = (Member) target;
 
         if (member.getEmail() == null || member.getEmail().isBlank()) {
-            errors.rejectValue("email", "member.email.empty", "Email cannot be empty.");
+            errors.rejectValue("email", "member.email.empty");
             return;
         }
 
         // Email format check
         if (!member.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            errors.rejectValue("email", "member.email.invalid", "Invalid email format.");
+            errors.rejectValue("email", "member.email.invalid");
             return;
         }
 
@@ -39,7 +38,7 @@ public class MemberEmailValidator implements Validator {
         Long id = member.getId() != null ? member.getId() : -1L;
         boolean emailExists = memberRepository.existsByEmailAndIdNot(member.getEmail(), id);
         if (emailExists) {
-            errors.rejectValue("email", "member.email.exists", "Email already exists.");
+            errors.rejectValue("email", "member.email.exists");
         }
     }
 }

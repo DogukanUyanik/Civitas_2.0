@@ -77,6 +77,13 @@
                         <span class="detail-value" th:text="${member.dateOfLastPayment}">31 May, 2023</span>
                     </div>
 
+                    <div class="detail-item">
+                        <i class="bi bi-clock-fill"></i>
+                        <span class="detail-label">Created At:</span>
+                        <span class="detail-value" th:text="${#temporals.format(member.createdAt, 'dd MMM, yyyy')}">16 Sep, 2025</span>
+                    </div>
+
+
                     <!-- Add this inside the left panel, below the personal details -->
                     <!-- Add data-member-id attribute here -->
                     <!-- Send Payment Button -->

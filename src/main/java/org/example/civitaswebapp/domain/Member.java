@@ -8,11 +8,11 @@ import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 @Entity
 @Data
 @AllArgsConstructor
@@ -58,9 +58,16 @@ public class Member {
     @JsonBackReference
     private Set<Event> events = new HashSet<>();
 
+    // new field to track creation timestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     public String getName(){
         return this.firstName + " " + this.lastName;
     }
-
-
 }

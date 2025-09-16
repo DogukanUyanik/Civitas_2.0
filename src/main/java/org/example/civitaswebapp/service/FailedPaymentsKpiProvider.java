@@ -28,6 +28,7 @@ public class FailedPaymentsKpiProvider implements KpiProvider {
                 .key(getKey())
                 .title("Failed payments")
                 .description("Failed payments")
+                .defaultEnabled(true)
                 .build();
     }
 

@@ -1,360 +1,226 @@
-/* KPI Dashboard Styles - Modern & Attractive */
 
-/* Tiles Container - Responsive Grid */
-.tiles-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+    /* Dashboard Container */
+.dashboard-container {
+    flex-grow: 1;
+    padding: 2rem;
+    background: #f8fafc;
+    min-height: 100vh;
 }
 
-/* Individual KPI Tile */
-.kpi-tile {
+/* Header */
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.dashboard-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 120px);
+    gap: 1.5rem;
+}
+
+/* Base KPI Card */
+.kpi-card {
     background: white;
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(10px);
-    min-height: 180px;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
-/* Gradient background variants for different KPI types */
-.kpi-tile[data-kpi="members.active.count"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.02) 100%);
-    border-left: 4px solid #10b981;
+.kpi-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
-.kpi-tile[data-kpi="stripe.totalRevenueMonth"] {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(29, 78, 216, 0.02) 100%);
-    border-left: 4px solid #3b82f6;
+/* Different card sizes */
+.kpi-small {
+    grid-column: span 3;
+    grid-row: span 2;
 }
 
-.kpi-tile[data-kpi="transactions.failed"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(220, 38, 38, 0.02) 100%);
-    border-left: 4px solid #ef4444;
+.kpi-medium {
+    grid-column: span 4;
+    grid-row: span 3;
 }
 
-.kpi-tile[data-kpi="events.upcoming"] {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(217, 119, 6, 0.02) 100%);
-    border-left: 4px solid #f59e0b;
+.kpi-large {
+    grid-column: span 6;
+    grid-row: span 3;
 }
 
-/* Hover effects */
-.kpi-tile:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 1);
+.kpi-wide {
+    grid-column: span 8;
+    grid-row: span 2;
 }
 
-.kpi-tile:hover[data-kpi="members.active.count"] {
-    box-shadow: 0 20px 60px rgba(16, 185, 129, 0.2);
-}
-
-.kpi-tile:hover[data-kpi="stripe.totalRevenueMonth"] {
-    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2);
-}
-
-.kpi-tile:hover[data-kpi="transactions.failed"] {
-    box-shadow: 0 20px 60px rgba(239, 68, 68, 0.2);
-}
-
-.kpi-tile:hover[data-kpi="events.upcoming"] {
-    box-shadow: 0 20px 60px rgba(245, 158, 11, 0.2);
-}
-
-/* Subtle background animation */
-.kpi-tile::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s;
-}
-
-.kpi-tile:hover::before {
-    left: 100%;
-}
-
-/* KPI Header */
+/* Card Header */
 .kpi-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    position: relative;
+    justify-content: space-between;
+    margin-bottom: 1rem;
 }
 
-.kpi-header h3 {
-    font-size: 1.1rem;
+.kpi-title {
+    font-size: 0.875rem;
     font-weight: 600;
-    color: #374151;
-    margin: 0;
-    letter-spacing: -0.025em;
-}
-
-/* Icon styling with dynamic colors */
-.kpi-header i {
-    font-size: 1.75rem;
-    padding: 0.5rem;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.kpi-tile[data-kpi="members.active.count"] .kpi-header i {
-    color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
-}
-
-.kpi-tile[data-kpi="stripe.totalRevenueMonth"] .kpi-header i {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-}
-
-.kpi-tile[data-kpi="transactions.failed"] .kpi-header i {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.kpi-tile[data-kpi="events.upcoming"] .kpi-header i {
-    color: #f59e0b;
-    background: rgba(245, 158, 11, 0.1);
-}
-
-.kpi-tile:hover .kpi-header i {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* KPI Value */
-.kpi-value {
-    font-size: 2.25rem;
-    font-weight: 800;
-    color: #1f2937;
-    margin: 0;
-    line-height: 1.2;
-    letter-spacing: -0.05em;
-    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Special handling for revenue values */
-.kpi-tile[data-kpi="stripe.totalRevenueMonth"] .kpi-value {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Special handling for failed transactions */
-.kpi-tile[data-kpi="transactions.failed"] .kpi-value {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Remove button - Modern and subtle */
-.remove-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: rgba(107, 114, 128, 0.1);
-    border: none;
     color: #6b7280;
-    cursor: pointer;
-    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.kpi-icon {
     width: 32px;
     height: 32px;
     border-radius: 8px;
+    background: #f3f4f6;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* Main Value */
+.kpi-value {
+    font-size: 2rem;
     font-weight: 700;
-    opacity: 0;
-    transform: scale(0.8);
+    color: #111827;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.2;
 }
 
-.kpi-tile:hover .remove-btn {
-    opacity: 1;
-    transform: scale(1);
+.kpi-small .kpi-value {
+    font-size: 1.75rem;
 }
 
-.remove-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    transform: scale(1.1);
+.kpi-large .kpi-value {
+    font-size: 2.5rem;
 }
 
-/* Add KPI Section */
-.add-kpi-container {
-    margin-top: 3rem;
-    padding: 2rem;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e5e7eb;
+/* Metric change indicator */
+.kpi-change {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    justify-content: center;
-    transition: all 0.2s ease;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
-.add-kpi-container:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    transform: translateY(-2px);
+.kpi-change.positive {
+    color: #059669;
 }
 
-.add-kpi-container label {
+.kpi-change.negative {
+    color: #dc2626;
+}
+
+.kpi-change i {
+    font-size: 0.75rem;
+}
+
+/* Chart container */
+.chart-container {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    margin-top: 1rem;
+}
+
+.chart-container canvas {
+    max-height: 100%;
+}
+
+/* List items for events */
+.kpi-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    flex: 1;
+}
+
+.kpi-list-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.kpi-list-item:last-child {
+    border-bottom: none;
+}
+
+/* Summary stats for medium cards */
+.kpi-stats {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+.stat-label {
+    color: #6b7280;
+}
+
+.stat-value {
     font-weight: 600;
     color: #374151;
-    font-size: 1rem;
-    margin-bottom: 0;
-}
-
-.add-kpi-container select {
-    padding: 0.75rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    background: white;
-    font-size: 14px;
-    min-width: 200px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.5rem center;
-    background-repeat: no-repeat;
-    background-size: 1.5em 1.5em;
-    padding-right: 2.5rem;
-}
-
-.add-kpi-container select:focus {
-    outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-}
-
-.add-kpi-container button {
-    padding: 0.75rem 2rem;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.add-kpi-container button:hover {
-    background: linear-gradient(135deg, #059669, #047857);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-}
-
-.add-kpi-container button:active {
-    transform: translateY(0);
-}
-
-/* Add a subtle plus icon */
-.add-kpi-container button::before {
-    content: '+';
-    font-size: 1.2rem;
-    font-weight: 700;
 }
 
 /* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(8, 1fr);
+    }
+
+    .kpi-small { grid-column: span 4; }
+    .kpi-medium { grid-column: span 4; }
+    .kpi-large { grid-column: span 8; }
+    .kpi-wide { grid-column: span 8; }
+}
+
 @media (max-width: 768px) {
-    .tiles-container {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .dashboard-grid {
         grid-template-columns: 1fr;
-        gap: 1.5rem;
-        margin-top: 1.5rem;
+        grid-template-rows: auto;
     }
 
-    .kpi-tile {
-        padding: 1.5rem;
-        min-height: 160px;
+    .kpi-small,
+    .kpi-medium,
+    .kpi-large,
+    .kpi-wide {
+        grid-column: span 1;
+        grid-row: span 1;
+        min-height: 120px;
     }
-
-    .kpi-value {
-        font-size: 2rem;
-    }
-
-    .add-kpi-container {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
-
-    .add-kpi-container select {
-        min-width: 100%;
-        max-width: 300px;
-    }
-}
-
-@media (max-width: 480px) {
-    .kpi-tile {
-        padding: 1.25rem;
-        min-height: 140px;
-    }
-
-    .kpi-header h3 {
-        font-size: 1rem;
-    }
-
-    .kpi-value {
-        font-size: 1.75rem;
-    }
-}
-
-/* Loading state animation (for when KPIs are being calculated) */
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-.kpi-tile.loading {
-    animation: pulse 1.5s infinite;
-}
-
-.kpi-tile.loading .kpi-value {
-    background: #e5e7eb;
-    color: transparent;
-    border-radius: 4px;
-    height: 2.25rem;
-}
-
-/* Empty state when no KPIs are selected */
-.tiles-container:empty::after {
-    content: "No KPIs selected. Add some KPIs to get started!";
-    display: block;
-    text-align: center;
-    color: #6b7280;
-    font-style: italic;
-    padding: 3rem;
-    background: white;
-    border-radius: 16px;
-    border: 2px dashed #e5e7eb;
 }

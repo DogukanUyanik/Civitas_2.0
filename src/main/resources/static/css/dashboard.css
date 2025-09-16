@@ -1,10 +1,15 @@
-
-    /* Dashboard Container */
+/* Dashboard Container - matches sidebar.css approach */
 .dashboard-container {
-    flex-grow: 1;
-    padding: 2rem;
-    background: #f8fafc;
+    margin-left: 260px; /* Same as sidebar width */
+    transition: margin-left 0.3s ease;
     min-height: 100vh;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Handle collapsed sidebar state */
+.dashboard-container.sidebar-collapsed {
+    margin-left: 70px; /* Same as collapsed sidebar width */
 }
 
 /* Header */
@@ -17,6 +22,20 @@
     font-weight: 700;
     color: #1f2937;
     margin: 0 0 0.5rem 0;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+/* Add the same accent line as members list */
+.dashboard-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    border-radius: 2px;
 }
 
 .dashboard-subtitle {
@@ -25,12 +44,16 @@
     margin: 0;
 }
 
-/* Dashboard Grid */
+/* Dashboard Grid - 3 Row Layout */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: repeat(6, 120px);
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto auto;
     gap: 1.5rem;
+    grid-template-areas:
+        "top1 top2 top3 top4"
+        "middle middle middle middle"
+        "bottom1 bottom1 bottom2 bottom2";
 }
 
 /* Base KPI Card */
@@ -38,38 +61,38 @@
     background: white;
     border-radius: 16px;
     padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     border: 1px solid #e5e7eb;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    min-height: 140px;
 }
 
 .kpi-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transform: translateY(-4px);
 }
 
-/* Different card sizes */
-.kpi-small {
-    grid-column: span 3;
-    grid-row: span 2;
+/* Row-specific positioning */
+.kpi-top-row {
+    min-height: 140px;
 }
 
-.kpi-medium {
-    grid-column: span 4;
-    grid-row: span 3;
+.kpi-top-row:nth-child(1) { grid-area: top1; }
+.kpi-top-row:nth-child(2) { grid-area: top2; }
+.kpi-top-row:nth-child(3) { grid-area: top3; }
+.kpi-top-row:nth-child(4) { grid-area: top4; }
+
+.kpi-middle-row {
+    grid-area: middle;
+    min-height: 300px;
 }
 
-.kpi-large {
-    grid-column: span 6;
-    grid-row: span 3;
-}
-
-.kpi-wide {
-    grid-column: span 8;
-    grid-row: span 2;
-}
+.kpi-bottom-row:nth-child(6) { grid-area: bottom1; }
+.kpi-bottom-row:nth-child(7) { grid-area: bottom2; }
 
 /* Card Header */
 .kpi-header {
@@ -81,40 +104,43 @@
 
 .kpi-title {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 700;
     color: #6b7280;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.8px;
     margin: 0;
 }
 
 .kpi-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: #f3f4f6;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #6b7280;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover .kpi-icon {
+    color: white;
+    transform: rotate(5deg) scale(1.1);
 }
 
 /* Main Value */
 .kpi-value {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: #111827;
     margin: 0 0 0.5rem 0;
     line-height: 1.2;
 }
 
-.kpi-small .kpi-value {
-    font-size: 1.75rem;
-}
-
-.kpi-large .kpi-value {
-    font-size: 2.5rem;
+.kpi-middle-row .kpi-value {
+    font-size: 2.25rem;
 }
 
 /* Metric change indicator */
@@ -123,15 +149,20 @@
     align-items: center;
     gap: 0.25rem;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 20px;
+    align-self: flex-start;
 }
 
 .kpi-change.positive {
     color: #059669;
+    background: rgba(16, 185, 129, 0.1);
 }
 
 .kpi-change.negative {
     color: #dc2626;
+    background: rgba(239, 68, 68, 0.1);
 }
 
 .kpi-change i {
@@ -159,10 +190,28 @@
 }
 
 .kpi-list-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f3f4f6;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
     font-size: 0.875rem;
     color: #6b7280;
+    transition: all 0.2s ease;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.kpi-list-item::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: #3b82f6;
+    font-weight: bold;
+}
+
+.kpi-list-item:hover {
+    color: #374151;
+    background: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+    padding-left: 1.25rem;
+    border-left: 3px solid #3b82f6;
 }
 
 .kpi-list-item:last-child {
@@ -174,7 +223,11 @@
     margin-top: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
 }
 
 .stat-row {
@@ -186,41 +239,80 @@
 
 .stat-label {
     color: #6b7280;
+    font-weight: 500;
 }
 
 .stat-value {
-    font-weight: 600;
+    font-weight: 700;
     color: #374151;
+    padding: 2px 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
 }
+
+/* Card-specific styling */
+#total-members .kpi-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+#active-members .kpi-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); }
+#revenue-card .kpi-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+#growth-card .kpi-icon { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); }
+#notifications .kpi-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+#failed-payments .kpi-icon { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+#upcoming-events .kpi-icon { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+
+#total-members:hover .kpi-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+#active-members:hover .kpi-icon { background: linear-gradient(135deg, #10b981, #059669); }
+#revenue-card:hover .kpi-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+#growth-card:hover .kpi-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+#notifications:hover .kpi-icon { background: linear-gradient(135deg, #ec4899, #db2777); }
+#failed-payments:hover .kpi-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+#upcoming-events:hover .kpi-icon { background: linear-gradient(135deg, #a855f7, #9333ea); }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
     .dashboard-grid {
-        grid-template-columns: repeat(8, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas:
+            "top1 top2"
+            "top3 top4"
+            "middle middle"
+            "bottom1 bottom2";
     }
-
-    .kpi-small { grid-column: span 4; }
-    .kpi-medium { grid-column: span 4; }
-    .kpi-large { grid-column: span 8; }
-    .kpi-wide { grid-column: span 8; }
 }
 
 @media (max-width: 768px) {
     .dashboard-container {
+        margin-left: 0;
         padding: 1rem;
+    }
+
+    .dashboard-container.sidebar-collapsed {
+        margin-left: 0;
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        text-align: center;
     }
 
     .dashboard-grid {
         grid-template-columns: 1fr;
-        grid-template-rows: auto;
+        grid-template-areas:
+            "top1"
+            "top2"
+            "top3"
+            "top4"
+            "middle"
+            "bottom1"
+            "bottom2";
+        gap: 1rem;
     }
 
-    .kpi-small,
-    .kpi-medium,
-    .kpi-large,
-    .kpi-wide {
-        grid-column: span 1;
-        grid-row: span 1;
+    .kpi-card {
         min-height: 120px;
+    }
+
+    .kpi-middle-row {
+        min-height: 250px;
     }
 }

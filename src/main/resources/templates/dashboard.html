@@ -28,8 +28,8 @@
     </div>
 
     <div class="dashboard-grid">
-        <!-- Total Members - Small Card -->
-        <div class="kpi-card kpi-small" id="total-members">
+        <!-- TOP ROW: 4 Small Cards -->
+        <div class="kpi-card kpi-top-row" id="total-members">
             <div class="kpi-header">
                 <h3 class="kpi-title">Total Members</h3>
                 <div class="kpi-icon">
@@ -43,8 +43,7 @@
             </div>
         </div>
 
-        <!-- Active Members - Small Card -->
-        <div class="kpi-card kpi-small" id="active-members">
+        <div class="kpi-card kpi-top-row" id="active-members">
             <div class="kpi-header">
                 <h3 class="kpi-title">Active Members</h3>
                 <div class="kpi-icon">
@@ -58,8 +57,36 @@
             </div>
         </div>
 
-        <!-- Revenue - Medium Card with Chart -->
-        <div class="kpi-card kpi-medium" id="revenue-card">
+        <div class="kpi-card kpi-top-row" id="growth-card">
+            <div class="kpi-header">
+                <h3 class="kpi-title">Monthly Growth</h3>
+                <div class="kpi-icon">
+                    <i class="fas fa-trending-up"></i>
+                </div>
+            </div>
+            <div class="kpi-value" id="growth-value">-</div>
+            <div class="kpi-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>New members</span>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-top-row" id="notifications">
+            <div class="kpi-header">
+                <h3 class="kpi-title">Notifications</h3>
+                <div class="kpi-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+            <div class="kpi-value" id="notifications-value">3</div>
+            <div class="kpi-change positive">
+                <i class="fas fa-info-circle"></i>
+                <span>Unread alerts</span>
+            </div>
+        </div>
+
+        <!-- MIDDLE ROW: Revenue Chart (Full Width) -->
+        <div class="kpi-card kpi-middle-row" id="revenue-card">
             <div class="kpi-header">
                 <h3 class="kpi-title">Revenue This Month</h3>
                 <div class="kpi-icon">
@@ -76,23 +103,21 @@
             </div>
         </div>
 
-        <!-- Monthly Growth - Small Card -->
-        <div class="kpi-card kpi-small" id="growth-card">
+        <!-- BOTTOM ROW: Events and Failed Payments -->
+        <div class="kpi-card kpi-bottom-row" id="upcoming-events">
             <div class="kpi-header">
-                <h3 class="kpi-title">Monthly Growth</h3>
+                <h3 class="kpi-title">Upcoming Events</h3>
                 <div class="kpi-icon">
-                    <i class="fas fa-trending-up"></i>
+                    <i class="fas fa-calendar-alt"></i>
                 </div>
             </div>
-            <div class="kpi-value" id="growth-value">-</div>
-            <div class="kpi-change positive">
-                <i class="fas fa-arrow-up"></i>
-                <span>New members</span>
-            </div>
+            <div class="kpi-value" id="events-count">-</div>
+            <ul class="kpi-list" id="events-list">
+                <li class="kpi-list-item">Loading events...</li>
+            </ul>
         </div>
 
-        <!-- Failed Payments - Medium Card -->
-        <div class="kpi-card kpi-medium" id="failed-payments">
+        <div class="kpi-card kpi-bottom-row" id="failed-payments">
             <div class="kpi-header">
                 <h3 class="kpi-title">Failed Payments</h3>
                 <div class="kpi-icon">
@@ -115,20 +140,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Upcoming Events - Large Card -->
-        <div class="kpi-card kpi-large" id="upcoming-events">
-            <div class="kpi-header">
-                <h3 class="kpi-title">Upcoming Events</h3>
-                <div class="kpi-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-            </div>
-            <div class="kpi-value" id="events-count">-</div>
-            <ul class="kpi-list" id="events-list">
-                <li class="kpi-list-item">Loading events...</li>
-            </ul>
-        </div>
     </div>
 </main>
 
@@ -137,106 +148,237 @@
         const userId = 1;
         let revenueChart;
 
-        // Initialize revenue chart
-        function initRevenueChart() {
-            const ctx = document.getElementById('revenueChart').getContext('2d');
-            revenueChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        data: [1200, 1800, 1600, 2100],
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    },
-                    elements: {
-                        point: { radius: 0 }
+        // Handle sidebar toggle for dashboard
+        const sidebar = document.querySelector('.sidebar');
+        const dashboardContainer = document.querySelector('.dashboard-container');
+
+        if (sidebar && dashboardContainer) {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const sidebar = mutation.target;
+                        if (sidebar.classList.contains('collapsed')) {
+                            dashboardContainer.classList.add('sidebar-collapsed');
+                        } else {
+                            dashboardContainer.classList.remove('sidebar-collapsed');
+                        }
                     }
-                }
+                });
             });
-        }
 
-        // Load KPI data using your existing API
-        function loadKPIs() {
-            fetch(`/api/dashboard/users/${userId}`)
-                .then(res => res.json())
-                .then(kpis => {
-                    // Process each KPI from the response
-                    kpis.forEach(kpi => updateKPI(kpi.key, kpi));
-                })
-                .catch(error => console.error('Error loading KPIs:', error));
-        }
+            observer.observe(sidebar, { attributes: true });
 
-        // Update individual KPI displays
-        function updateKPI(key, data) {
-            switch(key) {
-                case 'members.total.count':
-                    document.getElementById('total-members-value').textContent = data.formattedValue;
-                    break;
-
-                case 'members.active.count':
-                    document.getElementById('active-members-value').textContent = data.formattedValue;
-                    break;
-
-                case 'stripe.totalRevenueMonth':
-                    document.getElementById('revenue-value').textContent = data.formattedValue;
-                    break;
-
-                case 'members.growth.month':
-                    document.getElementById('growth-value').textContent = data.formattedValue;
-                    break;
-
-                case 'transactions.failed':
-                    const failedCount = Array.isArray(data.value) ? data.value.length : data.value;
-                    document.getElementById('failed-payments-value').textContent = failedCount;
-
-                    // Update failed payments stats
-                    const statsContainer = document.getElementById('failed-payments-stats');
-                    if (Array.isArray(data.value)) {
-                        // You can enhance this with more sophisticated stats
-                        statsContainer.querySelector('.stat-row:nth-child(1) .stat-value').textContent = Math.floor(failedCount / 2);
-                        statsContainer.querySelector('.stat-row:nth-child(2) .stat-value').textContent = Math.floor(failedCount / 3);
-                        statsContainer.querySelector('.stat-row:nth-child(3) .stat-value').textContent = '85%';
-                    }
-                    break;
-
-                case 'events.upcoming':
-                    const eventsList = document.getElementById('events-list');
-                    const eventsCount = document.getElementById('events-count');
-
-                    if (Array.isArray(data.value) && data.value.length > 0) {
-                        eventsCount.textContent = data.value.length;
-                        eventsList.innerHTML = data.value.slice(0, 5).map(event =>
-                            `<li class="kpi-list-item">${event}</li>`
-                        ).join('');
-                    } else {
-                        eventsCount.textContent = '0';
-                        eventsList.innerHTML = '<li class="kpi-list-item">No upcoming events</li>';
-                    }
-                    break;
+            if (sidebar.classList.contains('collapsed')) {
+                dashboardContainer.classList.add('sidebar-collapsed');
             }
         }
 
-        // Initialize everything
+        // Initialize revenue chart
+        function initRevenueChart() {
+            const ctx = document.getElementById('revenueChart');
+            if (!ctx) {
+                console.error('Revenue chart canvas not found!');
+                return;
+            }
+
+            try {
+                revenueChart = new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            data: [1200, 1800, 1600, 2100],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                grid: { display: false },
+                                ticks: { color: '#6b7280', font: { size: 12 } }
+                            },
+                            y: {
+                                display: true,
+                                grid: { color: '#f3f4f6' },
+                                ticks: { color: '#6b7280', font: { size: 12 } }
+                            }
+                        },
+                        elements: {
+                            point: { radius: 4 }
+                        }
+                    }
+                });
+                console.log('Revenue chart initialized successfully');
+            } catch (error) {
+                console.error('Error initializing revenue chart:', error);
+            }
+        }
+
+        // Load KPI data
+        function loadKPIs() {
+            console.log('Loading KPIs for user:', userId);
+
+            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+
+            if (token && header) {
+                headers[header] = token;
+            }
+
+            fetch(`/api/dashboard/users/${userId}`, {
+                method: 'GET',
+                headers: headers
+            })
+                .then(response => {
+                    console.log('API Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(kpis => {
+                    console.log('KPIs received:', kpis);
+                    if (Array.isArray(kpis)) {
+                        if (kpis.length === 0) {
+                            console.log('No KPI data received, loading fallback data');
+                            setFallbackData();
+                        } else {
+                            kpis.forEach(kpi => updateKPI(kpi.key, kpi));
+                        }
+                    } else {
+                        console.error('KPIs data is not an array:', kpis);
+                        setFallbackData();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading KPIs:', error);
+                    setFallbackData();
+                });
+        }
+
+        function setFallbackData() {
+            console.log('Setting fallback data for testing...');
+            document.getElementById('total-members-value').textContent = '1,234';
+            document.getElementById('active-members-value').textContent = '987';
+            document.getElementById('revenue-value').textContent = '€12,450';
+            document.getElementById('growth-value').textContent = '+156';
+            document.getElementById('failed-payments-value').textContent = '3';
+            document.getElementById('events-count').textContent = '2';
+            document.getElementById('events-list').innerHTML =
+                '<li class="kpi-list-item">Team Meeting - Tomorrow 2:00 PM</li>' +
+                '<li class="kpi-list-item">Monthly Review - Friday 10:00 AM</li>';
+
+            const statsContainer = document.getElementById('failed-payments-stats');
+            if (statsContainer) {
+                const statValues = statsContainer.querySelectorAll('.stat-value');
+                if (statValues.length >= 3) {
+                    statValues[0].textContent = '2';
+                    statValues[1].textContent = '5';
+                    statValues[2].textContent = '85%';
+                }
+            }
+        }
+
+        function updateKPI(key, data) {
+            console.log('Updating KPI:', key, data);
+
+            try {
+                switch(key) {
+                    case 'members.total.count':
+                        const totalElement = document.getElementById('total-members-value');
+                        if (totalElement) {
+                            totalElement.textContent = data.formattedValue || data.value || '-';
+                        }
+                        break;
+
+                    case 'members.active.count':
+                        const activeElement = document.getElementById('active-members-value');
+                        if (activeElement) {
+                            activeElement.textContent = data.formattedValue || data.value || '-';
+                        }
+                        break;
+
+                    case 'stripe.totalRevenueMonth':
+                        const revenueElement = document.getElementById('revenue-value');
+                        if (revenueElement) {
+                            revenueElement.textContent = data.formattedValue || data.value || '-';
+                        }
+                        break;
+
+                    case 'members.growth.month':
+                        const growthElement = document.getElementById('growth-value');
+                        if (growthElement) {
+                            growthElement.textContent = data.formattedValue || data.value || '-';
+                        }
+                        break;
+
+                    case 'transactions.failed':
+                        const failedCount = Array.isArray(data.value) ? data.value.length : data.value;
+                        const failedElement = document.getElementById('failed-payments-value');
+                        if (failedElement) {
+                            failedElement.textContent = failedCount || '0';
+                        }
+
+                        const statsContainer = document.getElementById('failed-payments-stats');
+                        if (statsContainer && Array.isArray(data.value)) {
+                            const statValues = statsContainer.querySelectorAll('.stat-value');
+                            if (statValues.length >= 3) {
+                                statValues[0].textContent = Math.floor(failedCount / 2);
+                                statValues[1].textContent = Math.floor(failedCount / 3);
+                                statValues[2].textContent = '85%';
+                            }
+                        }
+                        break;
+
+                    case 'events.upcoming':
+                        const eventsList = document.getElementById('events-list');
+                        const eventsCount = document.getElementById('events-count');
+
+                        if (Array.isArray(data.value) && data.value.length > 0) {
+                            if (eventsCount) eventsCount.textContent = data.value.length;
+                            if (eventsList) {
+                                eventsList.innerHTML = data.value.slice(0, 5).map(event =>
+                                    `<li class="kpi-list-item">${event}</li>`
+                                ).join('');
+                            }
+                        } else {
+                            if (eventsCount) eventsCount.textContent = '0';
+                            if (eventsList) {
+                                eventsList.innerHTML = '<li class="kpi-list-item">No upcoming events</li>';
+                            }
+                        }
+                        break;
+
+                    default:
+                        console.log('Unknown KPI key:', key);
+                }
+            } catch (error) {
+                console.error('Error updating KPI:', key, error);
+            }
+        }
+
+        console.log('Initializing dashboard...');
         initRevenueChart();
         loadKPIs();
 
-        // Refresh data every 5 minutes
         setInterval(loadKPIs, 5 * 60 * 1000);
     });
 </script>

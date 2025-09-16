@@ -36,7 +36,12 @@ public class DashboardServiceImpl implements DashboardService {
         // Load user-specific tile config
         List<UserDashboardTile> userTiles = tileRepository.findByUserIdOrderByPositionAsc(userId);
 
-        // Only compute KPIs the user has enabled
+        // If user has no custom tiles, return all available KPIs (standard dashboard)
+        if (userTiles.isEmpty()) {
+            return getStandardDashboard(userId);
+        }
+
+        // Only compute KPIs the user has enabled (for users with custom config)
         List<KpiValueDto> values = new ArrayList<>();
         for (UserDashboardTile tile : userTiles) {
             String widgetKey = tile.getWidgetKey();
@@ -48,6 +53,23 @@ public class DashboardServiceImpl implements DashboardService {
                         KpiValueDto value = provider.computeValue(userId);
                         values.add(value);
                     });
+        }
+
+        return values;
+    }
+
+    private List<KpiValueDto> getStandardDashboard(Long userId) {
+        // Return all available KPIs for the standard dashboard
+        List<KpiValueDto> values = new ArrayList<>();
+
+        for (KpiProvider provider : kpiProviders) {
+            try {
+                KpiValueDto value = provider.computeValue(userId);
+                values.add(value);
+            } catch (Exception e) {
+                // Log the error but continue with other KPIs
+                System.err.println("Error computing KPI " + provider.getTileMetadata().getKey() + ": " + e.getMessage());
+            }
         }
 
         return values;

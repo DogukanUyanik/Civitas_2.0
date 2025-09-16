@@ -33,44 +33,26 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public List<KpiValueDto> getUserDashboard(Long userId) {
-        // 1. Load tiles configured for this user
+        // Load user-specific tile config
         List<UserDashboardTile> userTiles = tileRepository.findByUserIdOrderByPositionAsc(userId);
 
-        // 2. If user has no tiles yet, assign defaults
-        if (userTiles.isEmpty()) {
-            List<KpiTileDto> defaults = getAllTiles().stream()
-                    .filter(KpiTileDto::isDefaultEnabled)
-                    .toList();
-
-            MyUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid user ID"));
-
-            List<UserDashboardTile> defaultTiles = defaults.stream()
-                    .map(dto -> UserDashboardTile.builder()
-                            .user(user)
-                            .widgetKey(dto.getKey())
-                            .enabled(true)
-                            .position(0) // TODO: compute position if you want order
-                            .build())
-                    .toList();
-
-            userTiles = tileRepository.saveAll(defaultTiles);
-        }
-
-        // 3. Compute values *only for the user's tiles*
-        Map<String, KpiProvider> providerMap = kpiProviders.stream()
-                .collect(Collectors.toMap(p -> p.getTileMetadata().getKey(), p -> p));
-
+        // Only compute KPIs the user has enabled
         List<KpiValueDto> values = new ArrayList<>();
         for (UserDashboardTile tile : userTiles) {
-            KpiProvider provider = providerMap.get(tile.getWidgetKey());
-            if (provider != null && tile.isEnabled()) {
-                values.add(provider.computeValue(userId));
-            }
+            String widgetKey = tile.getWidgetKey();
+
+            kpiProviders.stream()
+                    .filter(p -> p.getTileMetadata().getKey().equals(widgetKey))
+                    .findFirst()
+                    .ifPresent(provider -> {
+                        KpiValueDto value = provider.computeValue(userId);
+                        values.add(value);
+                    });
         }
 
         return values;
     }
+
 
 
     @Override

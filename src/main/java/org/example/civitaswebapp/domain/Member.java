@@ -58,5 +58,9 @@ public class Member {
     @JsonBackReference
     private Set<Event> events = new HashSet<>();
 
+    public String getName(){
+        return this.firstName + " " + this.lastName;
+    }
+
 
 }

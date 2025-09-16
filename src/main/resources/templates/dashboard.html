@@ -3,27 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <title>Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script th:src="@{/js/sidebar.js}" defer></script>
-    <style>
-        .kpi-tile { position: relative; }
-        .remove-btn {
-            position: absolute;
-            top: 5px; right: 5px;
-            background: none;
-            border: none;
-            color: #888;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-        .remove-btn:hover { color: red; }
-        .add-kpi-container {
-            margin-top: 20px;
-        }
-    </style>
+
 </head>
 <body>
 
@@ -48,6 +36,7 @@
 </main>
 
 <script>
+    // Complete JavaScript for KPI Dashboard
     document.addEventListener("DOMContentLoaded", function() {
         const userId = 1; // Replace with Thymeleaf session user ID
         const container = document.getElementById('tiles-container');
@@ -62,6 +51,9 @@
             .then(data => {
                 allTiles = data;
                 refreshSelect();
+            })
+            .catch(error => {
+                console.error('Error fetching tiles:', error);
             });
 
         // Fetch user dashboard
@@ -71,28 +63,54 @@
                 activeTiles = data;
                 renderTiles();
                 refreshSelect();
+            })
+            .catch(error => {
+                console.error('Error fetching user dashboard:', error);
             });
 
-        // Render KPI tiles
+        // Function to get appropriate icon for each KPI type
+        function getIconForKpi(key) {
+            const iconMap = {
+                'members.active.count': 'fas fa-users',
+                'stripe.totalRevenueMonth': 'fas fa-euro-sign',
+                'transactions.failed': 'fas fa-exclamation-triangle',
+                'events.upcoming': 'fas fa-calendar-alt'
+            };
+
+            return iconMap[key] || 'fas fa-chart-bar'; // Default fallback icon
+        }
+
+        // Render KPI tiles with enhanced styling
         function renderTiles() {
             container.innerHTML = "";
+
+            if (activeTiles.length === 0) {
+                return; // Let CSS handle empty state
+            }
+
             activeTiles.forEach(kpi => {
                 const tile = document.createElement('div');
                 tile.classList.add('kpi-tile');
+                tile.setAttribute('data-kpi', kpi.key); // Add data attribute for styling
+
+                // Get appropriate icon based on KPI type
+                const iconClass = getIconForKpi(kpi.key);
+
                 tile.innerHTML = `
-                    <button class="remove-btn" data-key="${kpi.key}">&times;</button>
-                    <div class="kpi-header">
-                        <i class="fas fa-chart-simple"></i>
-                        <h3>${kpi.title}</h3>
-                    </div>
-                    <p class="kpi-value">${kpi.formattedValue}</p>
-                `;
+                <button class="remove-btn" data-key="${kpi.key}" title="Remove KPI">&times;</button>
+                <div class="kpi-header">
+                    <i class="${iconClass}"></i>
+                    <h3>${kpi.title}</h3>
+                </div>
+                <p class="kpi-value">${kpi.formattedValue}</p>
+            `;
                 container.appendChild(tile);
             });
 
             // Add remove listeners
             document.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent any parent click handlers
                     const key = this.dataset.key;
                     removeKpi(key);
                 });
@@ -103,6 +121,15 @@
         function refreshSelect() {
             const activeKeys = new Set(activeTiles.map(k => k.key));
             kpiSelect.innerHTML = "";
+
+            // Add a default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "Select a KPI to add...";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            kpiSelect.appendChild(defaultOption);
+
             allTiles
                 .filter(t => !activeKeys.has(t.key))
                 .forEach(t => {
@@ -113,31 +140,75 @@
                 });
         }
 
-        // Remove KPI from dashboard
+        // Enhanced remove function with smooth animation
         function removeKpi(key) {
-            fetch(`/api/dashboard/users/${userId}/tiles/${key}`, { method: 'DELETE' })
-                .then(() => {
-                    activeTiles = activeTiles.filter(k => k.key !== key);
-                    renderTiles();
-                    refreshSelect();
-                });
+            const tileElement = document.querySelector(`[data-key="${key}"]`).closest('.kpi-tile');
+
+            // Add a smooth removal animation
+            if (tileElement) {
+                tileElement.style.transform = 'scale(0.8)';
+                tileElement.style.opacity = '0';
+                tileElement.style.transition = 'all 0.3s ease';
+
+                setTimeout(() => {
+                    fetch(`/api/dashboard/users/${userId}/tiles/${key}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                        }
+                    })
+                        .then(() => fetch(`/api/dashboard/users/${userId}`))
+                        .then(res => res.json())
+                        .then(data => {
+                            activeTiles = data;
+                            renderTiles();
+                            refreshSelect();
+                        })
+                        .catch(error => {
+                            console.error('Error removing KPI:', error);
+                            // Revert the animation on error
+                            tileElement.style.transform = '';
+                            tileElement.style.opacity = '';
+                        });
+                }, 300);
+            }
         }
 
-        // Add KPI to dashboard
+        // Enhanced add function with loading state
         document.getElementById('add-kpi-btn').addEventListener('click', function() {
             const key = kpiSelect.value;
             if (!key) return;
 
-            fetch(`/api/dashboard/users/${userId}/tiles/${key}`, { method: 'POST' })
+            // Disable button and show loading state
+            const originalButtonText = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+            fetch(`/api/dashboard/users/${userId}/tiles/${key}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                }
+            })
                 .then(() => {
-                    const tileMeta = allTiles.find(t => t.key === key);
-                    activeTiles.push({
-                        key: tileMeta.key,
-                        title: tileMeta.title,
-                        formattedValue: "Loading..."
-                    });
+                    // Re-fetch user dashboard so values are real, not "Loading..."
+                    return fetch(`/api/dashboard/users/${userId}`);
+                })
+                .then(res => res.json())
+                .then(data => {
+                    activeTiles = data;
                     renderTiles();
                     refreshSelect();
+
+                    // Reset button
+                    this.disabled = false;
+                    this.innerHTML = originalButtonText;
+                })
+                .catch(error => {
+                    console.error('Error adding KPI:', error);
+                    // Reset button on error
+                    this.disabled = false;
+                    this.innerHTML = originalButtonText;
                 });
         });
     });

@@ -42,6 +42,35 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-rtl-support</artifactId>
+            <version>1.0.10</version>
+        </dependency>
+
+        <dependencies>
+            <!-- Core OpenHTMLToPDF -->
+            <dependency>
+                <groupId>com.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-pdfbox</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+
+            <!-- For better font handling -->
+            <dependency>
+                <groupId>com.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-java2d</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+
+            <!-- Optional: For BiDi text support (if needed) -->
+            <dependency>
+                <groupId>com.openhtmltopdf</groupId>
+                <artifactId>openhtmltopdf-rtl-support</artifactId>
+                <version>1.0.10</version>
+            </dependency>
+        </dependencies>
+
         <!-- Flying Saucer + OpenPDF -->
         <dependency>
             <groupId>com.openhtmltopdf</groupId>

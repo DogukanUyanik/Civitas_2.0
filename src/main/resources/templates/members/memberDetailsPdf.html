@@ -1,26 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta charset="UTF-8"/>
     <title th:text="#{member.details.title}">Member Details PDF</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #1f2937; }
+        body {
+            font-family: 'Segoe UI', 'DejaVu Sans', 'Liberation Sans', Arial, sans-serif;
+            color: #1f2937;
+        }
         h1 { color: #667eea; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
         th { background-color: #f3f4f6; }
+        .no-data { text-align: center; color: #888; }
     </style>
 </head>
 <body>
 <h1 th:text="#{member.details.header}">Member Details</h1>
-<p><strong th:text="#{member.details.name}">Name:</strong>
-    <span th:text="${member.firstName} + ' ' + ${member.lastName}">Name</span></p>
-<p><strong th:text="#{member.details.email}">Email:</strong>
-    <span th:text="${member.email}">Email</span></p>
-<p><strong th:text="#{member.details.phone}">Phone:</strong>
-    <span th:text="${member.phoneNumber}">Phone</span></p>
-<p><strong th:text="#{member.details.status}">Status:</strong>
-    <span th:text="#{member.status.${member.memberStatus.name()}}">Status</span></p>
+
+<p>
+    <strong th:text="#{member.details.name}">Name:</strong>
+    <span th:text="${member.firstName} + ' ' + ${member.lastName}">Name</span>
+</p>
+<p>
+    <strong th:text="#{member.details.email}">Email:</strong>
+    <span th:text="${member.email}">Email</span>
+</p>
+<p>
+    <strong th:text="#{member.details.phone}">Phone:</strong>
+    <span th:text="${member.phoneNumber}">Phone</span>
+</p>
+<p>
+    <strong th:text="#{member.details.status}">Status:</strong>
+    <span th:text="${memberStatusLabel}">Status</span>
+</p>
 
 <h2 th:text="#{member.details.transactions}">Transactions</h2>
 <table>
@@ -34,15 +48,15 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="tx : ${member.transactions}">
-        <td th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025 12:00</td>
-        <td th:text="#{transaction.type.${tx.type.name()}}">Membership</td>
+    <tr th:each="tx : ${transactions}">
+        <td th:text="${tx.date}">01/01/2025 12:00</td>
+        <td th:text="${tx.typeLabel}">Membership</td>
         <td th:text="${tx.amount}">100.00</td>
         <td th:text="${tx.currency}">EUR</td>
-        <td th:text="#{transaction.status.${tx.status.name()}}">SUCCEEDED</td>
+        <td th:text="${tx.statusLabel}">Succeeded</td>
     </tr>
-    <tr th:if="${#lists.isEmpty(member.transactions)}">
-        <td colspan="5" th:text="#{transaction.none}">No transactions found</td>
+    <tr th:if="${#lists.isEmpty(transactions)}">
+        <td colspan="5" class="no-data" th:text="#{transaction.none}">No transactions found</td>
     </tr>
     </tbody>
 </table>

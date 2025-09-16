@@ -9,6 +9,8 @@
     <!-- FullCalendar UMD CSS & JS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet"/>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/nl.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/tr.global.min.js"></script>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -145,6 +147,13 @@
         </div>
     </div>
 </div>
+<!-- Add these locale scripts to your HTML head section, AFTER the main FullCalendar script -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/nl.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/tr.global.min.js"></script>
+
+<!-- Add these locale scripts to your HTML head section, AFTER the main FullCalendar script -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/nl.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/tr.global.min.js"></script>
 
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function() {
@@ -152,6 +161,19 @@
         let currentModal = null; // Track the current modal instance
         let allEvents = []; // Store all events for filtering
         let currentFilter = 'all'; // Track current filter
+
+        // Detect current page language and set appropriate FullCalendar locale
+        const currentLocale = /*[[${#locale}]]*/ 'en'; // Get current Spring locale
+        let calendarLocale = 'en'; // Default to English
+
+        // Map your application locales to FullCalendar locales
+        if (currentLocale === 'nl' || currentLocale.startsWith('nl')) {
+            calendarLocale = 'nl';
+        } else if (currentLocale === 'tr' || currentLocale.startsWith('tr')) {
+            calendarLocale = 'tr';
+        }
+
+        console.log('Current locale:', currentLocale, 'Calendar locale:', calendarLocale);
 
         // Internationalized messages from Spring
         const messages = {
@@ -262,17 +284,22 @@
             }
         }
 
+        // Ensure we have a fallback for the today button
+        const todayButtonText = messages.calendarToday || 'today';
+        console.log('Today button text:', todayButtonText); // Debug log
+
         // Use FullCalendar from the UMD bundle
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
+            locale: calendarLocale, // This enables localized month names, day names, and formatting
             height: 'auto',
             headerToolbar: {
-                left: 'prev,next,' + messages.calendarToday,
+                left: 'prev,next,today', // Use 'today' directly instead of concatenation
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             buttonText: {
-                today: messages.calendarToday,
+                today: todayButtonText, // Use the safe fallback
                 month: messages.calendarMonth,
                 week: messages.calendarWeek,
                 day: messages.calendarDay,
@@ -419,7 +446,7 @@
                 attendees: []
             };
 
-            // ← Add this here
+            // Add attendees
             const selectedAttendees = Array.from(document.getElementById('attendees').selectedOptions)
                 .map(option => Number(option.value));
             event.attendees = selectedAttendees;

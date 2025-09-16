@@ -25,9 +25,9 @@
                     <select name="status" id="statusFilter">
                         <option value="" th:text="#{filter.status.all}">All Status</option>
                         <option value="ACTIVE" th:selected="${status == 'ACTIVE'}"
-                                th:text="#{member.status.ACTIVE}">Active</option>
+                                th:text="#{${'member.status.' + 'ACTIVE'}}">Active</option>
                         <option value="INACTIVE" th:selected="${status == 'INACTIVE'}"
-                                th:text="#{member.status.INACTIVE}">Inactive</option>
+                                th:text="#{${'member.status.' + 'INACTIVE'}}">Inactive</option>
                     </select>
                 </div>
                 <div class="search-box">
@@ -64,7 +64,9 @@
                 <td th:text="${member.email}">john@example.com</td>
                 <td>
                     <span th:classappend="${member.memberStatus.name() == 'ACTIVE'} ? 'status-pill active' : 'status-pill inactive'"
-                          th:text="${member.memberStatus}">ACTIVE</span>
+                          th:text="#{${'member.status.' + member.memberStatus.name()}}">
+                        Active
+                    </span>
                 </td>
                 <td class="actions">
                     <a th:href="@{/members/view/{id}(id=${member.id})}" th:title="#{table.view}">

@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.service.MemberService;
 import org.example.civitaswebapp.service.PdfService;
+import org.example.civitaswebapp.service.PdfServiceImpl;
 import org.example.civitaswebapp.validator.MemberEmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -18,9 +19,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.context.Context;
+
 
 import java.security.Principal;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Controller
 @RequestMapping("/members")
@@ -116,18 +120,40 @@ public class MemberController {
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> generatePdf(@PathVariable Long id) throws Exception {
         Member member = memberService.getIdForPdf(id);
-        byte[] pdfBytes = pdfService.generateMemberPdf(member);
+        Locale currentLocale = LocaleContextHolder.getLocale();
+
+        // Resolve localized member status
+        String memberStatusLabel = messageSource.getMessage(
+                "member.status." + member.getMemberStatus().name(),
+                null,
+                currentLocale
+        );
+
+        // Format and localize transactions
+        List<Map<String, Object>> txList = member.getTransactions().stream().map(tx -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("date", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                    .format(tx.getCreatedAt()));
+            map.put("typeLabel", messageSource.getMessage(
+                    "transaction.type." + tx.getType().name(),
+                    null, currentLocale));
+            map.put("amount", tx.getAmount());
+            map.put("currency", tx.getCurrency());
+            map.put("statusLabel", messageSource.getMessage(
+                    "transaction.status." + tx.getStatus().name(),
+                    null, currentLocale));
+            return map;
+        }).toList();
+
+        // Pass locale to PDF service
+        byte[] pdfBytes = pdfService.generateMemberPdf(member, memberStatusLabel, txList, currentLocale);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("inline", "member_" + id + ".pdf");
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(pdfBytes);
+        return ResponseEntity.ok().headers(headers).body(pdfBytes);
     }
-
-
 
 
 }

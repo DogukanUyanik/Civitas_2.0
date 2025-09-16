@@ -42,7 +42,7 @@
                     <h2 class="profile-name">[[${member.firstName}]] [[${member.lastName}]]</h2>
                     <div class="profile-id" th:text="#{member.id} + ': ' + ${member.id}">Member ID: 1</div>
                     <div class="profile-status" th:class="'profile-status ' + ${member.memberStatus}"
-                         th:text="#{member.status.${member.memberStatus}}">Active</div>
+                         th:text="#{${'member.status.' + member.memberStatus}}">Active</div>
                 </div>
 
                 <div class="personal-details">
@@ -169,6 +169,18 @@
                             </select>
                         </div>
 
+                        <div class="filter-group">
+                            <label class="filter-label" th:text="#{transaction.type}">Type:</label>
+                            <select class="filter-select" id="typeFilter">
+                                <option value="all" th:text="#{filter.type.all}">All Types</option>
+                                <option value="MEMBERSHIP_FEE" th:text="#{transaction.type.MEMBERSHIP_FEE}">Membership Fee</option>
+                                <option value="EVENT_PAYMENT" th:text="#{transaction.type.EVENT_PAYMENT}">Event Payment</option>
+                                <option value="DONATION" th:text="#{transaction.type.DONATION}">Donation</option>
+                                <option value="OTHER" th:text="#{transaction.type.OTHER}">Other</option>
+                            </select>
+                        </div>
+
+
                         <button class="filter-reset-btn" id="resetFilters">
                             <i class="bi bi-arrow-clockwise"></i>
                             <span th:text="#{button.reset}">Reset</span>
@@ -205,12 +217,14 @@
                         <tbody id="transactionsBody">
                         <tr th:each="tx : ${member.transactions}">
                             <td class="date-cell" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td class="type-cell" th:text="#{transaction.type.${tx.type}}"></td>
+                            <td class="type-cell" th:text="#{${'transaction.type.' + tx.type}}" th:data-type="${tx.type}">Membership Fee</td>
                             <td class="amount-cell" th:text="${tx.amount}"></td>
                             <td class="currency-cell" th:text="${tx.currency}"></td>
                             <td class="status-cell">
-                                <span th:text="#{transaction.status.${tx.status}}" th:class="'status-pill ' + ${tx.status}"></span>
-                            </td>
+                                <span th:text="#{${'transaction.status.' + tx.status}}"
+                                      th:class="'status-pill ' + ${tx.status}"
+                                      th:data-status="${tx.status}">Succeeded</span>
+                                                        </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(member.transactions)}" class="no-data-row">
                             <td colspan="5" class="text-center">

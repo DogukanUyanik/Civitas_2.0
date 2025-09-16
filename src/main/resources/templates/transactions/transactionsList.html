@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transactions List</title>
+    <title th:text="#{transaction.list.title}">Transactions List</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/transactionsList.css}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
 <main class="transactions-container">
     <!-- Header section -->
     <div class="transactions-header">
-        <h1 class="title">Transactions</h1>
+        <h1 class="title" th:text="#{transaction.list.header}">Transactions</h1>
         <div class="header-actions">
             <form id="filterForm" method="get" action="/transactions" class="filters-container">
                 <input type="hidden" name="sort" th:value="${sort}" id="sortInput">
@@ -26,27 +26,27 @@
 
                 <div class="status-filter">
                     <select name="status" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="PENDING" th:selected="${status == 'PENDING'}">Pending</option>
-                        <option value="SUCCEEDED" th:selected="${status == 'SUCCEEDED'}">Succeeded</option>
-                        <option value="FAILED" th:selected="${status == 'FAILED'}">Failed</option>
-                        <option value="EXPIRED" th:selected="${status == 'EXPIRED'}">Expired</option>
+                        <option value="" th:text="#{filter.status.all}">All Status</option>
+                        <option value="PENDING" th:selected="${status == 'PENDING'}" th:text="#{transaction.status.PENDING}">Pending</option>
+                        <option value="SUCCEEDED" th:selected="${status == 'SUCCEEDED'}" th:text="#{transaction.status.SUCCEEDED}">Succeeded</option>
+                        <option value="FAILED" th:selected="${status == 'FAILED'}" th:text="#{transaction.status.FAILED}">Failed</option>
+                        <option value="EXPIRED" th:selected="${status == 'EXPIRED'}" th:text="#{transaction.status.EXPIRED}">Expired</option>
                     </select>
                 </div>
 
                 <div class="type-filter">
                     <select name="type" id="typeFilter">
-                        <option value="">All Types</option>
-                        <option value="MEMBERSHIP_FEE" th:selected="${type == 'MEMBERSHIP_FEE'}">Membership Fee</option>
-                        <option value="DONATION" th:selected="${type == 'DONATION'}">Donation</option>
-                        <option value="EVENT_PAYMENT" th:selected="${type == 'EVENT_PAYMENT'}">Event Payment</option>
-                        <option value="OTHER" th:selected="${type == 'OTHER'}">Other</option>
+                        <option value="" th:text="#{filter.type.all}">All Types</option>
+                        <option value="MEMBERSHIP_FEE" th:selected="${type == 'MEMBERSHIP_FEE'}" th:text="#{transactionType.MEMBERSHIP_FEE}">Membership Fee</option>
+                        <option value="DONATION" th:selected="${type == 'DONATION'}" th:text="#{transactionType.DONATION}">Donation</option>
+                        <option value="EVENT_PAYMENT" th:selected="${type == 'EVENT_PAYMENT'}" th:text="#{transactionType.EVENT_PAYMENT}">Event Payment</option>
+                        <option value="OTHER" th:selected="${type == 'OTHER'}" th:text="#{transactionType.OTHER}">Other</option>
                     </select>
                 </div>
 
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" name="search" id="searchInput" placeholder="Search transactions..." th:value="${search}">
+                    <input type="text" name="search" id="searchInput" th:placeholder="#{transaction.search.placeholder}" th:value="${search}">
                 </div>
             </form>
         </div>
@@ -58,31 +58,30 @@
             <thead>
             <tr>
                 <th class="sortable" data-column="member.firstName">
-                    Member
+                    <span th:text="#{transaction.table.member}">Member</span>
                     <i class="fas fa-sort"
                        th:classappend="${sort == 'member.firstName'} ? (${direction == 'asc'} ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
                 </th>
                 <th class="sortable" data-column="amount">
-                    Amount
+                    <span th:text="#{transaction.table.amount}">Amount</span>
                     <i class="fas fa-sort"
                        th:classappend="${sort == 'amount'} ? (${direction == 'asc'} ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
                 </th>
                 <th class="sortable" data-column="type">
-                    Type
+                    <span th:text="#{transaction.table.type}">Type</span>
                     <i class="fas fa-sort"
                        th:classappend="${sort == 'type'} ? (${direction == 'asc'} ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
                 </th>
                 <th class="sortable" data-column="status">
-                    Status
+                    <span th:text="#{transaction.table.status}">Status</span>
                     <i class="fas fa-sort"
                        th:classappend="${sort == 'status'} ? (${direction == 'asc'} ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
                 </th>
                 <th class="sortable" data-column="createdAt">
-                    Date
+                    <span th:text="#{transaction.table.date}">Date</span>
                     <i class="fas fa-sort"
                        th:classappend="${sort == 'createdAt'} ? (${direction == 'asc'} ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort'"></i>
                 </th>
-<!--                <th>Actions</th>-->
             </tr>
             </thead>
             <tbody>
@@ -96,22 +95,17 @@
                 <td>
                     <span class="type-pill"
                           th:classappend="${transaction.type.name()}"
-                          th:text="${#strings.replace(#strings.replace(transaction.type.name(), '_', ' '), 'EVENT PAYMENT', 'Event Payment')}">MEMBERSHIP_FEE</span>
+                          th:text="#{${'transactionType.' + transaction.type.name()}}">MEMBERSHIP_FEE</span>
                 </td>
                 <td>
                     <span th:classappend="${transaction.status.name() == 'SUCCEEDED'} ? 'status-pill succeeded' :
                                          (${transaction.status.name() == 'PENDING'} ? 'status-pill pending' :
                                          (${transaction.status.name() == 'FAILED'} ? 'status-pill failed' : 'status-pill expired'))"
-                          th:text="${#strings.capitalizeWords(#strings.toLowerCase(transaction.status.name()))}">Succeeded</span>
+                          th:text="#{${'transaction.status.' + transaction.status.name()}}">Succeeded</span>
                 </td>
                 <td class="date">
                     <span th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm')}">12/09/2025 14:30</span>
                 </td>
-<!--                <td class="actions">-->
-<!--                    <a th:href="@{/transactions/view/{id}(id=${transaction.id})}" title="View Transaction Details">-->
-<!--                        <i class="fa-solid fa-eye"></i>-->
-<!--                    </a>-->
-<!--                </td>-->
             </tr>
             </tbody>
         </table>
@@ -120,105 +114,19 @@
     <div class="pagination">
         <a th:if="${transactionsPage.number > 0}"
            th:href="@{/transactions(page=${transactionsPage.number - 1}, size=${transactionsPage.size}, search=${search}, status=${status}, type=${type}, sort=${sort}, direction=${direction})}">
-            <i class="fas fa-chevron-left"></i> Previous
+            <i class="fas fa-chevron-left"></i> <span th:text="#{pagination.previous}">Previous</span>
         </a>
 
-        <span>Page <strong th:text="${transactionsPage.number + 1}">1</strong> of <strong th:text="${transactionsPage.totalPages}">1</strong></span>
+        <span th:text="#{pagination.page}">Page</span>
+        <strong th:text="${transactionsPage.number + 1}">1</strong>
+        <span th:text="#{pagination.of}">of</span>
+        <strong th:text="${transactionsPage.totalPages}">1</strong>
 
         <a th:if="${transactionsPage.number + 1 < transactionsPage.totalPages}"
            th:href="@{/transactions(page=${transactionsPage.number + 1}, size=${transactionsPage.size}, search=${search}, status=${status}, type=${type}, sort=${sort}, direction=${direction})}">
-            Next <i class="fas fa-chevron-right"></i>
+            <span th:text="#{pagination.next}">Next</span> <i class="fas fa-chevron-right"></i>
         </a>
     </div>
-
-
 </main>
-
-<script>
-    const form = document.getElementById('filterForm');
-    const searchInput = document.getElementById('searchInput');
-    const statusSelect = document.getElementById('statusFilter');
-    const typeSelect = document.getElementById('typeFilter');
-    const sortInput = document.getElementById('sortInput');
-    const directionInput = document.getElementById('directionInput');
-
-    // Normalize Turkish characters
-    function normalizeText(text) {
-        return text
-            .toLowerCase()
-            .replace(/ğ/g, 'g')
-            .replace(/ü/g, 'u')
-            .replace(/ş/g, 's')
-            .replace(/ı/g, 'i')
-            .replace(/ö/g, 'o')
-            .replace(/ç/g, 'c')
-            .trim();
-    }
-
-    // Instant filtering for status and type change
-    statusSelect.addEventListener('change', () => {
-        // Reset to first page when filtering
-        const url = new URL(form.action, window.location.origin);
-        url.searchParams.delete('page');
-        form.action = url.pathname;
-        form.submit();
-    });
-
-    typeSelect.addEventListener('change', () => {
-        // Reset to first page when filtering
-        const url = new URL(form.action, window.location.origin);
-        url.searchParams.delete('page');
-        form.action = url.pathname;
-        form.submit();
-    });
-
-    // Instant filtering while typing (debounced)
-    let typingTimer;
-    const typingDelay = 300; // milliseconds
-    searchInput.addEventListener('input', () => {
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => {
-            // Reset to first page when searching
-            const url = new URL(form.action, window.location.origin);
-            url.searchParams.delete('page');
-            form.action = url.pathname;
-            form.submit();
-        }, typingDelay);
-    });
-
-    // Column sorting functionality
-    document.querySelectorAll('.sortable').forEach(header => {
-        header.addEventListener('click', () => {
-            const column = header.getAttribute('data-column');
-            const currentSort = sortInput.value;
-            const currentDirection = directionInput.value;
-
-            // Determine new direction
-            let newDirection = 'asc';
-            if (currentSort === column && currentDirection === 'asc') {
-                newDirection = 'desc';
-            }
-
-            // Update hidden inputs
-            sortInput.value = column;
-            directionInput.value = newDirection;
-
-            // Reset to first page when sorting
-            const url = new URL(form.action, window.location.origin);
-            url.searchParams.delete('page');
-            form.action = url.pathname;
-
-            form.submit();
-        });
-    });
-
-    // Optional: normalize input before sending
-    form.addEventListener('submit', (e) => {
-        if (searchInput.value) {
-            searchInput.value = normalizeText(searchInput.value);
-        }
-    });
-</script>
-
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Form</title>
+    <title th:text="#{member.form.title}">Member Form</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/memberForm.css}" />
     <script th:src="@{/js/sidebar.js}" defer></script>
@@ -16,62 +16,71 @@
 
 <!-- Main content -->
 <main class="members-container">
-    <h1 class="title" th:text="${member.id == null} ? 'Add Member' : 'Edit Member'">Add/Edit Member</h1>
+    <h1 class="title"
+        th:text="${member.id == null} ? #{member.form.add.title} : #{member.form.edit.title}">
+        Add/Edit Member
+    </h1>
 
     <form th:action="@{/members}" th:object="${member}" method="post" class="member-form">
         <input type="hidden" th:field="*{id}" />
 
         <div class="form-group">
-            <label for="firstName">First Name</label>
-            <input type="text" id="firstName" th:field="*{firstName}" placeholder="Enter first name" />
+            <label for="firstName" th:text="#{member.form.firstName}">First Name</label>
+            <input type="text" id="firstName" th:field="*{firstName}" th:placeholder="#{member.form.firstName.placeholder}" />
             <span class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
         </div>
 
         <div class="form-group">
-            <label for="lastName">Last Name</label>
-            <input type="text" id="lastName" th:field="*{lastName}" placeholder="Enter last name" />
+            <label for="lastName" th:text="#{member.form.lastName}">Last Name</label>
+            <input type="text" id="lastName" th:field="*{lastName}" th:placeholder="#{member.form.lastName.placeholder}" />
             <span class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
         </div>
 
         <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" th:field="*{email}" placeholder="Enter email" />
+            <label for="email" th:text="#{member.form.email}">Email</label>
+            <input type="email" id="email" th:field="*{email}" th:placeholder="#{member.form.email.placeholder}" />
             <span class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
         </div>
 
         <div class="form-group">
-            <label for="phoneNumber">Phone Number</label>
-            <input type="text" id="phoneNumber" th:field="*{phoneNumber}" placeholder="Enter phone number" />
+            <label for="phoneNumber" th:text="#{member.form.phone}">Phone Number</label>
+            <input type="text" id="phoneNumber" th:field="*{phoneNumber}" th:placeholder="#{member.form.phone.placeholder}" />
             <span class="error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></span>
         </div>
 
         <div class="form-group">
-            <label for="address">Address</label>
-            <input type="text" id="address" th:field="*{address}" placeholder="Enter address" />
+            <label for="address" th:text="#{member.form.address}">Address</label>
+            <input type="text" id="address" th:field="*{address}" th:placeholder="#{member.form.address.placeholder}" />
             <span class="error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
         </div>
 
         <div class="form-group">
-            <label for="dateOfBirth">Date of Birth</label>
-            <input type="text" id="dob" name="dateOfBirth" placeholder="dd/mm/yyyy" maxlength="10">
+            <label for="dateOfBirth" th:text="#{member.form.dob}">Date of Birth</label>
+            <input type="text" id="dob" name="dateOfBirth" th:placeholder="#{member.form.dob.placeholder}" maxlength="10">
             <span class="error" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></span>
         </div>
 
         <div class="form-group">
-            <label for="memberStatus">Status</label>
+            <label for="memberStatus" th:text="#{member.form.status}">Status</label>
             <select id="memberStatus" th:field="*{memberStatus}">
-                <option th:value="ACTIVE" th:selected="${member.memberStatus == T(org.example.civitaswebapp.domain.MemberStatus).ACTIVE}">Active</option>
-                <option th:value="INACTIVE" th:selected="${member.memberStatus == T(org.example.civitaswebapp.domain.MemberStatus).INACTIVE}">Inactive</option>
+                <option th:value="ACTIVE"
+                        th:selected="${member.memberStatus == T(org.example.civitaswebapp.domain.MemberStatus).ACTIVE}"
+                        th:text="#{member.status.ACTIVE}">Active</option>
+                <option th:value="INACTIVE"
+                        th:selected="${member.memberStatus == T(org.example.civitaswebapp.domain.MemberStatus).INACTIVE}"
+                        th:text="#{member.status.INACTIVE}">Inactive</option>
             </select>
         </div>
 
         <div class="form-actions">
             <button type="submit" class="btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>
-                <span th:text="${member.id == null} ? 'Add Member' : 'Update Member'">Save</span>
+                <span th:text="${member.id == null} ? #{member.form.add.button} : #{member.form.update.button}">
+                    Save
+                </span>
             </button>
             <a th:href="@{/members}" class="btn-cancel">
-                <i class="fa-solid fa-xmark"></i> Cancel
+                <i class="fa-solid fa-xmark"></i> <span th:text="#{member.form.cancel}">Cancel</span>
             </a>
         </div>
     </form>
@@ -86,7 +95,6 @@
         if (val.length > 5) val = val.slice(0,5) + '/' + val.slice(5,9);
         this.value = val;
     });
-
 </script>
 
 </body>

@@ -45,32 +45,24 @@
             <div class="form-group">
                 <label for="username" th:text="#{login.label.username}">Username</label>
                 <div class="input-with-icon">
-                    <!-- Left user icon -->
                     <span class="input-left-icon">
-        <i class="fas fa-user"></i>
-    </span>
-                    <!-- Input -->
+                        <i class="fas fa-user"></i>
+                    </span>
                     <input type="text" id="username" name="username" th:placeholder="#{login.username.placeholder}" required>
                 </div>
-
             </div>
 
             <div class="form-group">
                 <label for="password" th:text="#{login.label.password}">Password</label>
                 <div class="input-with-icon">
-                    <!-- Left lock icon -->
                     <span class="input-left-icon">
-        <i class="fas fa-lock"></i>
-    </span>
-                    <!-- Input -->
+                        <i class="fas fa-lock"></i>
+                    </span>
                     <input type="password" id="password" name="password" th:placeholder="#{login.password.placeholder}" required>
-                    <!-- Toggle eye -->
                     <span class="input-right-icon">
-        <i id="togglePassword" class="fas fa-eye"></i>
-    </span>
+                        <i id="togglePassword" class="fas fa-eye"></i>
+                    </span>
                 </div>
-
-
             </div>
 
             <button type="submit" class="btn-login">
@@ -89,7 +81,6 @@
     </div>
 </main>
 
-<!-- JavaScript to toggle password -->
 <script>
     const togglePassword = document.getElementById('togglePassword');
     const password = document.getElementById('password');
@@ -98,7 +89,6 @@
         const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
         password.setAttribute('type', type);
 
-        // Toggle eye icon
         togglePassword.classList.toggle('fa-eye');
         togglePassword.classList.toggle('fa-eye-slash');
     });

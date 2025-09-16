@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Members List</title>
+    <title th:text="#{members.list.title}">Members List</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/membersList.css}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script th:src="@{/js/sidebar.js}" defer></script>
-
 </head>
 <body>
 
@@ -19,25 +18,29 @@
 <main class="members-container">
     <!-- Header section -->
     <div class="members-header">
-        <h1 class="title">Members</h1>
+        <h1 class="title" th:text="#{members.list.heading}">Members</h1>
         <div class="header-actions">
             <form id="filterForm" method="get" action="/members" class="filters-container">
                 <div class="status-filter">
                     <select name="status" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Active</option>
-                        <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Inactive</option>
+                        <option value="" th:text="#{filter.status.all}">All Status</option>
+                        <option value="ACTIVE" th:selected="${status == 'ACTIVE'}"
+                                th:text="#{member.status.ACTIVE}">Active</option>
+                        <option value="INACTIVE" th:selected="${status == 'INACTIVE'}"
+                                th:text="#{member.status.INACTIVE}">Inactive</option>
                     </select>
                 </div>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" name="search" id="searchInput" placeholder="Search members..." th:value="${search}">
+                    <input type="text" name="search" id="searchInput"
+                           th:placeholder="#{members.search.placeholder}"
+                           th:value="${search}">
                 </div>
             </form>
 
             <button class="add-member-btn" onclick="window.location.href='/members/add'">
                 <i class="fas fa-plus"></i>
-                Add Member
+                <span th:text="#{members.add.button}">Add Member</span>
             </button>
         </div>
     </div>
@@ -47,11 +50,11 @@
         <table class="members-table">
             <thead>
             <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th th:text="#{member.firstName}">First Name</th>
+                <th th:text="#{member.lastName}">Last Name</th>
+                <th th:text="#{member.email}">Email</th>
+                <th th:text="#{member.status}">Status</th>
+                <th th:text="#{table.actions}">Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -64,10 +67,10 @@
                           th:text="${member.memberStatus}">ACTIVE</span>
                 </td>
                 <td class="actions">
-                    <a th:href="@{/members/view/{id}(id=${member.id})}" title="View Member">
+                    <a th:href="@{/members/view/{id}(id=${member.id})}" th:title="#{table.view}">
                         <i class="fa-solid fa-eye"></i>
                     </a>
-                    <a th:href="@{/members/edit/{id}(id=${member.id})}" title="Edit Member">
+                    <a th:href="@{/members/edit/{id}(id=${member.id})}" th:title="#{table.edit}">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                 </td>
@@ -80,52 +83,18 @@
     <div class="pagination">
         <a th:if="${currentPage > 0}"
            th:href="@{/members(page=${currentPage - 1}, size=10, search=${search}, status=${status})}">
-            <i class="fas fa-chevron-left"></i> Previous
+            <i class="fas fa-chevron-left"></i> <span th:text="#{pagination.previous}">Previous</span>
         </a>
 
-        <span>Page <strong th:text="${currentPage + 1}">1</strong> of <strong th:text="${totalPages}">1</strong></span>
+        <span th:text="#{pagination.page(${currentPage + 1},${totalPages})}">
+            Page 1 of 1
+        </span>
 
         <a th:if="${currentPage + 1 < totalPages}"
            th:href="@{/members(page=${currentPage + 1}, size=10, search=${search}, status=${status})}">
-            Next <i class="fas fa-chevron-right"></i>
+            <span th:text="#{pagination.next}">Next</span> <i class="fas fa-chevron-right"></i>
         </a>
     </div>
 </main>
-
-<script>
-    const form = document.getElementById('filterForm');
-    const searchInput = document.getElementById('searchInput');
-    const statusSelect = document.getElementById('statusFilter');
-
-    // Normalize Turkish characters
-    function normalizeText(text) {
-        return text
-            .toLowerCase()
-            .replace(/ğ/g, 'g')
-            .replace(/ü/g, 'u')
-            .replace(/ş/g, 's')
-            .replace(/ı/g, 'i')
-            .replace(/ö/g, 'o')
-            .replace(/ç/g, 'c')
-            .trim();
-    }
-
-    // Instant filtering for status change
-    statusSelect.addEventListener('change', () => form.submit());
-
-    // Instant filtering while typing (debounced)
-    let typingTimer;
-    const typingDelay = 300; // milliseconds
-    searchInput.addEventListener('input', () => {
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => form.submit(), typingDelay);
-    });
-
-    // Optional: normalize input before sending (makes sure "dogukan" matches "Doğukan")
-    form.addEventListener('submit', (e) => {
-        searchInput.value = normalizeText(searchInput.value);
-    });
-</script>
-
 </body>
 </html>

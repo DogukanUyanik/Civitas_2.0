@@ -6,7 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
-    <title>Dashboard</title>
+    <title th:text="#{dashboard.title}">Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
 
@@ -23,15 +23,15 @@
 <!-- Main Dashboard -->
 <main class="dashboard-container">
     <div class="dashboard-header">
-        <h1 class="dashboard-title">Dashboard</h1>
-        <p class="dashboard-subtitle">Overview of your key metrics and performance indicators</p>
+        <h1 class="dashboard-title" th:text="#{dashboard.title}">Dashboard</h1>
+        <p class="dashboard-subtitle" th:text="#{dashboard.subtitle}">Overview of your key metrics and performance indicators</p>
     </div>
 
     <div class="dashboard-grid">
         <!-- TOP ROW: 4 Small Cards -->
         <div class="kpi-card kpi-top-row" id="total-members">
             <div class="kpi-header">
-                <h3 class="kpi-title">Total Members</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.totalMembers}">Total Members</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-users"></i>
                 </div>
@@ -39,13 +39,13 @@
             <div class="kpi-value" id="total-members-value">-</div>
             <div class="kpi-change positive">
                 <i class="fas fa-arrow-up"></i>
-                <span>12% vs last month</span>
+                <span th:text="#{dashboard.kpi.totalMembers.change}">12% vs last month</span>
             </div>
         </div>
 
         <div class="kpi-card kpi-top-row" id="active-members">
             <div class="kpi-header">
-                <h3 class="kpi-title">Active Members</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.activeMembers}">Active Members</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-user-check"></i>
                 </div>
@@ -53,13 +53,13 @@
             <div class="kpi-value" id="active-members-value">-</div>
             <div class="kpi-change positive">
                 <i class="fas fa-arrow-up"></i>
-                <span>8% vs last month</span>
+                <span th:text="#{dashboard.kpi.activeMembers.change}">8% vs last month</span>
             </div>
         </div>
 
         <div class="kpi-card kpi-top-row" id="growth-card">
             <div class="kpi-header">
-                <h3 class="kpi-title">Monthly Growth</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.monthlyGrowth}">Monthly Growth</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-trending-up"></i>
                 </div>
@@ -67,13 +67,13 @@
             <div class="kpi-value" id="growth-value">-</div>
             <div class="kpi-change positive">
                 <i class="fas fa-arrow-up"></i>
-                <span>New members</span>
+                <span th:text="#{dashboard.kpi.monthlyGrowth.change}">New members</span>
             </div>
         </div>
 
         <div class="kpi-card kpi-top-row" id="notifications">
             <div class="kpi-header">
-                <h3 class="kpi-title">Notifications</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.notifications}">Notifications</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-bell"></i>
                 </div>
@@ -81,14 +81,14 @@
             <div class="kpi-value" id="notifications-value">3</div>
             <div class="kpi-change positive">
                 <i class="fas fa-info-circle"></i>
-                <span>Unread alerts</span>
+                <span th:text="#{dashboard.kpi.notifications.change}">Unread alerts</span>
             </div>
         </div>
 
         <!-- MIDDLE ROW: Revenue Chart (Full Width) -->
         <div class="kpi-card kpi-middle-row" id="revenue-card">
             <div class="kpi-header">
-                <h3 class="kpi-title">Revenue This Month</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.revenueThisMonth}">Revenue This Month</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-euro-sign"></i>
                 </div>
@@ -96,7 +96,7 @@
             <div class="kpi-value" id="revenue-value">-</div>
             <div class="kpi-change positive">
                 <i class="fas fa-arrow-up"></i>
-                <span>15% vs last month</span>
+                <span th:text="#{dashboard.kpi.revenue.change}">15% vs last month</span>
             </div>
             <div class="chart-container">
                 <canvas id="revenueChart"></canvas>
@@ -106,20 +106,20 @@
         <!-- BOTTOM ROW: Events and Failed Payments -->
         <div class="kpi-card kpi-bottom-row" id="upcoming-events">
             <div class="kpi-header">
-                <h3 class="kpi-title">Upcoming Events</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.upcomingEvents}">Upcoming Events</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-calendar-alt"></i>
                 </div>
             </div>
             <div class="kpi-value" id="events-count">-</div>
             <ul class="kpi-list" id="events-list">
-                <li class="kpi-list-item">Loading events...</li>
+                <li class="kpi-list-item" th:text="#{dashboard.kpi.events.loading}">Loading events...</li>
             </ul>
         </div>
 
         <div class="kpi-card kpi-bottom-row" id="failed-payments">
             <div class="kpi-header">
-                <h3 class="kpi-title">Failed Payments</h3>
+                <h3 class="kpi-title" th:text="#{dashboard.kpi.failedPayments}">Failed Payments</h3>
                 <div class="kpi-icon">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
@@ -127,15 +127,15 @@
             <div class="kpi-value" id="failed-payments-value">-</div>
             <div class="kpi-stats" id="failed-payments-stats">
                 <div class="stat-row">
-                    <span class="stat-label">This Week</span>
+                    <span class="stat-label" th:text="#{dashboard.kpi.failedPayments.thisWeek}">This Week</span>
                     <span class="stat-value">-</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Last Week</span>
+                    <span class="stat-label" th:text="#{dashboard.kpi.failedPayments.lastWeek}">Last Week</span>
                     <span class="stat-value">-</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Recovery Rate</span>
+                    <span class="stat-label" th:text="#{dashboard.kpi.failedPayments.recoveryRate}">Recovery Rate</span>
                     <span class="stat-value">-</span>
                 </div>
             </div>
@@ -143,10 +143,19 @@
     </div>
 </main>
 
-<script>
+<script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
         const userId = 1;
         let revenueChart;
+
+        // Internationalized messages from Spring
+        const messages = {
+            chartWeek: /*[[#{dashboard.chart.week}]]*/ 'Week',
+            eventsLoading: /*[[#{dashboard.kpi.events.loading}]]*/ 'Loading events...',
+            eventsNoUpcoming: /*[[#{dashboard.kpi.events.noUpcoming}]]*/ 'No upcoming events',
+            fallbackEventTeamMeeting: /*[[#{dashboard.fallback.event.teamMeeting}]]*/ 'Team Meeting - Tomorrow 2:00 PM',
+            fallbackEventMonthlyReview: /*[[#{dashboard.fallback.event.monthlyReview}]]*/ 'Monthly Review - Friday 10:00 AM'
+        };
 
         // Handle sidebar toggle for dashboard
         const sidebar = document.querySelector('.sidebar');
@@ -185,7 +194,12 @@
                 revenueChart = new Chart(ctx.getContext('2d'), {
                     type: 'line',
                     data: {
-                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        labels: [
+                            messages.chartWeek + ' 1',
+                            messages.chartWeek + ' 2',
+                            messages.chartWeek + ' 3',
+                            messages.chartWeek + ' 4'
+                        ],
                         datasets: [{
                             data: [1200, 1800, 1600, 2100],
                             borderColor: '#f59e0b',
@@ -283,8 +297,8 @@
             document.getElementById('failed-payments-value').textContent = '3';
             document.getElementById('events-count').textContent = '2';
             document.getElementById('events-list').innerHTML =
-                '<li class="kpi-list-item">Team Meeting - Tomorrow 2:00 PM</li>' +
-                '<li class="kpi-list-item">Monthly Review - Friday 10:00 AM</li>';
+                '<li class="kpi-list-item">' + messages.fallbackEventTeamMeeting + '</li>' +
+                '<li class="kpi-list-item">' + messages.fallbackEventMonthlyReview + '</li>';
 
             const statsContainer = document.getElementById('failed-payments-stats');
             if (statsContainer) {
@@ -362,7 +376,7 @@
                         } else {
                             if (eventsCount) eventsCount.textContent = '0';
                             if (eventsList) {
-                                eventsList.innerHTML = '<li class="kpi-list-item">No upcoming events</li>';
+                                eventsList.innerHTML = '<li class="kpi-list-item">' + messages.eventsNoUpcoming + '</li>';
                             }
                         }
                         break;

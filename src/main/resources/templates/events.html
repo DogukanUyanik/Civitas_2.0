@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Union Events</title>
+    <title th:text="#{events.title}">Union Events</title>
 
     <!-- FullCalendar UMD CSS & JS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet"/>
@@ -28,13 +28,12 @@
 <div class="events-container">
     <!-- Header Section -->
     <div class="events-header">
-        <h1 class="calendar-title">Union Events</h1>
+        <h1 class="calendar-title" th:text="#{events.title}">Union Events</h1>
         <div class="header-actions">
             <button class="add-event-btn" data-bs-toggle="modal" data-bs-target="#eventModal">
                 <i class="fas fa-plus"></i>
-                Create Event
+                <span th:text="#{events.createEvent}">Create Event</span>
             </button>
-
         </div>
     </div>
 
@@ -42,14 +41,14 @@
     <div class="filter-section">
         <span class="filter-label">
             <i class="fas fa-filter me-1"></i>
-            Filter Events:
+            <span th:text="#{events.filterLabel}">Filter Events:</span>
         </span>
         <div class="filter-buttons">
-            <button class="filter-btn all active" data-filter="all">All Events</button>
-            <button class="filter-btn general" data-filter="general">General</button>
-            <button class="filter-btn meeting" data-filter="meeting">Meetings</button>
-            <button class="filter-btn workshop" data-filter="workshop">Workshops</button>
-            <button class="filter-btn social" data-filter="social">Social</button>
+            <button class="filter-btn all active" data-filter="all" th:text="#{events.filter.all}">All Events</button>
+            <button class="filter-btn general" data-filter="general" th:text="#{events.filter.general}">General</button>
+            <button class="filter-btn meeting" data-filter="meeting" th:text="#{events.filter.meetings}">Meetings</button>
+            <button class="filter-btn workshop" data-filter="workshop" th:text="#{events.filter.workshops}">Workshops</button>
+            <button class="filter-btn social" data-filter="social" th:text="#{events.filter.social}">Social</button>
         </div>
     </div>
 
@@ -66,9 +65,9 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-calendar-plus me-2"></i>
-                    Create New Event
+                    <span th:text="#{events.modal.createNew}">Create New Event</span>
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" th:aria-label="#{events.modal.close}"></button>
             </div>
             <div class="modal-body">
                 <form id="eventForm">
@@ -76,20 +75,20 @@
                         <div class="col-md-8 mb-3">
                             <label for="title" class="form-label">
                                 <i class="fas fa-heading me-1"></i>
-                                Event Title
+                                <span th:text="#{events.form.eventTitle}">Event Title</span>
                             </label>
-                            <input type="text" class="form-control" id="title" required placeholder="Enter event title">
+                            <input type="text" class="form-control" id="title" required th:placeholder="#{events.form.eventTitle.placeholder}">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="eventType" class="form-label">
                                 <i class="fas fa-tag me-1"></i>
-                                Event Type
+                                <span th:text="#{events.form.eventType}">Event Type</span>
                             </label>
                             <select class="form-control" id="eventType">
-                                <option value="general">General</option>
-                                <option value="meeting">Meeting</option>
-                                <option value="workshop">Workshop</option>
-                                <option value="social">Social</option>
+                                <option value="general" th:text="#{events.type.general}">General</option>
+                                <option value="meeting" th:text="#{events.type.meeting}">Meeting</option>
+                                <option value="workshop" th:text="#{events.type.workshop}">Workshop</option>
+                                <option value="social" th:text="#{events.type.social}">Social</option>
                             </select>
                         </div>
                     </div>
@@ -97,34 +96,33 @@
                     <div class="mb-3">
                         <label for="attendees" class="form-label">
                             <i class="fas fa-users me-1"></i>
-                            Select Members
+                            <span th:text="#{events.form.selectMembers}">Select Members</span>
                         </label>
                         <select id="attendees" multiple class="form-control">
                             <!-- Options populated dynamically via JS -->
                         </select>
                     </div>
 
-
                     <div class="mb-3">
                         <label for="description" class="form-label">
                             <i class="fas fa-align-left me-1"></i>
-                            Description
+                            <span th:text="#{events.form.description}">Description</span>
                         </label>
-                        <textarea class="form-control" id="description" rows="3" placeholder="Event description (optional)"></textarea>
+                        <textarea class="form-control" id="description" rows="3" th:placeholder="#{events.form.description.placeholder}"></textarea>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="start" class="form-label">
                                 <i class="fas fa-play me-1"></i>
-                                Start Date & Time
+                                <span th:text="#{events.form.startDateTime}">Start Date & Time</span>
                             </label>
                             <input type="datetime-local" class="form-control" id="start" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="end" class="form-label">
                                 <i class="fas fa-stop me-1"></i>
-                                End Date & Time
+                                <span th:text="#{events.form.endDateTime}">End Date & Time</span>
                             </label>
                             <input type="datetime-local" class="form-control" id="end" required>
                         </div>
@@ -133,14 +131,14 @@
                     <div class="mb-3">
                         <label for="location" class="form-label">
                             <i class="fas fa-map-marker-alt me-1"></i>
-                            Location
+                            <span th:text="#{events.form.location}">Location</span>
                         </label>
-                        <input type="text" class="form-control" id="location" placeholder="Event location (optional)">
+                        <input type="text" class="form-control" id="location" th:placeholder="#{events.form.location.placeholder}">
                     </div>
 
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-2"></i>
-                        Create Event
+                        <span th:text="#{events.form.createEvent}">Create Event</span>
                     </button>
                 </form>
             </div>
@@ -148,12 +146,29 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function() {
         const calendarEl = document.getElementById('calendar');
         let currentModal = null; // Track the current modal instance
         let allEvents = []; // Store all events for filtering
         let currentFilter = 'all'; // Track current filter
+
+        // Internationalized messages from Spring
+        const messages = {
+            eventType: /*[[#{events.details.type}]]*/ 'Type',
+            eventStart: /*[[#{events.details.start}]]*/ 'Start',
+            eventEnd: /*[[#{events.details.end}]]*/ 'End',
+            eventDescription: /*[[#{events.details.description}]]*/ 'Description',
+            eventLocation: /*[[#{events.details.location}]]*/ 'Location',
+            notSpecified: /*[[#{events.details.notSpecified}]]*/ 'Not specified',
+            successMessage: /*[[#{events.messages.success}]]*/ 'Event created successfully!',
+            errorMessage: /*[[#{events.messages.error}]]*/ 'Failed to create event. Please try again.',
+            calendarToday: /*[[#{events.calendar.today}]]*/ 'today',
+            calendarMonth: /*[[#{events.calendar.month}]]*/ 'month',
+            calendarWeek: /*[[#{events.calendar.week}]]*/ 'week',
+            calendarDay: /*[[#{events.calendar.day}]]*/ 'day',
+            calendarList: /*[[#{events.calendar.list}]]*/ 'list'
+        };
 
         // Function to properly close any existing modal
         function closeExistingModal() {
@@ -252,9 +267,16 @@
             initialView: 'dayGridMonth',
             height: 'auto',
             headerToolbar: {
-                left: 'prev,next,today',
+                left: 'prev,next,' + messages.calendarToday,
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            buttonText: {
+                today: messages.calendarToday,
+                month: messages.calendarMonth,
+                week: messages.calendarWeek,
+                day: messages.calendarDay,
+                list: messages.calendarList
             },
             events: function(info, successCallback, failureCallback) {
                 // Fetch events from server
@@ -310,11 +332,11 @@
                 const eventType = event.extendedProps.eventType || event.eventType || 'general';
                 const eventDetails = `
                 <strong>${event.title}</strong><br>
-                <strong>Type:</strong> <span style="text-transform: capitalize;">${eventType}</span><br>
-                <strong>Start:</strong> ${event.start.toLocaleDateString()} ${event.start.toLocaleTimeString()}<br>
-                <strong>End:</strong> ${event.end ? event.end.toLocaleDateString() + ' ' + event.end.toLocaleTimeString() : 'Not specified'}<br>
-                ${event.extendedProps.description ? '<strong>Description:</strong> ' + event.extendedProps.description + '<br>' : ''}
-                ${event.extendedProps.location ? '<strong>Location:</strong> ' + event.extendedProps.location : ''}
+                <strong>${messages.eventType}:</strong> <span style="text-transform: capitalize;">${eventType}</span><br>
+                <strong>${messages.eventStart}:</strong> ${event.start.toLocaleDateString()} ${event.start.toLocaleTimeString()}<br>
+                <strong>${messages.eventEnd}:</strong> ${event.end ? event.end.toLocaleDateString() + ' ' + event.end.toLocaleTimeString() : messages.notSpecified}<br>
+                ${event.extendedProps.description ? '<strong>' + messages.eventDescription + ':</strong> ' + event.extendedProps.description + '<br>' : ''}
+                ${event.extendedProps.location ? '<strong>' + messages.eventLocation + ':</strong> ' + event.extendedProps.location : ''}
             `;
 
                 // You can replace this with a more sophisticated modal
@@ -436,11 +458,11 @@
                     document.getElementById('eventForm').reset();
 
                     // Show success message
-                    showNotification('Event created successfully!', 'success');
+                    showNotification(messages.successMessage, 'success');
                 })
                 .catch(err => {
                     console.error('Error creating event:', err);
-                    showNotification('Failed to create event. Please try again.', 'error');
+                    showNotification(messages.errorMessage, 'error');
                 });
         });
 

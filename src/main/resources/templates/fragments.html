@@ -16,7 +16,7 @@
             <div class="brand-icon">
                 <i class="fas fa-leaf"></i>
             </div>
-            <div class="brand-text">Civitas</div>
+            <div class="brand-text" th:text="#{sidebar.brand}">Civitas</div>
         </div>
 
         <!-- Toggle button -->
@@ -27,67 +27,66 @@
         <!-- Navigation -->
         <nav class="sidebar-nav">
             <div class="nav-section">
-                <div class="nav-title">Main</div>
+                <div class="nav-title" th:text="#{sidebar.section.main}">Main</div>
                 <ul class="sidebar-links">
                     <li>
-                        <a th:href="@{/members}" th:classappend="${currentUri == '/members'} ? 'active' : ''" title="Members">
+                        <a th:href="@{/members}" th:classappend="${currentUri == '/members'} ? 'active' : ''"
+                           th:title="#{sidebar.members}">
                             <i class="fa-solid fa-users"></i>
-                            <span class="link-text">Members</span>
-                            <span class="tooltip">Members</span>
+                            <span class="link-text" th:text="#{sidebar.members}">Members</span>
+                            <span class="tooltip" th:text="#{sidebar.members}">Members</span>
                         </a>
                     </li>
                     <li>
-                        <a th:href="@{/events}" th:classappend="${currentUri == '/events'} ? 'active' : ''" title="Events">
+                        <a th:href="@{/events}" th:classappend="${currentUri == '/events'} ? 'active' : ''"
+                           th:title="#{sidebar.events}">
                             <i class="fa-solid fa-calendar-alt"></i>
-                            <span class="link-text">Events</span>
-                            <span class="tooltip">Events</span>
+                            <span class="link-text" th:text="#{sidebar.events}">Events</span>
+                            <span class="tooltip" th:text="#{sidebar.events}">Events</span>
                         </a>
                     </li>
                     <li>
-                        <a th:href="@{/transactions}" th:classappend="${currentUri== '/transactions'} ? 'active' : ''" title="Transactions">
+                        <a th:href="@{/transactions}" th:classappend="${currentUri== '/transactions'} ? 'active' : ''"
+                           th:title="#{sidebar.transactions}">
                             <i class="fa-solid fa-credit-card"></i>
-                            <span class="link-text">Transactions</span>
-                            <span class="tooltip">Transactions</span>
+                            <span class="link-text" th:text="#{sidebar.transactions}">Transactions</span>
+                            <span class="tooltip" th:text="#{sidebar.transactions}">Transactions</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <div class="nav-title">Communication</div>
+                <div class="nav-title" th:text="#{sidebar.section.communication}">Communication</div>
                 <ul class="sidebar-links">
-<!--                    <li>-->
-<!--                        <a th:href="@{/messages}" th:classappend="${currentUri == '/messages'} ? 'active' : ''" title="Messages">-->
-<!--                            <i class="fa-solid fa-envelope"></i>-->
-<!--                            <span class="link-text">Messages</span>-->
-<!--                            <span class="tooltip">Messages</span>-->
-<!--                        </a>-->
-<!--                    </li>-->
                     <li>
-                        <a th:href="@{/notifications}" th:classappend="${currentUri == '/notifications'} ? 'active' : ''" title="Notifications">
+                        <a th:href="@{/notifications}" th:classappend="${currentUri == '/notifications'} ? 'active' : ''"
+                           th:title="#{sidebar.notifications}">
                             <i class="fa-solid fa-bell"></i>
-                            <span class="link-text">Notifications</span>
-                            <span class="tooltip">Notifications</span>
+                            <span class="link-text" th:text="#{sidebar.notifications}">Notifications</span>
+                            <span class="tooltip" th:text="#{sidebar.notifications}">Notifications</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="nav-section">
-                <div class="nav-title">Analytics</div>
+                <div class="nav-title" th:text="#{sidebar.section.analytics}">Analytics</div>
                 <ul class="sidebar-links">
                     <li>
-                        <a th:href="@{/dashboard}" th:classappend="${currentUri == '/dashboard'} ? 'active' : ''" title="Dashboard">
+                        <a th:href="@{/dashboard}" th:classappend="${currentUri == '/dashboard'} ? 'active' : ''"
+                           th:title="#{sidebar.dashboard}">
                             <i class="fa-solid fa-chart-pie"></i>
-                            <span class="link-text">Dashboard</span>
-                            <span class="tooltip">Dashboard</span>
+                            <span class="link-text" th:text="#{sidebar.dashboard}">Dashboard</span>
+                            <span class="tooltip" th:text="#{sidebar.dashboard}">Dashboard</span>
                         </a>
                     </li>
                     <li>
-                        <a th:href="@{/reports}" th:classappend="${currentUri == '/reports'} ? 'active' : ''" title="Reports">
+                        <a th:href="@{/reports}" th:classappend="${currentUri == '/reports'} ? 'active' : ''"
+                           th:title="#{sidebar.reports}">
                             <i class="fa-solid fa-chart-bar"></i>
-                            <span class="link-text">Reports</span>
-                            <span class="tooltip">Reports</span>
+                            <span class="link-text" th:text="#{sidebar.reports}">Reports</span>
+                            <span class="tooltip" th:text="#{sidebar.reports}">Reports</span>
                         </a>
                     </li>
                 </ul>
@@ -96,20 +95,19 @@
 
         <!-- User info + logout at the bottom -->
         <div class="sidebar-footer" th:if="${username != null and username != ''}">
-
             <div class="user-info">
                 <div class="user-avatar">
                     <span th:text="${username.substring(0,1).toUpperCase()}">U</span>
                 </div>
                 <div class="user-details">
                     <span class="user-name" th:text="${username}">Username</span>
-                    <span class="user-role">Admin Manager</span>
+                    <span class="user-role" th:text="#{sidebar.user.role}">Admin Manager</span>
                 </div>
             </div>
             <form th:action="@{/logout}" method="post">
                 <button type="submit" class="logout-button">
                     <i class="fa-solid fa-sign-out-alt"></i>
-                    <span class="logout-text">Logout</span>
+                    <span class="logout-text" th:text="#{sidebar.logout}">Logout</span>
                 </button>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             </form>
@@ -119,8 +117,8 @@
         <div class="sidebar-footer" th:if="${username == null or username == ''}">
             <a th:href="@{/login}" class="login-link">
                 <i class="fa-solid fa-sign-in-alt"></i>
-                <span class="link-text">Login</span>
-                <span class="tooltip">Login</span>
+                <span class="link-text" th:text="#{sidebar.login}">Login</span>
+                <span class="tooltip" th:text="#{sidebar.login}">Login</span>
             </a>
         </div>
 
@@ -128,15 +126,12 @@
         <div class="sidebar-footer">
             <form th:action="@{/changeLocale}" method="get">
                 <select name="lang" onchange="this.form.submit()" class="language-switcher">
-                    <option th:value="en" th:selected="${#locale.language == 'en'}">English</option>
-                    <option th:value="nl" th:selected="${#locale.language == 'nl'}">Nederlands</option>
-                    <option th:value="tr" th:selected="${#locale.language == 'tr'}">Turkish</option>
-
+                    <option th:value="en" th:selected="${#locale.language == 'en'}" th:text="#{lang.english}">English</option>
+                    <option th:value="nl" th:selected="${#locale.language == 'nl'}" th:text="#{lang.dutch}">Nederlands</option>
+                    <option th:value="tr" th:selected="${#locale.language == 'tr'}" th:text="#{lang.turkish}">Turkish</option>
                 </select>
             </form>
         </div>
-
-
     </div>
 </th:block>
 

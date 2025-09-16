@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Member Details</title>
+    <title th:text="#{member.details.title}">Member Details</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
@@ -12,7 +12,6 @@
 
     <script th:src="@{/js/sidebar.js}" defer></script>
     <script th:src="@{/js/memberDetails.js}" defer></script>
-
 </head>
 <body>
 <div th:replace="~{fragments :: sidebar}"></div>
@@ -21,99 +20,94 @@
     <div class="top-bar">
         <div class="top-bar-left">
             <a th:href="@{/members}" class="go-back-btn">
-                <i class="bi bi-arrow-left"></i> Go Back
+                <i class="bi bi-arrow-left"></i> <span th:text="#{button.goBack}">Go Back</span>
             </a>
-            <h1 class="title">Member Details</h1>
+            <h1 class="title" th:text="#{member.details.title}">Member Details</h1>
         </div>
         <div class="top-bar-right">
             <a th:href="@{/members/{id}/pdf(id=${member.id})}" class="btn-generate-pdf">
-                <i class="bi bi-file-earmark-pdf"></i> Generate PDF
+                <i class="bi bi-file-earmark-pdf"></i> <span th:text="#{button.generatePdf}">Generate PDF</span>
             </a>
         </div>
     </div>
 
     <div class="row">
-        <!-- Left Panel: Member Info -->
+        <!-- Left Panel -->
         <div class="col-md-4">
             <div class="panel member-info">
-                <!-- Profile Section -->
                 <div class="profile-section">
                     <div class="profile-avatar">
                         <i class="bi bi-person-fill"></i>
                     </div>
                     <h2 class="profile-name">[[${member.firstName}]] [[${member.lastName}]]</h2>
-                    <div class="profile-id">Member ID: [[${member.id}]]</div>
-                    <div class="profile-status" th:class="'profile-status ' + ${member.memberStatus}" th:text="${member.memberStatus}">Active</div>
+                    <div class="profile-id" th:text="#{member.id} + ': ' + ${member.id}">Member ID: 1</div>
+                    <div class="profile-status" th:class="'profile-status ' + ${member.memberStatus}"
+                         th:text="#{member.status.${member.memberStatus}}">Active</div>
                 </div>
 
-                <!-- Personal Details Section -->
                 <div class="personal-details">
                     <h3 class="section-title">
                         <i class="bi bi-person-lines-fill"></i>
-                        Personal Details
+                        <span th:text="#{member.personalDetails}">Personal Details</span>
                     </h3>
 
                     <div class="detail-item">
                         <i class="bi bi-envelope-fill"></i>
-                        <span class="detail-label">Email:</span>
-                        <span class="detail-value" th:text="${member.email}">mark.andrews@gmail.com</span>
+                        <span class="detail-label" th:text="#{member.email}">Email:</span>
+                        <span class="detail-value" th:text="${member.email}"></span>
                     </div>
 
                     <div class="detail-item">
                         <i class="bi bi-telephone-fill"></i>
-                        <span class="detail-label">Phone:</span>
-                        <span class="detail-value" th:text="${member.phoneNumber}">+91 98765 43210</span>
+                        <span class="detail-label" th:text="#{member.phone}">Phone:</span>
+                        <span class="detail-value" th:text="${member.phoneNumber}"></span>
                     </div>
 
                     <div class="detail-item">
                         <i class="bi bi-geo-alt-fill"></i>
-                        <span class="detail-label">Address:</span>
-                        <span class="detail-value" th:text="${member.address}">ABC Gym - Riyadh</span>
+                        <span class="detail-label" th:text="#{member.address}">Address:</span>
+                        <span class="detail-value" th:text="${member.address}"></span>
                     </div>
 
                     <div class="detail-item">
                         <i class="bi bi-calendar-check-fill"></i>
-                        <span class="detail-label">Last Payment:</span>
-                        <span class="detail-value" th:text="${member.dateOfLastPayment}">31 May, 2023</span>
+                        <span class="detail-label" th:text="#{member.lastPayment}">Last Payment:</span>
+                        <span class="detail-value" th:text="${member.dateOfLastPayment}"></span>
                     </div>
 
                     <div class="detail-item">
                         <i class="bi bi-clock-fill"></i>
-                        <span class="detail-label">Created At:</span>
-                        <span class="detail-value" th:text="${#temporals.format(member.createdAt, 'dd MMM, yyyy')}">16 Sep, 2025</span>
+                        <span class="detail-label" th:text="#{member.createdAt}">Created At:</span>
+                        <span class="detail-value" th:text="${#temporals.format(member.createdAt, 'dd MMM, yyyy')}"></span>
                     </div>
 
-
-                    <!-- Add this inside the left panel, below the personal details -->
-                    <!-- Add data-member-id attribute here -->
-                    <!-- Send Payment Button -->
                     <button class="send-payment-btn" id="sendPaymentBtn" th:data-member-id="${member.id}">
-                        <i class="bi bi-cash-stack"></i> Send Payment
+                        <i class="bi bi-cash-stack"></i> <span th:text="#{button.sendPayment}">Send Payment</span>
                     </button>
 
                     <!-- Payment Modal -->
                     <div class="modal-overlay hidden" id="paymentModal">
                         <div class="modal-content">
-                            <h3>Send Payment</h3>
+                            <h3 th:text="#{payment.send}">Send Payment</h3>
                             <form id="paymentForm">
                                 <div class="form-group">
-                                    <label for="paymentType">Payment Type:</label>
+                                    <label for="paymentType" th:text="#{payment.type}">Payment Type:</label>
                                     <select id="paymentType" name="paymentType" required>
-                                        <option value="">-- Select --</option>
-                                        <option value="MEMBERSHIP_FEE">Membership Fee</option>
-                                        <option value="EVENT_PAYMENT">Event Payment</option>
-                                        <option value="DONATION">Donation</option>
-                                        <option value="OTHER">Other</option>
+                                        <option value="" th:text="#{select.placeholder}">-- Select --</option>
+                                        <option value="MEMBERSHIP_FEE" th:text="#{transaction.type.MEMBERSHIP_FEE}">Membership Fee</option>
+                                        <option value="EVENT_PAYMENT" th:text="#{transaction.type.EVENT_PAYMENT}">Event Payment</option>
+                                        <option value="DONATION" th:text="#{transaction.type.DONATION}">Donation</option>
+                                        <option value="OTHER" th:text="#{transaction.type.OTHER}">Other</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="amount">Amount:</label>
-                                    <input type="number" id="amount" name="amount" placeholder="Enter amount" step="0.01" min="0.50" required>
+                                    <label for="amount" th:text="#{payment.amount}">Amount:</label>
+                                    <input type="number" id="amount" name="amount" th:placeholder="#{payment.amount.placeholder}" step="0.01" min="0.50" required>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="currency">Currency:</label>
+                                    <label for="currency" th:text="#{payment.currency}">Currency:</label>
                                     <select id="currency" name="currency">
                                         <option value="EUR">EUR</option>
                                         <option value="USD">USD</option>
@@ -121,126 +115,107 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="note">Note (optional):</label>
-                                    <textarea id="note" name="note" placeholder="Add a note..."></textarea>
+                                    <label for="note" th:text="#{payment.note}">Note:</label>
+                                    <textarea id="note" name="note" th:placeholder="#{payment.note.placeholder}"></textarea>
                                 </div>
 
                                 <div class="modal-actions">
-                                    <button type="button" class="btn-cancel" id="cancelPayment">Cancel</button>
-                                    <button type="submit" class="btn-send">Send Link</button>
+                                    <button type="button" class="btn-cancel" id="cancelPayment" th:text="#{button.cancel}">Cancel</button>
+                                    <button type="submit" class="btn-send" th:text="#{button.sendLink}">Send Link</button>
                                 </div>
                             </form>
 
-                            <!-- Payment Result -->
                             <div id="paymentResult" class="hidden">
-                                <p>Payment link generated:</p>
+                                <p th:text="#{payment.link.generated}">Payment link generated:</p>
                                 <a id="paymentLink" href="#" target="_blank"></a>
-                                <button id="closeResult" class="btn-send">Close</button>
+                                <button id="closeResult" class="btn-send" th:text="#{button.close}">Close</button>
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
 
-        <!-- Right Panel: Transactions Table -->
+        <!-- Right Panel -->
         <div class="col-md-8">
             <div class="panel transactions-table-wrapper">
-                <!-- Transactions Header -->
                 <div class="transactions-header">
                     <h3 class="transactions-title">
                         <i class="bi bi-receipt"></i>
-                        Transaction History
+                        <span th:text="#{transaction.history}">Transaction History</span>
                     </h3>
 
-                    <!-- Filter Controls -->
                     <div class="filter-controls">
                         <div class="filter-group">
-                            <label class="filter-label">Date Range:</label>
+                            <label class="filter-label" th:text="#{filter.dateRange}">Date Range:</label>
                             <select class="filter-select" id="dateFilter">
-                                <option value="all">All Time</option>
-                                <option value="today">Today</option>
-                                <option value="week">Last 7 Days</option>
-                                <option value="month">Last Month</option>
-                                <option value="quarter">Last 3 Months</option>
-                                <option value="year">Last Year</option>
+                                <option value="all" th:text="#{filter.date.all}">All Time</option>
+                                <option value="today" th:text="#{filter.date.today}">Today</option>
+                                <option value="week" th:text="#{filter.date.week}">Last 7 Days</option>
+                                <option value="month" th:text="#{filter.date.month}">Last Month</option>
+                                <option value="quarter" th:text="#{filter.date.quarter}">Last 3 Months</option>
+                                <option value="year" th:text="#{filter.date.year}">Last Year</option>
                             </select>
                         </div>
 
                         <div class="filter-group">
-                            <label class="filter-label">Status:</label>
+                            <label class="filter-label" th:text="#{filter.status}">Status:</label>
                             <select class="filter-select" id="statusFilter">
-                                <option value="all">All Status</option>
-                                <option value="SUCCEEDED">Succeeded</option>
-                                <option value="PENDING">Pending</option>
-                                <option value="FAILED">Failed</option>
-                                <option value="CANCELLED">Cancelled</option>
+                                <option value="all" th:text="#{filter.status.all}">All Status</option>
+                                <option value="SUCCEEDED" th:text="#{transaction.status.SUCCEEDED}">Succeeded</option>
+                                <option value="PENDING" th:text="#{transaction.status.PENDING}">Pending</option>
+                                <option value="FAILED" th:text="#{transaction.status.FAILED}">Failed</option>
+                                <option value="EXPIRED" th:text="#{transaction.status.EXPIRED}">Expired</option>
                             </select>
                         </div>
 
                         <button class="filter-reset-btn" id="resetFilters">
                             <i class="bi bi-arrow-clockwise"></i>
-                            Reset
+                            <span th:text="#{button.reset}">Reset</span>
                         </button>
                     </div>
                 </div>
 
-
-
-
-                <!-- Transactions Table -->
                 <div class="table-container">
                     <table class="transactions-table" id="transactionsTable">
                         <thead>
                         <tr>
                             <th class="sortable" data-column="date">
                                 <i class="bi bi-calendar3"></i>
-                                Date
-                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                <span th:text="#{transaction.date}">Date</span>
                             </th>
                             <th class="sortable" data-column="type">
                                 <i class="bi bi-tag"></i>
-                                Type
-                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                <span th:text="#{transaction.type}">Type</span>
                             </th>
                             <th class="sortable" data-column="amount">
                                 <i class="bi bi-currency-dollar"></i>
-                                Amount
-                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                <span th:text="#{transaction.amount}">Amount</span>
                             </th>
                             <th class="sortable" data-column="currency">
                                 <i class="bi bi-cash"></i>
-                                Currency
-                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                <span th:text="#{transaction.currency}">Currency</span>
                             </th>
                             <th class="sortable" data-column="status">
                                 <i class="bi bi-check-circle"></i>
-                                Status
-                                <i class="bi bi-chevron-expand sort-icon"></i>
+                                <span th:text="#{transaction.status}">Status</span>
                             </th>
                         </tr>
                         </thead>
                         <tbody id="transactionsBody">
-                        <tr th:each="tx : ${member.transactions}"
-                            th:attr="data-date=${#temporals.format(tx.createdAt, 'yyyy-MM-dd')},
-                                     data-status=${tx.status},
-                                     data-amount=${tx.amount},
-                                     data-type=${tx.type},
-                                     data-currency=${tx.currency}">
+                        <tr th:each="tx : ${member.transactions}">
                             <td class="date-cell" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td class="type-cell" th:text="${tx.type}"></td>
+                            <td class="type-cell" th:text="#{transaction.type.${tx.type}}"></td>
                             <td class="amount-cell" th:text="${tx.amount}"></td>
                             <td class="currency-cell" th:text="${tx.currency}"></td>
                             <td class="status-cell">
-                                <span th:text="${tx.status}" th:class="'status-pill ' + ${tx.status}"></span>
+                                <span th:text="#{transaction.status.${tx.status}}" th:class="'status-pill ' + ${tx.status}"></span>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(member.transactions)}" class="no-data-row">
                             <td colspan="5" class="text-center">
                                 <i class="bi bi-inbox" style="font-size: 2rem; color: #cbd5e0; margin-bottom: 0.5rem;"></i><br>
-                                No transactions found
+                                <span th:text="#{transaction.none}">No transactions found</span>
                             </td>
                         </tr>
                         </tbody>
@@ -250,8 +225,6 @@
         </div>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

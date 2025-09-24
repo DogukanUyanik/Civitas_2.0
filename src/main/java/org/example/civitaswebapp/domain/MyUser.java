@@ -20,6 +20,10 @@ public class MyUser {
     private Long id;
 
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
+
     @Column(nullable = false, unique = true)
     private String username;
 

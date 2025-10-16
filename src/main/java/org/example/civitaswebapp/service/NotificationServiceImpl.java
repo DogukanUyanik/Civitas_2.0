@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -24,16 +25,21 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public Notification createNotification(MyUser user, String title, String message, NotificationType type, String url) {
-
+        System.out.println("📢 createNotification called for user: " + user.getId());
         Notification notification = Notification.builder()
                 .user(user)
                 .title(title)
+                .message(message)
                 .type(type)
                 .url(url)
+                .status(NotificationStatus.UNREAD)
+                .createdAt(Instant.now())
                 .build();
-        return notificationRepository.save(notification);
-
+        Notification saved = notificationRepository.save(notification);
+        System.out.println("📢 Notification saved: " + saved.getId());
+        return saved;
     }
+
 
     @Override
     public Page<Notification> getAllNotifications(MyUser user, Pageable pageable) {

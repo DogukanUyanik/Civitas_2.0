@@ -1,6 +1,7 @@
 package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MyUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ public interface MemberService {
 
 
     @Transactional
-    public void saveMember(Member member);
+    public void saveMember(Member member, MyUser user);
 
     @Transactional
     public void deleteMember(Member member);

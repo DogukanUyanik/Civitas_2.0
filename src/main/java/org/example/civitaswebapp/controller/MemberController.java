@@ -3,7 +3,9 @@ package org.example.civitaswebapp.controller;
 
 import jakarta.validation.Valid;
 import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.service.MemberService;
+import org.example.civitaswebapp.service.MyUserService;
 import org.example.civitaswebapp.service.PdfService;
 import org.example.civitaswebapp.service.PdfServiceImpl;
 import org.example.civitaswebapp.validator.MemberEmailValidator;
@@ -35,6 +37,9 @@ public class MemberController {
 
     @Autowired
     private MemberEmailValidator memberEmailValidator;
+
+    @Autowired
+    private MyUserService  myUserService;
 
     @Autowired
     private MessageSource messageSource;
@@ -78,7 +83,8 @@ public class MemberController {
     public String saveMember(@Valid @ModelAttribute("member") Member member,
                              BindingResult result,
                              Model model,
-                             RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes,
+                             Principal principal) {
 
         memberEmailValidator.validate(member, result);
 
@@ -88,7 +94,8 @@ public class MemberController {
 
         boolean isNew = member.getId() == null;
 
-        memberService.saveMember(member);
+        MyUser createdByUser = myUserService.getLoggedInUser();
+        memberService.saveMember(member, createdByUser);
 
         if (isNew) {
             String message = messageSource.getMessage(

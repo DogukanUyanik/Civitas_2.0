@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.dto;
+package org.example.civitaswebapp.dto.member;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

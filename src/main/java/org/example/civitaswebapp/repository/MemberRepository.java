@@ -2,7 +2,6 @@ package org.example.civitaswebapp.repository;
 
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MemberStatus;
-import org.example.civitaswebapp.dto.MemberDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +37,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByDateOfLastPaymentBefore(LocalDate date);
 
     long countByCreatedAtAfter(LocalDateTime startOfMonth);
+
 }

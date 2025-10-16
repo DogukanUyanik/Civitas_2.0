@@ -4,6 +4,7 @@ import org.example.civitaswebapp.domain.*;
 import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.repository.MemberRepository;
 import org.example.civitaswebapp.repository.MyUserRepository;
+import org.example.civitaswebapp.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,15 +23,20 @@ public class InitDataConfig implements CommandLineRunner {
     @Autowired
     private MyUserRepository userRepository;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
 
-    // Inside your InitDataConfig class
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
+
     @Override
     public void run(String... args) throws Exception {
+
 
         List<Event> events = new ArrayList<>();
 
@@ -169,5 +175,42 @@ public class InitDataConfig implements CommandLineRunner {
         }
 
         memberRepository.saveAll(members);
+
+        List<Notification> notifications = new ArrayList<>();
+
+
+        Notification n1 = Notification.builder()
+                .user(admin1)
+                .url("/members/view/1")
+                .title("Nieuw lid toegevoegd")
+                .message("Lid Ali Khan is toegevoegd.")
+                .type(NotificationType.MEMBER)
+                .status(NotificationStatus.UNREAD)
+                .createdAt(java.time.Instant.now())
+                .build();
+
+        Notification n2 = Notification.builder()
+                .user(admin2)
+                .url("/events")
+                .title("Nieuwe activiteit")
+                .message("Er is een nieuw evenement toegevoegd: Board Meeting.")
+                .type(NotificationType.EVENTS)
+                .status(NotificationStatus.UNREAD)
+                .createdAt(java.time.Instant.now())
+                .build();
+
+        Notification n3 = Notification.builder()
+                .user(admin1)
+                .url("/transactions")
+                .title("Nieuwe betaling ontvangen")
+                .message("Lid Fatima Yildiz heeft haar bijdrage betaald.")
+                .type(NotificationType.TRANSACTION)
+                .status(NotificationStatus.READ)
+                .createdAt(java.time.Instant.now().minusSeconds(3600))
+                .build();
+
+        notificationRepository.saveAll(Arrays.asList(n1, n2, n3));
+
+
     }
 }

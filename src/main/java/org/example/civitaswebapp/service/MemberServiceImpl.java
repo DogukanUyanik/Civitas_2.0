@@ -2,11 +2,15 @@ package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MemberStatus;
+import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.dto.member.MemberCreatedEventDto;
 import org.example.civitaswebapp.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,14 +21,31 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @Override
     public Page<Member> getMembers(Pageable pageable) {
         return memberRepository.findAll(pageable);
     }
 
+
+    @Transactional
     @Override
-    public void saveMember(Member member) {
+    public void saveMember(Member member, MyUser createdByUser) {
+
+        boolean isNew = member.getId() == null;
         memberRepository.save(member);
+
+        if (isNew) {
+            var dto = new MemberCreatedEventDto(
+                    member.getId(),
+                    member.getFirstName(),
+                    member.getLastName(),
+                    createdByUser.getId()
+            );
+            eventPublisher.publishEvent(dto);
+        }
 
     }
 

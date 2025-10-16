@@ -1,16 +1,17 @@
-package org.example.civitaswebapp.dto;
+package org.example.civitaswebapp.dto.member;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.civitaswebapp.domain.MyUser;
 
-// Member DTO
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberDTO {
+public class MemberCreatedEventDto {
     private Long id;
     private String firstName;
     private String lastName;
+    private Long createdByUserId;
 }
-

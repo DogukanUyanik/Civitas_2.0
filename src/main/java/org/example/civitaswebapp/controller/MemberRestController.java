@@ -1,8 +1,7 @@
 package org.example.civitaswebapp.controller;
 
 
-import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.dto.MemberDTO;
+import org.example.civitaswebapp.dto.member.MemberDTO;
 import org.example.civitaswebapp.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

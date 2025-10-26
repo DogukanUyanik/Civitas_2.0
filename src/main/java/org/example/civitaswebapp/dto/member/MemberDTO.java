@@ -4,13 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// Member DTO
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class MemberDTO {
-    private Long id;
-    private String firstName;
-    private String lastName;
-}
+
+public record MemberDTO(Long id, String firstName, String lastName) {}
 

@@ -1,9 +1,8 @@
 package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.domain.MemberStatus;
 import org.example.civitaswebapp.domain.MyUser;
-import org.example.civitaswebapp.dto.member.MemberCreatedEventDto;
+import org.example.civitaswebapp.dto.member.MemberSavedEventDto;
 import org.example.civitaswebapp.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -33,21 +32,20 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     @Override
     public void saveMember(Member member, MyUser createdByUser) {
-
         boolean isNew = member.getId() == null;
         memberRepository.save(member);
 
-        if (isNew) {
-            var dto = new MemberCreatedEventDto(
-                    member.getId(),
-                    member.getFirstName(),
-                    member.getLastName(),
-                    createdByUser.getId()
-            );
-            eventPublisher.publishEvent(dto);
-        }
-
+        var dto = new MemberSavedEventDto(
+                member.getId(),
+                member.getFirstName(),
+                member.getLastName(),
+                createdByUser.getId(),
+                isNew
+        );
+        eventPublisher.publishEvent(dto);
     }
+
+
 
     @Override
     public void deleteMember(Member member) {

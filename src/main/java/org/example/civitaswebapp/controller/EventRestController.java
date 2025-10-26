@@ -1,7 +1,7 @@
 package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.Event;
-import org.example.civitaswebapp.dto.EventRequest;
+import org.example.civitaswebapp.dto.events.EventRequest;
 import org.example.civitaswebapp.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;

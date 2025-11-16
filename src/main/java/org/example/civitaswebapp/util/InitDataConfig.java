@@ -194,7 +194,7 @@ public class InitDataConfig implements CommandLineRunner {
                 .url("/events")
                 .title("Nieuwe activiteit")
                 .message("Er is een nieuw evenement toegevoegd: Board Meeting.")
-                .type(NotificationType.EVENTS)
+                .type(NotificationType.EVENT)
                 .status(NotificationStatus.UNREAD)
                 .createdAt(java.time.Instant.now())
                 .build();

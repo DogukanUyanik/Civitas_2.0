@@ -11,8 +11,6 @@ public interface EventService {
 
     Page<Event> getEvents(Pageable pageable);
 
-    //Page<Event> getEvents(Pageable pageable, String search);
-
     Optional<Event> findById(Long id);
 
     Event saveEvent(EventRequest eventRequest);

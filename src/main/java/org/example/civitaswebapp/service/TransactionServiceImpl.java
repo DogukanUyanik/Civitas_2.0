@@ -7,9 +7,12 @@ import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.Transaction;
 import org.example.civitaswebapp.domain.TransactionStatus;
 import org.example.civitaswebapp.domain.TransactionType;
+import org.example.civitaswebapp.dto.transactions.TransactionCreatedDto;
+import org.example.civitaswebapp.dto.transactions.TransactionStatusChangedDto;
 import org.example.civitaswebapp.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.criteria.Predicate;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -27,10 +31,15 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
 
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
+
+    @Transactional
     @Override
     public Transaction createTransaction(Member member, double amount, TransactionType type) {
         Transaction tx = Transaction.builder()
@@ -42,7 +51,18 @@ public class TransactionServiceImpl implements TransactionService {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
-        return transactionRepository.save(tx);
+        transactionRepository.save(tx);
+
+        TransactionCreatedDto dto = new TransactionCreatedDto(
+                tx.getId(),
+                tx.getMember().getId(),
+                tx.getMember().getFirstName(),
+                tx.getMember().getLastName(),
+                tx.getAmount(),
+                tx.getCreatedAt()
+        );
+        eventPublisher.publishEvent(dto);
+        return tx;
     }
 
     @Override
@@ -107,41 +127,27 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepository.findAllByMember(member);
     }
 
+
+    @Transactional
     @Override
     public void updateTransactionStatus(Long transactionId, TransactionStatus status) {
-        System.out.println("=== TRANSACTION UPDATE DEBUG START ===");
-        System.out.println("Updating transaction ID: " + transactionId);
-        System.out.println("New status: " + status);
 
-        try {
-            Transaction transaction = transactionRepository.findById(transactionId)
-                    .orElseThrow(() -> {
-                        System.err.println("❌ Transaction not found with ID: " + transactionId);
-                        return new IllegalArgumentException("Transaction not found: " + transactionId);
-                    });
 
-            System.out.println("✅ Found transaction: " + transaction.getId());
-            System.out.println("Current status: " + transaction.getStatus());
-            System.out.println("Amount: " + transaction.getAmount());
-            System.out.println("Member: " + (transaction.getMember() != null ? transaction.getMember().getId() : "null"));
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
 
-            TransactionStatus oldStatus = transaction.getStatus();
-            transaction.setStatus(status);
-            transaction.setUpdatedAt(LocalDateTime.now());
+        TransactionStatus oldStatus = transaction.getStatus();
+        TransactionStatus newStatus = status;
+        transaction.setStatus(status);
+        transactionRepository.save(transaction);
 
-            Transaction savedTransaction = transactionRepository.save(transaction);
-
-            System.out.println("✅ Transaction updated successfully!");
-            System.out.println("Status changed from " + oldStatus + " to " + savedTransaction.getStatus());
-            System.out.println("Updated at: " + savedTransaction.getUpdatedAt());
-
-        } catch (Exception e) {
-            System.err.println("❌ Error updating transaction status: " + e.getMessage());
-            e.printStackTrace();
-            throw e; // Re-throw so the webhook knows there was an error
-        }
-
-        System.out.println("=== TRANSACTION UPDATE DEBUG END ===");
+        TransactionStatusChangedDto dto = new TransactionStatusChangedDto(
+                transactionId,
+                transaction.getMember().getId(),
+                oldStatus,
+                newStatus
+        );
+        eventPublisher.publishEvent(dto);
     }
 
 

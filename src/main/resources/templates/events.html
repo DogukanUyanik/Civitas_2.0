@@ -21,11 +21,14 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+
     <link rel="stylesheet" th:href="@{/css/eventsList.css}" />
     <script th:src="@{/js/sidebar.js}" defer></script>
 </head>
 <body>
 <div th:replace="~{fragments :: sidebar}"></div>
+<div th:replace="~{fragments :: header}"></div>
 
 <div class="events-container">
     <!-- Header Section -->

@@ -146,14 +146,60 @@ html, body {
     background-color: #f8fafc;
 }
 
-/* Base spacing for containers that don't have their own margin-top */
+.notification-dropdown {
+    position: absolute;
+    top: 32px; /* below the bell */
+    right: 0;
+    width: 250px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    display: none; /* hidden by default */
+    z-index: 1000;
+}
+
+.notification-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.notification-dropdown li {
+    padding: 8px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+}
+
+.notification-dropdown li:last-child {
+    border-bottom: none;
+}
+
+.notification-dropdown li:hover {
+    background: #f3f4f6;
+}
+
+
+/* Base spacing for ALL containers */
 .main-content,
 .members-container,
 .events-container,
 .transactions-container,
 .notifications-container,
-.reports-container {
-    margin-top: 90px;
+.reports-container,
+[class*="-container"]:not(.dashboard-container) {
+    margin-top: 70px !important;
+    padding-top: 20px !important;
+}
+
+/* Dashboard has its own specific styling in dashboard.css */
+.dashboard-container {
+    margin-top: 70px !important;
+    padding-top: 20px !important;
 }
 
 /* Mobile responsiveness */

@@ -20,6 +20,14 @@
             <div class="notification-bell">
                 <i class="fa-solid fa-bell"></i>
                 <span class="notification-count" th:text="${notificationCount}" th:if="${notificationCount > 0}"></span>
+
+                <!-- Notifications dropdown -->
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <ul>
+                        <li th:each="note : ${notifications}" th:text="${note.message}">Notification message</li>
+                        <li th:if="${#lists.isEmpty(notifications)}">No new notifications</li>
+                    </ul>
+                </div>
             </div>
 
             <!-- User info -->

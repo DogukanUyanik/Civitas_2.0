@@ -9,6 +9,8 @@
     <title th:text="#{dashboard.title}">Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script th:src="@{/js/sidebar.js}" defer></script>
@@ -19,9 +21,14 @@
 
 <!-- Sidebar -->
 <div th:replace="~{fragments :: sidebar}"></div>
+<div th:replace="~{fragments :: header}"></div>
+
+
+
 
 <!-- Main Dashboard -->
 <main class="dashboard-container">
+    <div class="dashboard-content">
     <div class="dashboard-header">
         <h1 class="dashboard-title" th:text="#{dashboard.title}">Dashboard</h1>
         <p class="dashboard-subtitle" th:text="#{dashboard.subtitle}">Overview of your key metrics and performance indicators</p>
@@ -140,6 +147,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </main>
 

@@ -8,16 +8,41 @@
 </head>
 <body>
 
+<!-- Header fragment -->
+<th:block th:fragment="header">
+    <header class="app-header">
+        <div class="logo">
+            <a th:href="@{/dashboard}">Civitas</a>
+        </div>
+
+        <div class="header-right">
+            <!-- Notification bell with optional counter -->
+            <div class="notification-bell">
+                <i class="fa-solid fa-bell"></i>
+                <span class="notification-count" th:text="${notificationCount}" th:if="${notificationCount > 0}"></span>
+            </div>
+
+            <!-- User info -->
+            <div class="user-info" th:if="${username != null}">
+                <span th:text="${username}">Username</span>
+            </div>
+        </div>
+    </header>
+</th:block>
+
+
 <!-- Sidebar fragment -->
 <th:block th:fragment="sidebar">
     <div id="sidebar" class="sidebar">
-        <!-- Brand/Logo area -->
-        <div class="sidebar-brand">
-            <div class="brand-icon">
-                <i class="fas fa-leaf"></i>
-            </div>
-            <div class="brand-text" th:text="#{sidebar.brand}">Civitas</div>
-        </div>
+
+
+<!--        &lt;!&ndash; Brand/Logo area &ndash;&gt;-->
+<!--        <div class="sidebar-brand">-->
+<!--            <div class="brand-icon">-->
+<!--                <i class="fas fa-leaf"></i>-->
+<!--            </div>-->
+<!--            <div class="brand-text" th:text="#{sidebar.brand}">Civitas</div>-->
+<!--        </div>-->
 
         <!-- Toggle button -->
         <button id="toggleSidebar" class="toggle-btn">

@@ -5,6 +5,8 @@
     min-height: 100vh;
     padding: 2rem;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    margin-top: 70px; /* Just the header height */
+    padding-top: 20px; /* The spacing gap */
 }
 
 /* Handle collapsed sidebar state */
@@ -283,7 +285,9 @@
 @media (max-width: 768px) {
     .dashboard-container {
         margin-left: 0;
+        margin-top: 70px;
         padding: 1rem;
+        padding-top: 20px;
     }
 
     .dashboard-container.sidebar-collapsed {

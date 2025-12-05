@@ -8,5 +8,6 @@ public record TransactionCreatedDto(
         String firstName,
         String lastName,
         Double amount,
-        LocalDateTime createdAt) {
+        LocalDateTime createdAt,
+        Long createdByUserId) {
 }

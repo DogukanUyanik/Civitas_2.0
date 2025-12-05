@@ -35,16 +35,15 @@ public class TransactionRestController {
     ) {
         Map<String, Object> response = new HashMap<>();
 
-        // Find the member
         Member member = memberService.findById(memberId).orElse(null);
         if (member == null) {
             response.put("success", false);
-            response.put("message", "Member not found");
+            response.put("message", "Member not found in Database"); // Updated for clarity
             return ResponseEntity.badRequest().body(response);
         }
 
         try {
-            // Create transaction
+            // 1. Create transaction
             TransactionType transactionType = TransactionType.valueOf(paymentType);
             Transaction transaction = transactionService.createTransaction(member, amount, transactionType);
             transaction.setCurrency(currency);
@@ -53,23 +52,31 @@ public class TransactionRestController {
                 transaction.setNote(note);
             }
 
-            // Generate Stripe payment link
+            // 2. Generate Stripe payment link
             String paymentLink = transactionService.generateStripePaymentLink(transaction);
 
-            // ✅ Send WhatsApp message (sandbox/dev)
-            if (member.getPhoneNumber() != null && !member.getPhoneNumber().isEmpty()) {
-                whatsAppService.sendPaymentLink(member.getPhoneNumber(), paymentLink);
+            // 3. Send WhatsApp message (ISOLATED)
+            try {
+                if (member.getPhoneNumber() != null && !member.getPhoneNumber().isEmpty()) {
+                    whatsAppService.sendPaymentLink(member.getPhoneNumber(), paymentLink);
+                }
+            } catch (Exception wa) {
+                // Log the error but DO NOT stop the response.
+                System.err.println("WhatsApp failed: " + wa.getMessage());
+                response.put("whatsapp_error", "Message could not be sent: " + wa.getMessage());
             }
 
-            // Return response
+            // 4. Return success (Payment link was generated successfully)
             response.put("success", true);
             response.put("paymentLink", paymentLink);
             response.put("transactionId", transaction.getId());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            // This catch now only handles Stripe or Database failures
+            e.printStackTrace(); // PRINT THE STACK TRACE TO CONSOLE
             response.put("success", false);
-            response.put("message", "Failed to generate payment link or send WhatsApp: " + e.getMessage());
+            response.put("message", "Critical Error: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }

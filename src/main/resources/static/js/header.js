@@ -5,8 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const dropdown = document.getElementById("notificationDropdown");
 
     // Debugging check
-    if (!bell) console.error("❌ Error: Could not find element with id 'notificationBell'");
-    if (!dropdown) console.error("❌ Error: Could not find element with id 'notificationDropdown'");
+    if (!bell) console.warn("⚠️ Warning: Could not find element with id 'notificationBell'");
+    if (!dropdown) console.warn("⚠️ Warning: Could not find element with id 'notificationDropdown'");
 
     // 1. Fetch unread count immediately
     fetchUnreadCount();
@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function () {
         bell.addEventListener("click", function (e) {
             console.log("🔔 Bell clicked!");
             e.stopPropagation(); // Stop click from closing the menu immediately
-
             toggleNotifications();
         });
     }
@@ -34,6 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function toggleNotifications() {
     const dropdown = document.getElementById('notificationDropdown');
+    if (!dropdown) return;
 
     // Toggle logic
     const isHidden = dropdown.style.display === 'none' || dropdown.style.display === '';
@@ -90,7 +90,7 @@ function loadRecentNotifications() {
             data.forEach(note => {
                 const li = document.createElement("li");
 
-                // Style Unread
+                // Style unread items
                 if (note.status === 'UNREAD') {
                     li.style.backgroundColor = '#f0fdf4';
                     li.style.borderLeft = '3px solid #10b981';
@@ -107,11 +107,63 @@ function loadRecentNotifications() {
                 if(note.url) {
                     li.style.cursor = "pointer";
                     li.onclick = (e) => {
-                        window.location.href = note.url;
+                        e.stopPropagation(); // Prevent closing dropdown immediately
+                        // ✅ Use markAndRedirect so clicking dropdown ALSO marks as read
+                        markAndRedirect(note.id, note.url);
                     };
                 }
                 list.appendChild(li);
             });
         })
         .catch(err => console.error("❌ Error loading list:", err));
+}
+
+/**
+ * Marks a notification as read via API, then redirects the user.
+ * @param {number} notificationId - The ID of the notification
+ * @param {string} url - The URL to redirect to (optional)
+ */
+function markAndRedirect(notificationId, url) {
+    // 1. Get CSRF Token from Meta Tags (Spring Security)
+    const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+    if (!csrfTokenMeta || !csrfHeaderMeta) {
+        console.error("❌ CSRF Meta tags not found! Cannot send POST request.");
+        // Fallback: just redirect if we can't mark read
+        if (url && url !== '#' && url !== 'null') window.location.href = url;
+        return;
+    }
+
+    const csrfToken = csrfTokenMeta.getAttribute('content');
+    const csrfHeader = csrfHeaderMeta.getAttribute('content');
+
+    // 2. Send API Request
+    fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            [csrfHeader]: csrfToken // 👈 Critical for Spring Security
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log(`Notification ${notificationId} marked as read.`);
+
+                // 3. Update Badge immediately (UX improvement)
+                const badge = document.getElementById("notificationBadge");
+                if (badge && badge.innerText) {
+                    let count = parseInt(badge.innerText);
+                    if (count > 1) badge.innerText = count - 1;
+                    else badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(err => console.error("Error marking read:", err))
+        .finally(() => {
+            // 4. Redirect regardless of success/fail
+            if (url && url !== '#' && url !== 'null') {
+                window.location.href = url;
+            }
+        });
 }

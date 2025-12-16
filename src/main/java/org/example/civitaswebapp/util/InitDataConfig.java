@@ -1,4 +1,4 @@
-package org.example.civitaswebapp;
+package org.example.civitaswebapp.util;
 
 import org.example.civitaswebapp.domain.*;
 import org.example.civitaswebapp.repository.EventRepository;
@@ -22,7 +22,6 @@ public class InitDataConfig implements CommandLineRunner {
 
     @Autowired
     private MyUserRepository userRepository;
-
 
     @Autowired
     private EventRepository eventRepository;

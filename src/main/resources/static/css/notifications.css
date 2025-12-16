@@ -1,0 +1,262 @@
+/* Container Background matching membersList.css */
+.notifications-container {
+    flex-grow: 1;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* Title with your signature Green Underline */
+.title {
+    text-align: left;
+    color: #1f2937;
+    font-size: 2.5rem;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 1rem;
+    margin: 0;
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 2px;
+}
+
+/* Mark All Read Button (Secondary Style) */
+.action-btn.secondary {
+    padding: 0.75rem 1.5rem;
+    background: white;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.action-btn.secondary:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    color: #10b981; /* Green text on hover */
+}
+
+/* --- NOTIFICATION CARD LIST --- */
+
+.notifications-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Space between cards */
+}
+
+.notification-card {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 1.25rem;
+    border-radius: 16px; /* Matches your table radius */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover Effect: Lift up slightly */
+.notification-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    border-color: #10b981; /* subtle green border on hover */
+}
+
+/* Unread State: Green tint background */
+.notification-card.unread {
+    background: linear-gradient(to right, #f0fdf4, white);
+    border-left: 4px solid #10b981;
+}
+
+.notification-card.read {
+    border-left: 4px solid transparent; /* Keeps alignment */
+    opacity: 0.9;
+}
+
+/* --- ICONS --- */
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Dynamic Colors for Icons */
+.type-MEMBER { background: #eff6ff; color: #3b82f6; } /* Blue */
+.type-TRANSACTION { background: #ecfdf5; color: #10b981; } /* Green */
+.type-EVENT { background: #fffbeb; color: #f59e0b; } /* Orange */
+.type-DEFAULT { background: #f3f4f6; color: #6b7280; } /* Gray */
+
+/* --- TEXT CONTENT --- */
+.content-wrapper {
+    flex-grow: 1;
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.notif-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.notif-message {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.notif-time {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* --- ACTION ARROW --- */
+.action-wrapper {
+    margin-left: 1rem;
+    color: #d1d5db;
+    transition: transform 0.2s;
+}
+
+.notification-card:hover .action-wrapper {
+    color: #10b981;
+    transform: translateX(4px);
+}
+
+/* --- UNREAD DOT (Visual candy) --- */
+.unread-dot {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444; /* Red dot */
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px white;
+}
+
+/* --- EMPTY STATE --- */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 16px;
+    border: 1px dashed #e5e7eb;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #9ca3af;
+}
+
+/* --- PAGINATION (Reusing your styles) --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.pagination a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    color: #374151;
+    text-decoration: none;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #f9fafb;
+}
+
+.pagination a:hover {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border-color: #10b981;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.pagination span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .notifications-container { padding: 1rem; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .title { font-size: 2rem; }
+
+    .notification-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .icon-wrapper { margin-bottom: 0; }
+    .notif-header { flex-direction: column; gap: 4px; }
+    .action-wrapper { display: none; } /* Hide arrow on mobile */
+    .unread-dot { top: 16px; right: 16px; }
+}

@@ -7,7 +7,6 @@ import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.service.MemberService;
 import org.example.civitaswebapp.service.MyUserService;
 import org.example.civitaswebapp.service.PdfService;
-import org.example.civitaswebapp.service.PdfServiceImpl;
 import org.example.civitaswebapp.validator.MemberEmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -21,7 +20,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.thymeleaf.context.Context;
 
 
 import java.security.Principal;
@@ -39,7 +37,7 @@ public class MemberController {
     private MemberEmailValidator memberEmailValidator;
 
     @Autowired
-    private MyUserService  myUserService;
+    private MyUserService myUserService;
 
     @Autowired
     private MessageSource messageSource;

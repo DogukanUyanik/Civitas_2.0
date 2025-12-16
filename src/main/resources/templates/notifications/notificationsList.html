@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+  <title>Notifications - Civitas</title>
+
+  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+  <link rel="stylesheet" th:href="@{/css/header.css}" />
+  <link rel="stylesheet" th:href="@{/css/notifications.css}" />
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <script th:src="@{/js/sidebar.js}" defer></script>
+  <script th:src="@{/js/header.js}" defer></script>
+</head>
+<body>
+
+<div th:replace="~{fragments :: sidebar}"></div>
+<div th:replace="~{fragments :: header}"></div>
+
+<main class="main-content notifications-container">
+
+  <div class="page-header">
+    <h1 class="title">Notifications</h1>
+
+    <div class="header-actions">
+      <form th:action="@{/notifications/mark-all-read}" method="post">
+        <button type="submit" class="action-btn secondary">
+          <i class="fa-solid fa-check-double"></i>
+          <span>Mark all as read</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="notifications-wrapper">
+
+    <div th:each="note : ${notifications}"
+         class="notification-card"
+         th:classappend="${note.status.name() == 'UNREAD'} ? 'unread' : 'read'"
+
+    th:data-id="${note.id}"
+    th:data-url="${note.url != null ? note.url : '#'}"
+         onclick="markAndRedirect(this.getAttribute('data-id'), this.getAttribute('data-url'))">
+
+    <div class="icon-wrapper" th:classappend="${'type-' + (note.type != null ? note.type.name() : 'DEFAULT')}">
+      <i th:if="${note.type != null and note.type.name() == 'MEMBER'}" class="fa-solid fa-user-plus"></i>
+      <i th:if="${note.type != null and note.type.name() == 'TRANSACTION'}" class="fa-solid fa-euro-sign"></i>
+      <i th:if="${note.type != null and note.type.name() == 'EVENT'}" class="fa-solid fa-calendar-check"></i>
+      <i th:if="${note.type == null}" class="fa-solid fa-bell"></i>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="notif-header">
+        <h3 class="notif-title" th:text="${note.title}">Notification Title</h3>
+        <span class="notif-time">
+                        <i class="fa-regular fa-clock"></i>
+                        <span th:text="${#temporals.format(note.createdAt, 'dd MMM HH:mm')}">10:30</span>
+                    </span>
+      </div>
+      <p class="notif-message" th:text="${note.message}">Description...</p>
+    </div>
+
+    <div class="action-wrapper">
+      <i class="fa-solid fa-chevron-right"></i>
+    </div>
+
+    <div th:if="${note.status.name() == 'UNREAD'}" class="unread-dot" title="Unread"></div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(notifications)}" class="empty-state">
+    <div class="empty-icon">
+      <i class="fa-regular fa-bell-slash"></i>
+    </div>
+    <h3>All caught up!</h3>
+    <p>You have no notifications at the moment.</p>
+  </div>
+
+  </div>
+
+  <div class="pagination" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/notifications(page=${currentPage - 1}, size=10)}">
+      <i class="fas fa-chevron-left"></i> <span>Previous</span>
+    </a>
+
+    <span>
+            Page <span th:text="${currentPage + 1}">1</span> of <span th:text="${totalPages}">1</span>
+        </span>
+
+    <a th:if="${currentPage + 1 < totalPages}"
+       th:href="@{/notifications(page=${currentPage + 1}, size=10)}">
+      <span>Next</span> <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+
+</main>
+
+</body>
+</html>

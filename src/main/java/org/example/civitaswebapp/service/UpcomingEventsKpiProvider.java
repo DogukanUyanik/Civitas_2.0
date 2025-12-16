@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter; // 👈 Import this
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,16 +44,20 @@ public class UpcomingEventsKpiProvider implements KpiProvider {
 
         List<Event> upcomingEvents = eventRepository.findByStartBetween(now, in30Days);
 
-        // Convert to a simple list of event info to send to frontend
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM HH:mm");
+
         List<String> eventTitles = upcomingEvents.stream()
-                .map(event -> event.getStart() + " - " + event.getTitle())
+                .map(event -> {
+                    String formattedDate = event.getStart().format(formatter);
+                    return formattedDate + " - " + event.getTitle();
+                })
                 .collect(Collectors.toList());
 
         return KpiValueDto.builder()
                 .key(getKey())
                 .title("Upcoming Events")
-                .value(eventTitles) // store list of events
-                .formattedValue(String.join("\n", eventTitles)) // simple string for display
+                .value(eventTitles)
+                .formattedValue(String.join("\n", eventTitles))
                 .build();
     }
 }

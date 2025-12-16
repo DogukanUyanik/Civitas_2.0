@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<!-- Header fragment -->
+
 <th:block th:fragment="header">
     <header class="app-header">
         <div class="logo">
@@ -18,7 +18,7 @@
         </div>
 
         <div class="header-right">
-            <!-- Notification bell with optional counter -->
+
             <div class="notification-bell" id="notificationBell">
                 <i class="fa-solid fa-bell"></i>
 
@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            <!-- User info -->
+
             <div class="user-info" th:if="${username != null}">
                 <span th:text="${username}">Username</span>
             </div>
@@ -54,25 +54,13 @@
 </th:block>
 
 
-<!-- Sidebar fragment -->
 <th:block th:fragment="sidebar">
     <div id="sidebar" class="sidebar">
 
-
-<!--        &lt;!&ndash; Brand/Logo area &ndash;&gt;-->
-<!--        <div class="sidebar-brand">-->
-<!--            <div class="brand-icon">-->
-<!--                <i class="fas fa-leaf"></i>-->
-<!--            </div>-->
-<!--            <div class="brand-text" th:text="#{sidebar.brand}">Civitas</div>-->
-<!--        </div>-->
-
-        <!-- Toggle button -->
         <button id="toggleSidebar" class="toggle-btn">
             <i class="fas fa-chevron-left"></i>
         </button>
 
-        <!-- Navigation -->
         <nav class="sidebar-nav">
             <div class="nav-section">
                 <div class="nav-title" th:text="#{sidebar.section.main}">Main</div>
@@ -141,7 +129,6 @@
             </div>
         </nav>
 
-        <!-- User info + logout at the bottom -->
         <div class="sidebar-footer" th:if="${username != null and username != ''}">
             <div class="user-info">
                 <div class="user-avatar">
@@ -161,7 +148,7 @@
             </form>
         </div>
 
-        <!-- Login link if not logged in -->
+
         <div class="sidebar-footer" th:if="${username == null or username == ''}">
             <a th:href="@{/login}" class="login-link">
                 <i class="fa-solid fa-sign-in-alt"></i>
@@ -170,7 +157,7 @@
             </a>
         </div>
 
-        <!-- Language switcher -->
+
         <div class="sidebar-footer">
             <form th:action="@{/changeLocale}" method="get">
                 <select name="lang" onchange="this.form.submit()" class="language-switcher">

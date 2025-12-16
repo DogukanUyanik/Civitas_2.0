@@ -31,7 +31,7 @@ public class MemberEventListener {
                     "Nieuw lid toegevoegd",
                     "Lid " + dto.firstName() + " " + dto.lastName() + " is toegevoegd.",
                     NotificationType.MEMBER,
-                    "/members/" + dto.memberId()
+                    "/members/view/" + dto.memberId()
             );
         } else {
             notificationService.createNotification(
@@ -39,7 +39,7 @@ public class MemberEventListener {
                     "Lid geupdate",
                     "Lid " + dto.firstName() + " " + dto.lastName() + " is geupdate",
                     NotificationType.MEMBER,
-                    "/members/" + dto.memberId()
+                    "/members/view/" + dto.memberId()
             );
         }
     }

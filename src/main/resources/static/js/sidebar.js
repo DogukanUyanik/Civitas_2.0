@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebar');
-    const mainContents = document.querySelectorAll('.main-content, .members-container, .events-container, .transactions-container');
+    const mainContents = document.querySelectorAll('.main-content, .members-container, .events-container, .transactions-container, .notifications-container');
     const header = document.querySelector('.app-header');
 
     if (!sidebar) {

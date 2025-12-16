@@ -1,7 +1,5 @@
 package org.example.civitaswebapp.service;
 
-
-
 import lombok.NoArgsConstructor;
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.MyUserRole;
@@ -31,7 +29,8 @@ public class MyUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        return new User(user.getUsername(), user.getPassword(), convertAuthorities(user.getRole()));
+
+        return user;
     }
 
     private Collection<? extends GrantedAuthority> convertAuthorities(MyUserRole role) {

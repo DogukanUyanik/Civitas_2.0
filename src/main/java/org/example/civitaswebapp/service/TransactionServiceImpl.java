@@ -3,10 +3,7 @@ package org.example.civitaswebapp.service;
 import com.stripe.Stripe;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
-import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.domain.Transaction;
-import org.example.civitaswebapp.domain.TransactionStatus;
-import org.example.civitaswebapp.domain.TransactionType;
+import org.example.civitaswebapp.domain.*;
 import org.example.civitaswebapp.dto.transactions.TransactionCreatedDto;
 import org.example.civitaswebapp.dto.transactions.TransactionStatusChangedDto;
 import org.example.civitaswebapp.repository.TransactionRepository;
@@ -28,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
+
+
     @Autowired
     private TransactionRepository transactionRepository;
 
@@ -41,7 +40,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Transactional
     @Override
-    public Transaction createTransaction(Member member, double amount, TransactionType type) {
+    public Transaction createTransaction(Member member, double amount, TransactionType type, MyUser createdByUser) {
+
         Transaction tx = Transaction.builder()
                 .member(member)
                 .amount(amount)
@@ -59,7 +59,8 @@ public class TransactionServiceImpl implements TransactionService {
                 tx.getMember().getFirstName(),
                 tx.getMember().getLastName(),
                 tx.getAmount(),
-                tx.getCreatedAt()
+                tx.getCreatedAt(),
+                createdByUser.getId()
         );
         eventPublisher.publishEvent(dto);
         return tx;

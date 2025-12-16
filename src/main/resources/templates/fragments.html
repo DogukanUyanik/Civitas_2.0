@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <script th:src="@{/js/sidebar.js}" defer></script>
+    <script th:src="@{/js/header.js}" defer></script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -17,16 +19,29 @@
 
         <div class="header-right">
             <!-- Notification bell with optional counter -->
-            <div class="notification-bell">
+            <div class="notification-bell" id="notificationBell">
                 <i class="fa-solid fa-bell"></i>
-                <span class="notification-count" th:text="${notificationCount}" th:if="${notificationCount > 0}"></span>
 
-                <!-- Notifications dropdown -->
+                <span class="notification-count"
+                      id="notificationBadge"
+                      th:text="${notificationCount > 0 ? notificationCount : ''}"
+                      th:style="${notificationCount != null and notificationCount > 0 ? 'display:flex' : 'display:none'}">
+    </span>
+
                 <div class="notification-dropdown" id="notificationDropdown">
-                    <ul>
-                        <li th:each="note : ${notifications}" th:text="${note.message}">Notification message</li>
-                        <li th:if="${#lists.isEmpty(notifications)}">No new notifications</li>
+                    <div class="dropdown-header" style="padding: 10px 16px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #6b7280; font-weight: bold;">
+                        Recent Notifications
+                    </div>
+
+                    <ul id="notificationList">
+                        <li style="text-align:center; padding:15px; color:#9ca3af;">Loading...</li>
                     </ul>
+
+                    <div class="dropdown-footer" style="padding: 10px; text-align: center; border-top: 1px solid #f1f5f9;">
+                        <a th:href="@{/notifications}" style="text-decoration: none; color: #10b981; font-size: 13px; font-weight: 600;">
+                            See all notifications
+                        </a>
+                    </div>
                 </div>
             </div>
 

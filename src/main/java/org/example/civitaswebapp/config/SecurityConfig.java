@@ -38,6 +38,9 @@ public class SecurityConfig {
                         .usernameParameter("username")
                         .passwordParameter("password")
                 )
+                .headers(headers -> headers
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin())
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")

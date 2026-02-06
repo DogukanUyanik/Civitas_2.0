@@ -49,7 +49,8 @@ public class InvoiceService {
                 filename,
                 dto.guessedDate(),
                 dto.guessedAmount(),
-                dto.guessedCounterparty()
+                dto.guessedCounterparty(),
+                dto.guessedType()
         );
     }
 

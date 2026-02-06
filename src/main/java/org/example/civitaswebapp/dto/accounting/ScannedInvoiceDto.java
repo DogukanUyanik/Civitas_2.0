@@ -7,6 +7,7 @@ public record ScannedInvoiceDto(
         String filename,
         LocalDate guessedDate,
         BigDecimal guessedAmount,
-        String guessedCounterparty
+        String guessedCounterparty,
+        String guessedType
 )
 {}

@@ -89,6 +89,9 @@ function showReviewModal(data) {
         document.getElementById('inputCounterparty').value = data.guessedCounterparty;
     }
 
+    if(data.guessedType){
+        document.getElementById('inputInvoiceType').value = data.guessedType;    }
+
     // 3. Show Modal
     modal.style.display = 'block';
 }

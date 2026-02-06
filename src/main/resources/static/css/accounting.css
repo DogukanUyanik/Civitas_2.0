@@ -1,0 +1,215 @@
+/* --- KPI Cards --- */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-left: 5px solid #ccc;
+}
+
+.stat-card.income { border-left-color: #10b981; } /* Green */
+.stat-card.expense { border-left-color: #ef4444; } /* Red */
+.stat-card.balance { border-left-color: #3b82f6; } /* Blue */
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 10px 0 0 0;
+    color: #1f2937;
+}
+
+/* --- Action Header & Tabs --- */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.tabs {
+    background: #f3f4f6;
+    padding: 5px;
+    border-radius: 8px;
+    display: inline-flex;
+}
+
+.tab-btn {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: white;
+    color: #374151;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s;
+}
+
+.add-btn:hover { transform: translateY(-2px); }
+
+/* --- Tables --- */
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.data-table th, .data-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.data-table th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.amount-positive { color: #10b981; font-weight: 600; }
+.amount-negative { color: #ef4444; font-weight: 600; }
+
+.icon-btn {
+    color: #6b7280;
+    font-size: 18px;
+    transition: color 0.2s;
+}
+.icon-btn:hover { color: #3b82f6; }
+
+/* --- THE SPLIT MODAL --- */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content.dual-pane {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 85vh; /* Tall modal */
+    background: white;
+    margin: 40px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-left {
+    flex: 1.5; /* Takes 60% width */
+    background: #374151;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-left h3 { color: white; margin-top: 0; }
+.modal-left iframe { flex-grow: 1; border: none; background: white; border-radius: 4px; }
+
+.modal-right {
+    flex: 1; /* Takes 40% width */
+    padding: 30px;
+    background: white;
+    overflow-y: auto;
+}
+
+/* Form Styles */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 5px; }
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.modal-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-save {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background: white;
+    border: 1px solid #d1d5db;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255,255,255,0.9);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

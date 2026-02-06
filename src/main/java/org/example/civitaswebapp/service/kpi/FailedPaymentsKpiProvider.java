@@ -1,9 +1,9 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.kpi;
 
 import org.example.civitaswebapp.domain.Transaction;
 import org.example.civitaswebapp.domain.TransactionStatus;
-import org.example.civitaswebapp.dto.KpiTileDto;
-import org.example.civitaswebapp.dto.KpiValueDto;
+import org.example.civitaswebapp.dto.kpi.KpiTileDto;
+import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 import org.example.civitaswebapp.dto.transactions.TransactionSummaryDto;
 import org.example.civitaswebapp.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;

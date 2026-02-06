@@ -1,7 +1,7 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.kpi;
 
-import org.example.civitaswebapp.dto.KpiTileDto;
-import org.example.civitaswebapp.dto.KpiValueDto;
+import org.example.civitaswebapp.dto.kpi.KpiTileDto;
+import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;

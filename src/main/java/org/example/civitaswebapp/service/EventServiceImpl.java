@@ -7,6 +7,7 @@ import org.example.civitaswebapp.dto.events.EventRequest;
 import org.example.civitaswebapp.dto.events.EventSavedEventDto;
 import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.repository.MemberRepository;
+import org.example.civitaswebapp.service.communication.WhatsAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;

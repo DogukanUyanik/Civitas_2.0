@@ -2,7 +2,7 @@ package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.Notification;
-import org.example.civitaswebapp.service.NotificationService;
+import org.example.civitaswebapp.service.communication.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

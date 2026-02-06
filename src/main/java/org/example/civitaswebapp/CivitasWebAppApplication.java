@@ -1,6 +1,8 @@
 package org.example.civitaswebapp;
 
 import org.example.civitaswebapp.service.*;
+import org.example.civitaswebapp.service.communication.WhatsAppService;
+import org.example.civitaswebapp.service.communication.WhatsAppServiceImpl;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;

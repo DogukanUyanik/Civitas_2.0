@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.communication;
 
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;

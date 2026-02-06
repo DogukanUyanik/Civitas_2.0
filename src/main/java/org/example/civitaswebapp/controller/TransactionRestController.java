@@ -7,7 +7,7 @@ import org.example.civitaswebapp.domain.TransactionType;
 import org.example.civitaswebapp.service.MemberService;
 import org.example.civitaswebapp.service.MyUserService;
 import org.example.civitaswebapp.service.TransactionService;
-import org.example.civitaswebapp.service.WhatsAppService;
+import org.example.civitaswebapp.service.communication.WhatsAppService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

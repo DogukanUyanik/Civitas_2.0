@@ -125,6 +125,14 @@
                             <span class="tooltip" th:text="#{sidebar.reports}">Reports</span>
                         </a>
                     </li>
+                    <li>
+                        <a th:href="@{/accounting}" th:classappend="${currentUri == '/accounting'} ? 'active' : ''"
+                           th:title="#{sidebar.accounting}">
+                            <i class="fa-solid fa-chart-bar"></i>
+                            <span class="link-text" th:text="#{sidebar.accounting}">Accounting</span>
+                            <span class="tooltip" th:text="#{sidebar.accounting}">Accounting</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>

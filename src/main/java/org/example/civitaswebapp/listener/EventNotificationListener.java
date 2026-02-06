@@ -4,7 +4,7 @@ import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.NotificationType;
 import org.example.civitaswebapp.dto.events.EventSavedEventDto;
 import org.example.civitaswebapp.repository.MyUserRepository;
-import org.example.civitaswebapp.service.NotificationService;
+import org.example.civitaswebapp.service.communication.NotificationService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;

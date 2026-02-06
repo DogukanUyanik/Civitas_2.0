@@ -1,20 +1,17 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.kpi;
 
 import org.example.civitaswebapp.domain.UserDashboardTile;
-import org.example.civitaswebapp.dto.KpiTileDto;
-import org.example.civitaswebapp.dto.KpiValueDto;
+import org.example.civitaswebapp.dto.kpi.KpiTileDto;
+import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 
 import java.util.List;
 
 public interface DashboardService {
 
-    // Get all available KPI tiles metadata
     List<KpiTileDto> getAllTiles();
 
-    // Get computed KPI values for a specific user
     List<KpiValueDto> getUserDashboard(Long userId);
 
-    // Save or update user tile preferences
     void saveUserDashboard(Long userId, List<UserDashboardTile> tiles);
 
     void addTile(Long userId, String widgetKey);

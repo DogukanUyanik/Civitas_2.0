@@ -1,9 +1,9 @@
 package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.UserDashboardTile;
-import org.example.civitaswebapp.dto.KpiTileDto;
-import org.example.civitaswebapp.dto.KpiValueDto;
-import org.example.civitaswebapp.service.DashboardService;
+import org.example.civitaswebapp.dto.kpi.KpiTileDto;
+import org.example.civitaswebapp.dto.kpi.KpiValueDto;
+import org.example.civitaswebapp.service.kpi.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

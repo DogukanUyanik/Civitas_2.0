@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.communication;
 
 
 import org.example.civitaswebapp.domain.MyUser;
@@ -6,7 +6,6 @@ import org.example.civitaswebapp.domain.Notification;
 import org.example.civitaswebapp.domain.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

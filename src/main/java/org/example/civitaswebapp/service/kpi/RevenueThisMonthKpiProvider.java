@@ -1,10 +1,10 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.kpi;
 
 import com.stripe.Stripe;
 import com.stripe.model.Charge;
 import com.stripe.param.ChargeListParams;
-import org.example.civitaswebapp.dto.KpiTileDto;
-import org.example.civitaswebapp.dto.KpiValueDto;
+import org.example.civitaswebapp.dto.kpi.KpiTileDto;
+import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

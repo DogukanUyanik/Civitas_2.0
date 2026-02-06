@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.accounting;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.example.civitaswebapp.domain.Member;
@@ -10,7 +10,6 @@ import org.thymeleaf.context.Context;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;

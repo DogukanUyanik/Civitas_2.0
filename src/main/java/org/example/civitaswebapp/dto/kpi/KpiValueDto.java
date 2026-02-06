@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.dto;
+package org.example.civitaswebapp.dto.kpi;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

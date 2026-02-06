@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.accounting;
 
 import org.springframework.web.multipart.MultipartFile;
 

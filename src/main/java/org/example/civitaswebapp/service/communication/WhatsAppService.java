@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.communication;
 
 import org.example.civitaswebapp.domain.Event;
 

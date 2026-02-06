@@ -1,4 +1,4 @@
-package org.example.civitaswebapp.service;
+package org.example.civitaswebapp.service.communication;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.example.civitaswebapp.domain.MyUser;

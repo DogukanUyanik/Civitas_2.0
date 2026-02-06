@@ -6,7 +6,7 @@ import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.service.MemberService;
 import org.example.civitaswebapp.service.MyUserService;
-import org.example.civitaswebapp.service.PdfService;
+import org.example.civitaswebapp.service.accounting.PdfService;
 import org.example.civitaswebapp.validator.MemberEmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;

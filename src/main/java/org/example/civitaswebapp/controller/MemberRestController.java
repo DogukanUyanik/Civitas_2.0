@@ -1,7 +1,7 @@
 package org.example.civitaswebapp.controller;
 
 
-import org.example.civitaswebapp.dto.member.MemberDTO;
+import org.example.civitaswebapp.dto.member.MemberDto;
 import org.example.civitaswebapp.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +19,9 @@ public class MemberRestController {
     private MemberService memberService;
 
     @GetMapping
-    public List<MemberDTO> getAllMembers() {
+    public List<MemberDto> getAllMembers() {
         return memberService.getAllMembers().stream()
-                .map(member -> new MemberDTO(member.getId(), member.getFirstName(), member.getLastName()))
+                .map(member -> new MemberDto(member.getId(), member.getFirstName(), member.getLastName()))
                 .collect(Collectors.toList());
     }
 

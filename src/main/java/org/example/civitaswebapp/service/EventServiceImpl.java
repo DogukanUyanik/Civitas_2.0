@@ -60,25 +60,22 @@ public class EventServiceImpl implements EventService {
         event.setLocation(eventRequest.getLocation());
         event.setEventType(eventRequest.getEventType() != null ? eventRequest.getEventType() : EventType.GENERAL);
 
-        // Load members from IDs
         Set<Member> attendees = new HashSet<>(memberRepository.findAllById(eventRequest.getAttendees()));
         event.setAttendees(attendees);
 
         Event savedEvent = eventRepository.save(event);
+//
+//        for (Member member : attendees) {
+//            whatsAppService.sendEventNotification(member.getPhoneNumber(), savedEvent);
+//        }
 
-        // Send WhatsApp messages
-        for (Member member : attendees) {
-            whatsAppService.sendEventNotification(member.getPhoneNumber(), savedEvent);
-        }
-
-        // Publish notification event
         EventSavedEventDto dto = new EventSavedEventDto(
                 savedEvent.getId(),
                 savedEvent.getTitle(),
                 savedEvent.getDescription(),
                 savedEvent.getStart(),
                 savedEvent.getEnd(),
-                eventRequest.getCreatedByUserId(), // You may need to include this in EventRequest
+                eventRequest.getCreatedByUserId(),
                 isNew
         );
         eventPublisher.publishEvent(dto);

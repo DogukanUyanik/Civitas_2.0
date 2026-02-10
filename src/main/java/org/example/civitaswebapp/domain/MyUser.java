@@ -13,11 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity
+@Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-
 public class MyUser implements UserDetails {
 
     @Id
@@ -35,6 +35,10 @@ public class MyUser implements UserDetails {
     @Column(nullable = false)
     private MyUserRole role;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "union_id", nullable = false)
+    private Union union;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Notification> notifications = new ArrayList<>();
@@ -43,22 +47,17 @@ public class MyUser implements UserDetails {
     @JsonIgnore
     private List<UserDashboardTile> dashboardTiles = new ArrayList<>();
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
 
-    // These 4 methods tell Spring "This user is allowed to login"
     @Override
     public boolean isAccountNonExpired() { return true; }
-
     @Override
     public boolean isAccountNonLocked() { return true; }
-
     @Override
     public boolean isCredentialsNonExpired() { return true; }
-
     @Override
     public boolean isEnabled() { return true; }
 }

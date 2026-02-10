@@ -22,11 +22,6 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    @NotNull(message = "{transaction.member.required}")
-    private Member member;
-
     @NotNull(message = "{transaction.amount.required}")
     @DecimalMin(value = "0.49", message = "{transaction.amount.min}")
     private Double amount;
@@ -48,4 +43,13 @@ public class Transaction {
     private LocalDateTime updatedAt;
 
     private String note;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
+    @NotNull(message = "{transaction.member.required}")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "union_id", nullable = false)
+    private Union union;
 }

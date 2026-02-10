@@ -54,6 +54,10 @@ public class Event {
     )
     private Set<Member> attendees = new HashSet<>();
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "union_id", nullable = false)
+    private Union union;
+
     @PrePersist
     @PreUpdate
     private void validateDates() {

@@ -15,6 +15,9 @@ import java.util.Set;
 
 @Entity
 @Data
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"email", "union_id"}) // <--- Unique combination
+})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -32,7 +35,6 @@ public class Member {
 
     @Email(message = "{member.email.valid}")
     @NotBlank(message = "{member.email.required}")
-    @Column(unique = true)
     private String email;
 
     @NotBlank(message = "{member.phone.required}")
@@ -57,6 +59,10 @@ public class Member {
     @ManyToMany(mappedBy = "attendees")
     @JsonBackReference
     private Set<Event> events = new HashSet<>();
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "union_id", nullable = false)
+    private Union union;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

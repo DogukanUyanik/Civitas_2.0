@@ -1,12 +1,13 @@
 package org.example.civitaswebapp.validator;
 
+import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
-
-import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.repository.MemberRepository;
 
 @Component
 public class MemberEmailValidator implements Validator {
@@ -16,29 +17,23 @@ public class MemberEmailValidator implements Validator {
 
     @Override
     public boolean supports(Class<?> clazz) {
-        return Member.class.isAssignableFrom(clazz);
+        return Member.class.equals(clazz);
     }
 
     @Override
     public void validate(Object target, Errors errors) {
         Member member = (Member) target;
 
-        if (member.getEmail() == null || member.getEmail().isBlank()) {
-            errors.rejectValue("email", "member.email.empty");
-            return;
-        }
+        MyUser currentUser = (MyUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        // Email format check
-        if (!member.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            errors.rejectValue("email", "member.email.invalid");
-            return;
-        }
+        boolean exists = memberRepository.existsByEmailAndUnionAndIdNot(
+                member.getEmail(),
+                currentUser.getUnion(),
+                member.getId() == null ? -1L : member.getId()
+        );
 
-        // Check uniqueness
-        Long id = member.getId() != null ? member.getId() : -1L;
-        boolean emailExists = memberRepository.existsByEmailAndIdNot(member.getEmail(), id);
-        if (emailExists) {
-            errors.rejectValue("email", "member.email.exists");
+        if (exists) {
+            errors.rejectValue("email", "member.email.duplicate", "This email is already registered in your union.");
         }
     }
 }

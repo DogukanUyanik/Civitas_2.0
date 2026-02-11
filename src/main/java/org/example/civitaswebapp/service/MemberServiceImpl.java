@@ -1,13 +1,16 @@
 package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MemberStatus;
 import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.member.MemberSavedEventDto;
 import org.example.civitaswebapp.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,21 +20,76 @@ import java.util.Optional;
 @Service
 public class MemberServiceImpl implements MemberService {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
+    public MemberServiceImpl(MemberRepository memberRepository, ApplicationEventPublisher eventPublisher) {
+        this.memberRepository = memberRepository;
+        this.eventPublisher = eventPublisher;
+    }
+
+    // 👇 SECURITY HELPER: Get the Union of the currently logged-in user
+    private Union getCurrentUserUnion() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof MyUser) {
+            return ((MyUser) principal).getUnion();
+        }
+        throw new RuntimeException("No user logged in or user is not of type MyUser");
+    }
 
     @Override
     public Page<Member> getMembers(Pageable pageable) {
-        return memberRepository.findAll(pageable);
+        // 🔒 SECURE: Only find members of my union
+        return memberRepository.findAllByUnion(getCurrentUserUnion(), pageable);
     }
 
+    // Note: You need to add this method to your Repository interface first:
+    // Page<Member> findAllByUnion(Union union, Pageable pageable);
+
+    @Override
+    public Page<Member> getMembers(Pageable pageable, String search, String status) {
+        Union currentUnion = getCurrentUserUnion();
+        boolean hasSearch = (search != null && !search.isBlank());
+        boolean hasStatus = (status != null && !status.isBlank());
+
+        if (!hasSearch && !hasStatus) {
+            // Case 1: Show All (Scoped to Union)
+            return memberRepository.findAllByUnion(currentUnion, pageable);
+
+        } else if (hasStatus && !hasSearch) {
+            // Case 2: Filter by Status Only (Scoped to Union)
+            return memberRepository.findByMemberStatusAndUnion(
+                    MemberStatus.valueOf(status), currentUnion, pageable);
+
+        } else if (!hasStatus && hasSearch) {
+            // Case 3: Search Text Only (Scoped to Union)
+            return memberRepository.searchByUnion(currentUnion, search, pageable);
+
+        } else {
+            // Case 4: Search + Status (Scoped to Union)
+            return memberRepository.searchByStatusAndUnion(
+                    currentUnion, MemberStatus.valueOf(status), search, pageable);
+        }
+    }
 
     @Transactional
     @Override
     public void saveMember(Member member, MyUser createdByUser) {
+        // 🔒 SECURE: Force the new member to belong to the creator's union
+        // We use createdByUser here because it's passed in, but we could also use getCurrentUserUnion()
+        member.setUnion(createdByUser.getUnion());
+
+        // Optional: Check for duplicate email within THIS union
+        boolean exists = memberRepository.existsByEmailAndUnionAndIdNot(
+                member.getEmail(),
+                createdByUser.getUnion(),
+                member.getId() == null ? -1L : member.getId()
+        );
+
+        if (exists) {
+            throw new IllegalArgumentException("Email already exists in this Union.");
+        }
+
         boolean isNew = member.getId() == null;
         memberRepository.save(member);
 
@@ -45,48 +103,46 @@ public class MemberServiceImpl implements MemberService {
         eventPublisher.publishEvent(dto);
     }
 
-
-
     @Override
     public void deleteMember(Member member) {
+        // 🔒 SECURE: Check before delete
+        verifyMemberBelongsToUnion(member);
         memberRepository.delete(member);
     }
 
     @Override
     public Optional<Member> findById(Long id) {
-        return memberRepository.findById(id);
+        Optional<Member> memberOpt = memberRepository.findById(id);
+
+        // 🔒 SECURE: If found, check if it belongs to us. If not, return Empty.
+        if (memberOpt.isPresent()) {
+            try {
+                verifyMemberBelongsToUnion(memberOpt.get());
+            } catch (AccessDeniedException e) {
+                return Optional.empty(); // Treat "Unauthorized" as "Not Found" to hide data
+            }
+        }
+        return memberOpt;
     }
 
     @Override
     public Member getIdForPdf(Long id) {
-        return memberRepository.findById(id).get();
-    }
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
-    @Override
-    public Page<Member> getMembers(Pageable pageable, String search, String status) {
-        if ((search == null || search.isBlank()) && (status == null || status.isBlank())) {
-            return memberRepository.findAll(pageable);
-        } else if (status == null || status.isBlank()) {
-            // filter only by search
-            return memberRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                    search, search, search, pageable);
-        } else if (search == null || search.isBlank()) {
-            // filter only by status
-            return memberRepository.findByMemberStatus(org.example.civitaswebapp.domain.MemberStatus.valueOf(status), pageable);
-        } else {
-            // filter by search AND status
-            return memberRepository.findByMemberStatusAndFirstNameContainingIgnoreCaseOrMemberStatusAndLastNameContainingIgnoreCaseOrMemberStatusAndEmailContainingIgnoreCase(
-                    org.example.civitaswebapp.domain.MemberStatus.valueOf(status), search,
-                    org.example.civitaswebapp.domain.MemberStatus.valueOf(status), search,
-                    org.example.civitaswebapp.domain.MemberStatus.valueOf(status), search,
-                    pageable
-            );
-        }
+        verifyMemberBelongsToUnion(member);
+        return member;
     }
 
     @Override
     public List<Member> getAllMembers() {
-        return memberRepository.findAll();
+        return memberRepository.findAllByUnion(getCurrentUserUnion());
     }
 
+    private void verifyMemberBelongsToUnion(Member member) {
+        Union currentUnion = getCurrentUserUnion();
+        if (!member.getUnion().getId().equals(currentUnion.getId())) {
+            throw new AccessDeniedException("ACCESS DENIED: You do not have permission to view/edit this member.");
+        }
+    }
 }

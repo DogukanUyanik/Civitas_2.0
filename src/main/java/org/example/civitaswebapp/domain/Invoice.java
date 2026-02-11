@@ -40,4 +40,8 @@ public class Invoice {
     @Column(nullable = false)
     private InvoiceStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "union_id", nullable = false)
+    private Union union;
+
 }

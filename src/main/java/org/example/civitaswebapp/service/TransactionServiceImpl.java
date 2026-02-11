@@ -13,19 +13,17 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.persistence.criteria.Predicate;
-import org.springframework.transaction.annotation.Transactional;
-
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
-
-
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -33,17 +31,30 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
-
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
+    // 👇 SECURITY HELPER
+    private Union getCurrentUserUnion() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof MyUser) {
+            return ((MyUser) principal).getUnion();
+        }
+        throw new RuntimeException("No user logged in or user is not of type MyUser");
+    }
 
     @Transactional
     @Override
     public Transaction createTransaction(Member member, double amount, TransactionType type, MyUser createdByUser) {
 
+        // 🛡️ Extra check: Ensure the member belongs to the same union as the creator
+        if (!member.getUnion().getId().equals(createdByUser.getUnion().getId())) {
+            throw new SecurityException("Cannot create transaction for a member of a different union.");
+        }
+
         Transaction tx = Transaction.builder()
                 .member(member)
+                .union(createdByUser.getUnion()) // 👈 CRITICAL: Stamp the Union!
                 .amount(amount)
                 .currency("EUR")
                 .status(TransactionStatus.PENDING)
@@ -51,6 +62,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
+
         transactionRepository.save(tx);
 
         TransactionCreatedDto dto = new TransactionCreatedDto(
@@ -75,8 +87,6 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new IllegalArgumentException("Transaction amount must be greater than zero");
             }
 
-            long amountInCents = Math.round(transaction.getAmount() * 100);
-
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setSuccessUrl("http://localhost:8080/payment-success?transactionId=" + transaction.getId())
@@ -97,18 +107,16 @@ public class TransactionServiceImpl implements TransactionService {
                                     )
                                     .build()
                     )
-                    .putMetadata("transactionId", String.valueOf(transaction.getId())) // session metadata
+                    .putMetadata("transactionId", String.valueOf(transaction.getId()))
                     .setPaymentIntentData(
                             SessionCreateParams.PaymentIntentData.builder()
-                                    .putMetadata("transactionId", String.valueOf(transaction.getId())) // ⚠️ important!
+                                    .putMetadata("transactionId", String.valueOf(transaction.getId()))
                                     .build()
                     )
                     .build();
 
-
             Session session = Session.create(params);
             return session.getUrl();
-
 
         } catch (Exception e) {
             System.err.println("Stripe exception: " + e.getMessage());
@@ -116,100 +124,64 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-
     @Override
     public void handleStripeWebhook(String payload, String sigHeader) {
+        // Webhooks come from Stripe (System level), so no User Union check needed here.
+        // We look up by ID, which is unique globally.
         System.out.println("Webhook received: " + payload);
-
     }
 
     @Override
     public List<Transaction> getTransactionsByMember(Member member) {
-        return transactionRepository.findAllByMember(member);
+        return transactionRepository.findAllByMemberAndUnion(member, getCurrentUserUnion());
     }
-
 
     @Transactional
     @Override
     public void updateTransactionStatus(Long transactionId, TransactionStatus status) {
-
-
-        Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        Transaction transaction = transactionRepository.findByIdAndUnion(transactionId, getCurrentUserUnion())
+                .orElseThrow(() -> new RuntimeException("Transaction not found or access denied"));
 
         TransactionStatus oldStatus = transaction.getStatus();
-        TransactionStatus newStatus = status;
         transaction.setStatus(status);
-        transactionRepository.save(transaction);
+        transactionRepository.save(transaction); // Union is already set, so safe to save
 
         TransactionStatusChangedDto dto = new TransactionStatusChangedDto(
                 transactionId,
                 transaction.getMember().getId(),
                 oldStatus,
-                newStatus
+                status
         );
         eventPublisher.publishEvent(dto);
     }
 
-
+    @Override
     public Page<Transaction> getTransactions(Pageable pageable, String search,
                                              TransactionStatus status, TransactionType type) {
+
+        Union currentUnion = getCurrentUserUnion();
 
         Specification<Transaction> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Search filter - search in member name, payment ID, and note
+            predicates.add(criteriaBuilder.equal(root.get("union"), currentUnion));
+
+
+            // Search filter
             if (search != null && !search.trim().isEmpty()) {
                 String searchTerm = "%" + search.toLowerCase().trim() + "%";
-                Predicate memberSearch = criteriaBuilder.or(
-                        criteriaBuilder.like(
-                                criteriaBuilder.lower(root.get("member").get("firstName")),
-                                searchTerm
-                        ),
-                        criteriaBuilder.like(
-                                criteriaBuilder.lower(root.get("member").get("lastName")),
-                                searchTerm
-                        ),
-                        criteriaBuilder.like(
-                                criteriaBuilder.lower(
-                                        criteriaBuilder.concat(
-                                                criteriaBuilder.concat(root.get("member").get("firstName"), " "),
-                                                root.get("member").get("lastName")
-                                        )
-                                ),
-                                searchTerm
-                        )
+                Predicate searchPredicate = criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("member").get("firstName")), searchTerm),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("member").get("lastName")), searchTerm),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("note")), searchTerm)
                 );
-
-                if (root.get("paymentId") != null) {
-                    memberSearch = criteriaBuilder.or(
-                            memberSearch,
-                            criteriaBuilder.like(
-                                    criteriaBuilder.lower(root.get("paymentId")),
-                                    searchTerm
-                            )
-                    );
-                }
-
-                if (root.get("note") != null) {
-                    memberSearch = criteriaBuilder.or(
-                            memberSearch,
-                            criteriaBuilder.like(
-                                    criteriaBuilder.lower(root.get("note")),
-                                    searchTerm
-                            )
-                    );
-                }
-
-                predicates.add(memberSearch);
+                predicates.add(searchPredicate);
             }
 
-            // Status filter
             if (status != null) {
                 predicates.add(criteriaBuilder.equal(root.get("status"), status));
             }
 
-            // Type filter
             if (type != null) {
                 predicates.add(criteriaBuilder.equal(root.get("type"), type));
             }
@@ -219,6 +191,4 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionRepository.findAll(spec, pageable);
     }
-
-
 }

@@ -1,9 +1,12 @@
 package org.example.civitaswebapp.service.kpi;
 
+import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.kpi.KpiTileDto;
 import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.domain.Event;
+import org.example.civitaswebapp.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +19,10 @@ import java.util.stream.Collectors;
 public class UpcomingEventsKpiProvider implements KpiProvider {
 
     @Autowired
-    private final EventRepository eventRepository;
+    private EventRepository eventRepository;
+
+    @Autowired
+    private MyUserRepository myUserRepository;
 
     public UpcomingEventsKpiProvider(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
@@ -39,10 +45,15 @@ public class UpcomingEventsKpiProvider implements KpiProvider {
 
     @Override
     public KpiValueDto computeValue(Long userId) {
+        MyUser user = myUserRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found for KPI calculation"));
+
+        Union currentUnion = user.getUnion();
+
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime in30Days = now.plusDays(30);
 
-        List<Event> upcomingEvents = eventRepository.findByStartBetween(now, in30Days);
+        List<Event> upcomingEvents = eventRepository.findByStartBetweenAndUnion(now, in30Days, currentUnion);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM HH:mm");
 

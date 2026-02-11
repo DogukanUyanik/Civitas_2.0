@@ -6,6 +6,7 @@ import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.member.MemberSavedEventDto;
 import org.example.civitaswebapp.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,15 +21,14 @@ import java.util.Optional;
 @Service
 public class MemberServiceImpl implements MemberService {
 
-    private final MemberRepository memberRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    @Autowired
+    private MemberRepository memberRepository;
 
-    public MemberServiceImpl(MemberRepository memberRepository, ApplicationEventPublisher eventPublisher) {
-        this.memberRepository = memberRepository;
-        this.eventPublisher = eventPublisher;
-    }
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
-    // 👇 SECURITY HELPER: Get the Union of the currently logged-in user
+
+
     private Union getCurrentUserUnion() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof MyUser) {
@@ -39,12 +39,11 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Page<Member> getMembers(Pageable pageable) {
-        // 🔒 SECURE: Only find members of my union
         return memberRepository.findAllByUnion(getCurrentUserUnion(), pageable);
     }
 
-    // Note: You need to add this method to your Repository interface first:
-    // Page<Member> findAllByUnion(Union union, Pageable pageable);
+
+
 
     @Override
     public Page<Member> getMembers(Pageable pageable, String search, String status) {
@@ -75,11 +74,8 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     @Override
     public void saveMember(Member member, MyUser createdByUser) {
-        // 🔒 SECURE: Force the new member to belong to the creator's union
-        // We use createdByUser here because it's passed in, but we could also use getCurrentUserUnion()
         member.setUnion(createdByUser.getUnion());
 
-        // Optional: Check for duplicate email within THIS union
         boolean exists = memberRepository.existsByEmailAndUnionAndIdNot(
                 member.getEmail(),
                 createdByUser.getUnion(),

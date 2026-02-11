@@ -1,9 +1,12 @@
 package org.example.civitaswebapp.service.kpi;
 
 import org.example.civitaswebapp.domain.MemberStatus;
+import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.kpi.KpiTileDto;
 import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 import org.example.civitaswebapp.repository.MemberRepository;
+import org.example.civitaswebapp.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +15,10 @@ public class ActiveMembersCountKpiProvider implements KpiProvider {
 
 
     @Autowired
-    private MemberRepository  memberRepository;
+    private MemberRepository memberRepository;
 
+    @Autowired
+    private MyUserRepository myUserRepository;
 
     @Override
     public String getKey() {
@@ -33,7 +38,13 @@ public class ActiveMembersCountKpiProvider implements KpiProvider {
 
     @Override
     public KpiValueDto computeValue(Long userId) {
-        long activeCount = memberRepository.countByMemberStatus(MemberStatus.ACTIVE);
+
+        MyUser user = myUserRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found for KPI calculation"));
+
+        Union currentUnion = user.getUnion();
+
+        long activeCount = memberRepository.countByMemberStatusAndUnion(MemberStatus.ACTIVE, currentUnion);
         return KpiValueDto.builder()
                 .key("members.active.count")
                 .title("Active Members")

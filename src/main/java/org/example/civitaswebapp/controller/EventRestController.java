@@ -1,10 +1,12 @@
 package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.Event;
+import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.dto.events.EventRequest;
 import org.example.civitaswebapp.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,15 +20,12 @@ public class EventRestController {
 
     @GetMapping
     public List<Event> getEvents() {
-        // Return events directly - Spring will serialize them to JSON
         return eventService.getEvents(Pageable.unpaged()).getContent();
     }
 
     @PostMapping
-    public Event createEvent(@RequestBody EventRequest event) {
-        System.out.println("Received event: " + event); // DEBUG: Print received event
-        Event savedEvent = eventService.saveEvent(event);
-        System.out.println("Saved event: " + savedEvent); // DEBUG: Print saved event
+    public Event createEvent(@RequestBody EventRequest event, @AuthenticationPrincipal MyUser user) {
+        Event savedEvent = eventService.saveEvent(event, user);
         return savedEvent;
     }
 }

@@ -2,8 +2,10 @@ package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.dto.member.BulkImportResultDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,4 +25,6 @@ public interface MemberService {
     Optional<Member> findById(Long id);
 
     Member getIdForPdf(Long id);
+
+    BulkImportResultDto bulkImport(MultipartFile file, MyUser currentUser);
 }

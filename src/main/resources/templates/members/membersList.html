@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:text="#{members.list.title}">Members List</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/header.css}" />
@@ -41,6 +43,13 @@
                            th:value="${search}">
                 </div>
             </form>
+
+            <input type="file" id="bulkImportInput" style="display:none" accept=".xlsx"
+                   onchange="handleBulkImport(this)">
+            <button class="import-member-btn" onclick="document.getElementById('bulkImportInput').click()">
+                <i class="fas fa-file-excel"></i>
+                <span th:text="#{members.import.button}">Import Excel</span>
+            </button>
 
             <button class="add-member-btn" onclick="window.location.href='/members/add'">
                 <i class="fas fa-plus"></i>
@@ -102,5 +111,32 @@
         </a>
     </div>
 </main>
+
+<!-- Import loading overlay -->
+<div id="importLoadingOverlay" class="import-loading-overlay" style="display:none;">
+    <div class="spinner"></div>
+    <p th:text="#{members.import.loading}">Importing members...</p>
+</div>
+
+<!-- Import result modal -->
+<div id="importResultModal" class="import-modal-backdrop" style="display:none;">
+    <div class="import-modal">
+        <div class="import-modal-header">
+            <h3 th:text="#{members.import.modal.title}">Import Results</h3>
+        </div>
+        <div class="import-modal-body">
+            <div id="importSummary"></div>
+            <div id="importErrors"></div>
+        </div>
+        <div class="import-modal-footer">
+            <button class="import-btn-secondary" onclick="closeImportModal()"
+                    th:text="#{members.import.modal.close}">Close</button>
+            <button class="import-btn-primary" onclick="window.location.reload()"
+                    th:text="#{members.import.modal.refresh}">View Members</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/members.js}"></script>
 </body>
 </html>

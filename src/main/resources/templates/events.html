@@ -101,9 +101,9 @@
                             <i class="fas fa-users me-1"></i>
                             <span th:text="#{events.form.selectMembers}">Select Members</span>
                         </label>
-                        <select id="attendees" multiple class="form-control">
-                            <!-- Options populated dynamically via JS -->
-                        </select>
+                        <div id="attendees" class="member-checkbox-list">
+                            <!-- Items populated dynamically via JS -->
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -448,8 +448,9 @@
             };
 
             // Add attendees
-            const selectedAttendees = Array.from(document.getElementById('attendees').selectedOptions)
-                .map(option => Number(option.value));
+            const selectedAttendees = Array.from(
+                document.querySelectorAll('#attendees input[type="checkbox"]:checked')
+            ).map(cb => Number(cb.value));
             event.attendees = selectedAttendees;
 
             console.log('Sending event to server:', event); // Debug log
@@ -553,12 +554,12 @@
     fetch('/api/members')
         .then(res => res.json())
         .then(data => {
-            const attendeesSelect = document.getElementById('attendees');
+            const container = document.getElementById('attendees');
             data.forEach(member => {
-                const option = document.createElement('option');
-                option.value = member.id;
-                option.textContent = member.firstName + ' ' + member.lastName;
-                attendeesSelect.appendChild(option);
+                const label = document.createElement('label');
+                label.className = 'member-checkbox-item';
+                label.innerHTML = `<input type="checkbox" value="${member.id}"><span>${member.firstName} ${member.lastName}</span>`;
+                container.appendChild(label);
             });
         });
 

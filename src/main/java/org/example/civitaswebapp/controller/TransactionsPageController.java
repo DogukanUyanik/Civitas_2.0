@@ -44,8 +44,8 @@ public class TransactionsPageController {
         // Add attributes to model
         model.addAttribute("transactionsPage", transactionsPage);
         model.addAttribute("search", search);
-        model.addAttribute("status", status);
-        model.addAttribute("type", type);
+        model.addAttribute("status", status != null ? status.name() : null);
+        model.addAttribute("type", type != null ? type.name() : null);
         model.addAttribute("sort", sort);
         model.addAttribute("direction", direction);
 

@@ -470,6 +470,19 @@
     font-size: 14px;
 }
 
+#eventForm input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    padding: 0;
+    border: none;
+    border-radius: 3px;
+    box-shadow: none;
+    accent-color: #10b981;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: none;
+}
+
 #eventForm input,
 #eventForm textarea,
 #eventForm select {
@@ -738,4 +751,41 @@ body.modal-open {
 
 .fc-daygrid-event .fc-event-main {
     color: white !important;
+}
+/* --- Member checkbox list (attendee picker) --- */
+.member-checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.member-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    width: 100%;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.15s ease;
+}
+
+.member-checkbox-item:last-child {
+    border-bottom: none;
+}
+
+.member-checkbox-item:hover {
+    background: #f0fdf4;
+}
+
+.member-checkbox-item:has(input:checked) {
+    background: #ecfdf5;
+    color: #065f46;
 }

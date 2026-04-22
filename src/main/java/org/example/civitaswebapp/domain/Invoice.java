@@ -34,7 +34,7 @@ public class Invoice {
     private String category;
 
     private String fileUrl;
-    private String originalFilename;
+    private String filename;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

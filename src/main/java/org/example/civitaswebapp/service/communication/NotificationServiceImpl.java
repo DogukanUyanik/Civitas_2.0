@@ -74,6 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
 
 
     @Override
+    @Transactional
     public void markAllAsRead(MyUser user) {
         List<Notification> notifications = notificationRepository.findByUserOrderByCreatedAtDesc(user, Pageable.unpaged()).getContent();
 

@@ -26,7 +26,7 @@
         <div class="header-actions">
             <form id="filterForm" method="get" action="/members" class="filters-container">
                 <div class="status-filter">
-                    <select name="status" id="statusFilter">
+                    <select name="status" id="statusFilter" onchange="this.form.submit()">
                         <option value="" th:text="#{filter.status.all}">All Status</option>
                         <option value="ACTIVE" th:selected="${status == 'ACTIVE'}"
                                 th:text="#{${'member.status.' + 'ACTIVE'}}">Active</option>

@@ -3,9 +3,11 @@ package org.example.civitaswebapp.service.accounting;
 import org.example.civitaswebapp.domain.Invoice;
 import org.example.civitaswebapp.domain.InvoiceStatus;
 import org.example.civitaswebapp.domain.InvoiceType;
+import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.accounting.ScannedInvoiceDto;
 import org.example.civitaswebapp.repository.InvoiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,6 +63,13 @@ public class InvoiceService {
     public Invoice saveConfirmedInvoice(Invoice invoice) {
         invoice.setStatus(InvoiceStatus.APPROVED);
         return invoiceRepository.save(invoice);
+    }
+
+    public void deleteInvoice(Long id, Union union) {
+        Invoice invoice = invoiceRepository.findByIdAndUnion(id, union)
+                .orElseThrow(() -> new AccessDeniedException("Access Denied: invoice not found or belongs to another union."));
+        storageService.delete(invoice.getFileUrl());
+        invoiceRepository.delete(invoice);
     }
 
     // Fetch lists for the UI tabs

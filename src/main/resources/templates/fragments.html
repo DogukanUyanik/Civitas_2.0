@@ -30,7 +30,7 @@
 
                 <div class="notification-dropdown" id="notificationDropdown">
                     <div class="dropdown-header" style="padding: 10px 16px; border-bottom: 1px solid #f1f5f9; font-size: 12px; color: #6b7280; font-weight: bold;">
-                        Recent Notifications
+                        <span th:text="#{notifications.dropdown.header}">Recent Notifications</span>
                     </div>
 
                     <ul id="notificationList">
@@ -38,9 +38,8 @@
                     </ul>
 
                     <div class="dropdown-footer" style="padding: 10px; text-align: center; border-top: 1px solid #f1f5f9;">
-                        <a th:href="@{/notifications}" style="text-decoration: none; color: #10b981; font-size: 13px; font-weight: 600;">
-                            See all notifications
-                        </a>
+                        <a th:href="@{/notifications}" style="text-decoration: none; color: #10b981; font-size: 13px; font-weight: 600;"
+                           th:text="#{notifications.dropdown.seeAll}">See all notifications</a>
                     </div>
                 </div>
             </div>

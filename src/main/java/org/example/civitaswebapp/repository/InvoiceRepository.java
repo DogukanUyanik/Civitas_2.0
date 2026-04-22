@@ -13,5 +13,9 @@ public interface InvoiceRepository  extends JpaRepository<Invoice, Long> {
 
     List<Invoice> findByTypeAndStatusOrderByInvoiceDateDesc(InvoiceType type, InvoiceStatus status);
 
-    Optional<Invoice> findByFilenameAndUnion(String filename, Union union);
+    Optional<Invoice> findByFileUrlAndUnion(String fileUrl, Union union);
+
+    boolean existsByFileUrl(String fileUrl);
+
+    Optional<Invoice> findByIdAndUnion(Long id, Union union);
 }

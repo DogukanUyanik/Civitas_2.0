@@ -7,6 +7,8 @@ import java.nio.file.Path;
 public interface StorageService {
     String store(MultipartFile file);
 
+    void delete(String filename);
+
     Path getRootLocation();
 }
 

@@ -53,6 +53,16 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public void delete(String filename) {
+        try {
+            Path file = rootLocation.resolve(filename).normalize();
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + filename, e);
+        }
+    }
+
+    @Override
     public Path getRootLocation() {
         return rootLocation;
     }

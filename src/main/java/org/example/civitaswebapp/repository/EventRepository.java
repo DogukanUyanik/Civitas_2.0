@@ -32,4 +32,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             @Param("search") String search,
             Pageable pageable);
 
+    List<Event> findByStartBetween(LocalDateTime startAfter, LocalDateTime startBefore);
 }

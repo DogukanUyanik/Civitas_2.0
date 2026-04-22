@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accounting - Civitas</title>
+    <title th:text="#{accounting.page.title}">Accounting - Civitas</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="stylesheet" th:href="@{/css/header.css}" />
-    <link rel="stylesheet" th:href="@{/css/accounting.css}" />
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" /> <link rel="stylesheet" th:href="@{/css/accounting.css}" />
 
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
@@ -26,17 +26,22 @@
 
 <main class="main-content accounting-container">
 
+    <div class="dashboard-header">
+        <h1 class="dashboard-title" th:text="#{accounting.title}">Boekhouding</h1>
+        <p class="dashboard-subtitle" th:text="#{accounting.subtitle}">Beheer en overzicht van alle inkomsten en uitgaven</p>
+    </div>
+
     <div class="stats-row">
         <div class="stat-card income">
-            <h3>Total Income</h3>
+            <h3 th:text="#{accounting.stat.income}">Total Income</h3>
             <p class="stat-value" th:text="${'€ ' + #numbers.formatDecimal(totalIncome, 1, 2)}">€ 0.00</p>
         </div>
         <div class="stat-card expense">
-            <h3>Total Expenses</h3>
+            <h3 th:text="#{accounting.stat.expenses}">Total Expenses</h3>
             <p class="stat-value" th:text="${'€ ' + #numbers.formatDecimal(totalExpense, 1, 2)}">€ 0.00</p>
         </div>
         <div class="stat-card balance">
-            <h3>Current Balance</h3>
+            <h3 th:text="#{accounting.stat.balance}">Current Balance</h3>
             <p class="stat-value" th:text="${'€ ' + #numbers.formatDecimal(balance, 1, 2)}">€ 0.00</p>
         </div>
     </div>
@@ -45,14 +50,15 @@
 
         <div class="section-header">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('income')">Inkomsten</button>
-                <button class="tab-btn" onclick="switchTab('expense')">Uitgaven</button>
+                <button class="tab-btn active" onclick="switchTab('income')" th:text="#{accounting.tab.income}">Income</button>
+                <button class="tab-btn" onclick="switchTab('expense')" th:text="#{accounting.tab.expenses}">Expenses</button>
             </div>
 
             <input type="file" id="fileUpload" style="display: none" accept=".pdf, .png, .jpg" onchange="handleFileUpload(this)">
 
             <button class="add-btn" onclick="document.getElementById('fileUpload').click()">
-                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Invoice
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span th:text="#{accounting.button.uploadInvoice}">Upload Invoice</span>
             </button>
         </div>
 
@@ -60,11 +66,11 @@
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Counterparty</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Action</th>
+                    <th th:text="#{accounting.table.date}">Date</th>
+                    <th th:text="#{accounting.table.counterparty}">Counterparty</th>
+                    <th th:text="#{accounting.table.category}">Category</th>
+                    <th th:text="#{accounting.table.amount}">Amount</th>
+                    <th th:text="#{accounting.table.action}">Action</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -74,9 +80,12 @@
                     <td th:text="${inv.category}">Sponsorship</td>
                     <td class="amount-positive" th:text="${'€ ' + inv.totalAmount}">€ 100</td>
                     <td>
-                        <a th:href="@{'/uploads/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" title="View PDF">
+                        <a th:href="@{'/api/files/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" th:title="#{accounting.action.viewPdf}">
                             <i class="fa-solid fa-file-pdf"></i>
                         </a>
+                        <button type="button" class="icon-btn danger" th:title="#{accounting.action.delete}" th:onclick="'deleteInvoice(' + ${inv.id} + ')'">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -87,11 +96,11 @@
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Counterparty</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Action</th>
+                    <th th:text="#{accounting.table.date}">Date</th>
+                    <th th:text="#{accounting.table.counterparty}">Counterparty</th>
+                    <th th:text="#{accounting.table.category}">Category</th>
+                    <th th:text="#{accounting.table.amount}">Amount</th>
+                    <th th:text="#{accounting.table.action}">Action</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -101,9 +110,12 @@
                     <td th:text="${inv.category}">Infra</td>
                     <td class="amount-negative" th:text="${'€ ' + inv.totalAmount}">€ 50</td>
                     <td>
-                        <a th:href="@{'/uploads/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn">
+                        <a th:href="@{'/api/files/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" th:title="#{accounting.action.viewPdf}">
                             <i class="fa-solid fa-file-pdf"></i>
                         </a>
+                        <button type="button" class="icon-btn danger" th:title="#{accounting.action.delete}" th:onclick="'deleteInvoice(' + ${inv.id} + ')'">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -116,49 +128,49 @@
     <div class="modal-content dual-pane">
 
         <div class="modal-left">
-            <h3>Scanned Document</h3>
+            <h3 th:text="#{accounting.modal.scannedDocument}">Scanned Document</h3>
             <iframe id="pdfPreview" src="" width="100%" height="500px"></iframe>
         </div>
 
         <div class="modal-right">
-            <h3>Verify Data</h3>
-            <p class="helper-text">Our scanner guessed this data. Please verify.</p>
+            <h3 th:text="#{accounting.modal.verifyData}">Verify Data</h3>
+            <p class="helper-text" th:text="#{accounting.modal.helperText}">Our scanner guessed this data. Please verify.</p>
 
             <form id="verifyForm">
                 <input type="hidden" id="hiddenFileUrl">
                 <input type="hidden" id="hiddenOriginalName">
 
                 <div class="form-group">
-                    <label>Type</label>
+                    <label th:text="#{accounting.form.type}">Type</label>
                     <select id="inputInvoiceType">
-                        <option value="INCOME">Income (Inkomsten)</option>
-                        <option value="EXPENSE">Expense (Uitgaven)</option>
+                        <option value="INCOME" th:text="#{accounting.form.type.income}">Income</option>
+                        <option value="EXPENSE" th:text="#{accounting.form.type.expense}">Expense</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>Counterparty</label>
+                    <label th:text="#{accounting.form.counterparty}">Counterparty</label>
                     <input type="text" id="inputCounterparty">
                 </div>
 
                 <div class="form-group">
-                    <label>Date</label>
+                    <label th:text="#{accounting.form.date}">Date</label>
                     <input type="date" id="inputDate">
                 </div>
 
                 <div class="form-group">
-                    <label>Total Amount (€)</label>
+                    <label th:text="#{accounting.form.totalAmount}">Total Amount (€)</label>
                     <input type="number" step="0.01" id="inputAmount">
                 </div>
 
                 <div class="form-group">
-                    <label>Category</label>
-                    <input type="text" id="inputCategory" placeholder="e.g. Hosting, Office">
+                    <label th:text="#{accounting.form.category}">Category</label>
+                    <input type="text" id="inputCategory" th:placeholder="#{accounting.form.category.placeholder}">
                 </div>
 
                 <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="button" class="btn-save" onclick="saveInvoice()">Confirm & Save</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()" th:text="#{accounting.button.cancel}">Cancel</button>
+                    <button type="button" class="btn-save" onclick="saveInvoice()" th:text="#{accounting.button.confirmSave}">Confirm &amp; Save</button>
                 </div>
             </form>
         </div>
@@ -167,7 +179,7 @@
 
 <div id="loadingOverlay" class="loading-overlay" style="display:none;">
     <div class="spinner"></div>
-    <p>Scanning Invoice...</p>
+    <p th:text="#{accounting.loading.scanning}">Scanning Invoice...</p>
 </div>
 
 <script th:src="@{/js/accounting.js}"></script>

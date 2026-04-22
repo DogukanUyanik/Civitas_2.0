@@ -30,7 +30,7 @@
                 <input type="hidden" name="direction" th:value="${direction}" id="directionInput">
 
                 <div class="status-filter">
-                    <select name="status" id="statusFilter">
+                    <select name="status" id="statusFilter" onchange="this.form.submit()">
                         <option value="" th:text="#{filter.status.all}">All Status</option>
                         <option value="PENDING" th:selected="${status == 'PENDING'}" th:text="#{transaction.status.PENDING}">Pending</option>
                         <option value="SUCCEEDED" th:selected="${status == 'SUCCEEDED'}" th:text="#{transaction.status.SUCCEEDED}">Succeeded</option>
@@ -40,7 +40,7 @@
                 </div>
 
                 <div class="type-filter">
-                    <select name="type" id="typeFilter">
+                    <select name="type" id="typeFilter" onchange="this.form.submit()">
                         <option value="" th:text="#{filter.type.all}">All Types</option>
                         <option value="MEMBERSHIP_FEE" th:selected="${type == 'MEMBERSHIP_FEE'}" th:text="#{transactionType.MEMBERSHIP_FEE}">Membership Fee</option>
                         <option value="DONATION" th:selected="${type == 'DONATION'}" th:text="#{transactionType.DONATION}">Donation</option>
@@ -122,10 +122,7 @@
             <i class="fas fa-chevron-left"></i> <span th:text="#{pagination.previous}">Previous</span>
         </a>
 
-        <span th:text="#{pagination.page}">Page</span>
-        <strong th:text="${transactionsPage.number + 1}">1</strong>
-        <span th:text="#{pagination.of}">of</span>
-        <strong th:text="${transactionsPage.totalPages}">1</strong>
+        <span th:text="#{pagination.page(${transactionsPage.number + 1},${transactionsPage.totalPages})}">Page 1 of 1</span>
 
         <a th:if="${transactionsPage.number + 1 < transactionsPage.totalPages}"
            th:href="@{/transactions(page=${transactionsPage.number + 1}, size=${transactionsPage.size}, search=${search}, status=${status}, type=${type}, sort=${sort}, direction=${direction})}">

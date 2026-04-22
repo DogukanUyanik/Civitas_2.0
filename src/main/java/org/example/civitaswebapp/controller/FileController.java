@@ -37,8 +37,13 @@ public class FileController {
     public ResponseEntity<Resource> downloadInvoice(@PathVariable String filename,
                                                     @AuthenticationPrincipal MyUser currentUser) {
 
-        Invoice invoice = invoiceRepository.findByFilenameAndUnion(filename, currentUser.getUnion())
-                .orElseThrow(() -> new AccessDeniedException("Access Denied: You do not have permission to view this file."));
+        Optional<Invoice> invoice = invoiceRepository.findByFileUrlAndUnion(filename, currentUser.getUnion());
+
+        if (invoice.isEmpty() && invoiceRepository.existsByFileUrl(filename)) {
+            // File is confirmed and saved, but belongs to a different union
+            throw new AccessDeniedException("Access Denied: You do not have permission to view this file.");
+        }
+        // If invoice is empty but existsByFileUrl is false: file is a fresh upload not yet confirmed — allow preview
 
         try {
             Path filePath = Paths.get("./uploads/invoices").resolve(filename).normalize();

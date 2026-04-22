@@ -65,7 +65,7 @@ function showReviewModal(data) {
     // 1. Set PDF Preview
     // We access the file via the temp path or the newly saved ID
     // Note: In real app, make sure this path is accessible via browser
-    const viewerUrl = '/uploads/invoices/' + data.filename;
+    const viewerUrl = '/api/files/invoices/' + data.filename;
     document.getElementById('pdfPreview').src = viewerUrl;
 
     // 2. Pre-fill Form Fields (Smart Guessing)
@@ -139,6 +139,27 @@ function saveInvoice() {
                 window.location.reload();
             } else {
                 alert("Error saving invoice");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// --- DELETE INVOICE ---
+function deleteInvoice(id) {
+    if (!window.confirm('Are you sure you want to delete this invoice? This cannot be undone.')) return;
+
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+    fetch('/api/invoices/' + id, {
+        method: 'DELETE',
+        headers: { [csrfHeader]: csrfToken }
+    })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to delete invoice.');
             }
         })
         .catch(error => console.error('Error:', error));

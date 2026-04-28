@@ -215,8 +215,34 @@ html, body {
     padding-top: 20px !important;
 }
 
+/* Hamburger button — only visible on mobile */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #374151;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    line-height: 1;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.hamburger-btn:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+    .hamburger-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .app-header {
         left: 0;
         padding: 0 16px;

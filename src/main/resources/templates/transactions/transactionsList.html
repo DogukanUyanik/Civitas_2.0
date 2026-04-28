@@ -91,24 +91,24 @@
             </thead>
             <tbody>
             <tr th:each="transaction : ${transactionsPage.content}">
-                <td>
+                <td th:attr="data-label=#{transaction.table.member}">
                     <span th:text="${transaction.member.firstName + ' ' + transaction.member.lastName}">John Doe</span>
                 </td>
-                <td class="amount">
+                <td class="amount" th:attr="data-label=#{transaction.table.amount}">
                     <span th:text="${#numbers.formatDecimal(transaction.amount, 1, 2) + ' ' + transaction.currency}">€25.00</span>
                 </td>
-                <td>
+                <td th:attr="data-label=#{transaction.table.type}">
                     <span class="type-pill"
                           th:classappend="${transaction.type.name()}"
                           th:text="#{${'transactionType.' + transaction.type.name()}}">MEMBERSHIP_FEE</span>
                 </td>
-                <td>
+                <td th:attr="data-label=#{transaction.table.status}">
                     <span th:classappend="${transaction.status.name() == 'SUCCEEDED'} ? 'status-pill succeeded' :
                                          (${transaction.status.name() == 'PENDING'} ? 'status-pill pending' :
                                          (${transaction.status.name() == 'FAILED'} ? 'status-pill failed' : 'status-pill expired'))"
                           th:text="#{${'transaction.status.' + transaction.status.name()}}">Succeeded</span>
                 </td>
-                <td class="date">
+                <td class="date" th:attr="data-label=#{transaction.table.date}">
                     <span th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm')}">12/09/2025 14:30</span>
                 </td>
             </tr>

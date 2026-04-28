@@ -45,9 +45,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Page<Member> findByMemberStatusAndUnion(MemberStatus status, Union union, Pageable pageable);
 
+    long countByUnion(Union union);
+
     long countByMemberStatusAndUnion(MemberStatus status, Union union);
 
     long countByCreatedAtAfterAndUnion(LocalDateTime date, Union union);
+
+    long countByDateOfLastPaymentBeforeAndUnion(LocalDate date, Union union);
 
     List<Member> findByDateOfLastPaymentBeforeAndUnion(LocalDate date, Union union);
 }

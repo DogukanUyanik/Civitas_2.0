@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_current_user_id" th:content="${currentUserId}"/>
 
     <title th:text="#{dashboard.title}">Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
@@ -46,10 +47,6 @@
                 </div>
             </div>
             <div class="kpi-value" id="total-members-value">-</div>
-            <div class="kpi-change positive">
-                <i class="fas fa-arrow-up"></i>
-                <span th:text="#{dashboard.kpi.totalMembers.change}">12% vs last month</span>
-            </div>
         </div>
 
         <div class="kpi-card kpi-top-row" id="active-members">
@@ -60,10 +57,6 @@
                 </div>
             </div>
             <div class="kpi-value" id="active-members-value">-</div>
-            <div class="kpi-change positive">
-                <i class="fas fa-arrow-up"></i>
-                <span th:text="#{dashboard.kpi.activeMembers.change}">8% vs last month</span>
-            </div>
         </div>
 
         <div class="kpi-card kpi-top-row" id="growth-card">
@@ -90,10 +83,6 @@
                 </div>
             </div>
             <div class="kpi-value" id="revenue-value">-</div>
-            <div class="kpi-change positive">
-                <i class="fas fa-arrow-up"></i>
-                <span th:text="#{dashboard.kpi.revenue.change}">15% vs last month</span>
-            </div>
             <div class="chart-container">
                 <canvas id="revenueChart"></canvas>
             </div>
@@ -124,15 +113,11 @@
             <div class="kpi-stats" id="failed-payments-stats">
                 <div class="stat-row">
                     <span class="stat-label" th:text="#{dashboard.kpi.failedPayments.thisWeek}">This Week</span>
-                    <span class="stat-value">-</span>
+                    <span class="stat-value" id="failed-this-week">-</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label" th:text="#{dashboard.kpi.failedPayments.lastWeek}">Last Week</span>
-                    <span class="stat-value">-</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label" th:text="#{dashboard.kpi.failedPayments.recoveryRate}">Recovery Rate</span>
-                    <span class="stat-value">-</span>
+                    <span class="stat-value" id="failed-last-week">-</span>
                 </div>
             </div>
         </div>
@@ -142,255 +127,182 @@
 
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function() {
-        const userId = 1;
+        const currentUserId = document.querySelector('meta[name="_current_user_id"]')?.getAttribute('content');
         let revenueChart;
 
-        // Internationalized messages from Spring
-        const messages = {
-            chartWeek: /*[[#{dashboard.chart.week}]]*/ 'Week',
-            eventsLoading: /*[[#{dashboard.kpi.events.loading}]]*/ 'Loading events...',
-            eventsNoUpcoming: /*[[#{dashboard.kpi.events.noUpcoming}]]*/ 'No upcoming events',
-            fallbackEventTeamMeeting: /*[[#{dashboard.fallback.event.teamMeeting}]]*/ 'Team Meeting - Tomorrow 2:00 PM',
-            fallbackEventMonthlyReview: /*[[#{dashboard.fallback.event.monthlyReview}]]*/ 'Monthly Review - Friday 10:00 AM'
+        const i18n = {
+            eventsNoUpcoming: /*[[#{dashboard.kpi.events.noUpcoming}]]*/ 'No upcoming events'
         };
 
-        // Handle sidebar toggle for dashboard
+        // Sidebar collapse observer
         const sidebar = document.querySelector('.sidebar');
         const dashboardContainer = document.querySelector('.dashboard-container');
-
         if (sidebar && dashboardContainer) {
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                        const sidebar = mutation.target;
-                        if (sidebar.classList.contains('collapsed')) {
-                            dashboardContainer.classList.add('sidebar-collapsed');
-                        } else {
-                            dashboardContainer.classList.remove('sidebar-collapsed');
-                        }
+            const observer = new MutationObserver(mutations => {
+                mutations.forEach(m => {
+                    if (m.type === 'attributes' && m.attributeName === 'class') {
+                        dashboardContainer.classList.toggle('sidebar-collapsed',
+                            m.target.classList.contains('collapsed'));
                     }
                 });
             });
-
             observer.observe(sidebar, { attributes: true });
-
             if (sidebar.classList.contains('collapsed')) {
                 dashboardContainer.classList.add('sidebar-collapsed');
             }
         }
 
-        // Initialize revenue chart
+        // Build an empty chart on page load; data is populated by loadChartData()
         function initRevenueChart() {
             const ctx = document.getElementById('revenueChart');
-            if (!ctx) {
-                console.error('Revenue chart canvas not found!');
-                return;
-            }
-
-            try {
-                revenueChart = new Chart(ctx.getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: [
-                            messages.chartWeek + ' 1',
-                            messages.chartWeek + ' 2',
-                            messages.chartWeek + ' 3',
-                            messages.chartWeek + ' 4'
-                        ],
-                        datasets: [{
-                            data: [1200, 1800, 1600, 2100],
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#f59e0b',
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            x: {
-                                display: true,
-                                grid: { display: false },
-                                ticks: { color: '#6b7280', font: { size: 12 } }
-                            },
-                            y: {
-                                display: true,
-                                grid: { color: '#f3f4f6' },
-                                ticks: { color: '#6b7280', font: { size: 12 } }
+            if (!ctx) return;
+            revenueChart = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f59e0b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => '€' + ctx.parsed.y.toFixed(2)
                             }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { display: false },
+                            ticks: { color: '#6b7280', font: { size: 12 } }
                         },
-                        elements: {
-                            point: { radius: 4 }
+                        y: {
+                            display: true,
+                            grid: { color: '#f3f4f6' },
+                            ticks: {
+                                color: '#6b7280',
+                                font: { size: 12 },
+                                callback: v => '€' + v
+                            }
                         }
-                    }
-                });
-                console.log('Revenue chart initialized successfully');
-            } catch (error) {
-                console.error('Error initializing revenue chart:', error);
-            }
-        }
-
-        // Load KPI data
-        function loadKPIs() {
-            console.log('Loading KPIs for user:', userId);
-
-            const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
-            const headers = {
-                'Content-Type': 'application/json',
-            };
-
-            if (token && header) {
-                headers[header] = token;
-            }
-
-            fetch(`/api/dashboard/users/${userId}`, {
-                method: 'GET',
-                headers: headers
-            })
-                .then(response => {
-                    console.log('API Response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(kpis => {
-                    console.log('KPIs received:', kpis);
-                    if (Array.isArray(kpis)) {
-                        if (kpis.length === 0) {
-                            console.log('No KPI data received, loading fallback data');
-                            setFallbackData();
-                        } else {
-                            kpis.forEach(kpi => updateKPI(kpi.key, kpi));
-                        }
-                    } else {
-                        console.error('KPIs data is not an array:', kpis);
-                        setFallbackData();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading KPIs:', error);
-                    setFallbackData();
-                });
-        }
-
-        function setFallbackData() {
-            console.log('Setting fallback data for testing...');
-            document.getElementById('total-members-value').textContent = '1,234';
-            document.getElementById('active-members-value').textContent = '987';
-            document.getElementById('revenue-value').textContent = '€12,450';
-            document.getElementById('growth-value').textContent = '+156';
-            document.getElementById('failed-payments-value').textContent = '3';
-            document.getElementById('events-count').textContent = '2';
-            document.getElementById('events-list').innerHTML =
-                '<li class="kpi-list-item">' + messages.fallbackEventTeamMeeting + '</li>' +
-                '<li class="kpi-list-item">' + messages.fallbackEventMonthlyReview + '</li>';
-
-            const statsContainer = document.getElementById('failed-payments-stats');
-            if (statsContainer) {
-                const statValues = statsContainer.querySelectorAll('.stat-value');
-                if (statValues.length >= 3) {
-                    statValues[0].textContent = '2';
-                    statValues[1].textContent = '5';
-                    statValues[2].textContent = '85%';
+                    },
+                    elements: { point: { radius: 4 } }
                 }
-            }
+            });
+        }
+
+        // Fetch daily revenue aggregation from the local database and repaint the chart
+        function loadChartData() {
+            fetch('/api/dashboard/chart/revenue')
+                .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
+                .then(chart => {
+                    if (revenueChart && Array.isArray(chart.labels) && Array.isArray(chart.data)) {
+                        revenueChart.data.labels = chart.labels;
+                        revenueChart.data.datasets[0].data = chart.data;
+                        revenueChart.update();
+                    }
+                })
+                .catch(err => console.error('Chart data load failed:', err));
+        }
+
+        // Fetch all KPI tiles for the authenticated user from the local database
+        function loadKPIs() {
+            const token  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token && header) headers[header] = token;
+
+            fetch('/api/dashboard/me', { method: 'GET', headers })
+                .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
+                .then(kpis => {
+                    if (Array.isArray(kpis)) kpis.forEach(kpi => updateKPI(kpi.key, kpi));
+                })
+                .catch(err => console.error('KPI load failed:', err));
         }
 
         function updateKPI(key, data) {
-            console.log('Updating KPI:', key, data);
-
             try {
-                switch(key) {
+                switch (key) {
                     case 'members.total.count':
-                        const totalElement = document.getElementById('total-members-value');
-                        if (totalElement) {
-                            totalElement.textContent = data.formattedValue || data.value || '-';
-                        }
+                        document.getElementById('total-members-value').textContent =
+                            data.formattedValue ?? data.value ?? '-';
                         break;
 
                     case 'members.active.count':
-                        const activeElement = document.getElementById('active-members-value');
-                        if (activeElement) {
-                            activeElement.textContent = data.formattedValue || data.value || '-';
-                        }
+                        document.getElementById('active-members-value').textContent =
+                            data.formattedValue ?? data.value ?? '-';
                         break;
 
-                    case 'stripe.totalRevenueMonth':
-                        const revenueElement = document.getElementById('revenue-value');
-                        if (revenueElement) {
-                            revenueElement.textContent = data.formattedValue || data.value || '-';
-                        }
+                    case 'revenue.this.month':
+                        document.getElementById('revenue-value').textContent =
+                            data.formattedValue ?? data.value ?? '-';
                         break;
 
                     case 'members.growth.month':
-                        const growthElement = document.getElementById('growth-value');
-                        if (growthElement) {
-                            growthElement.textContent = data.formattedValue || data.value || '-';
-                        }
+                        document.getElementById('growth-value').textContent =
+                            data.formattedValue ?? data.value ?? '-';
                         break;
 
-                    case 'transactions.failed':
-                        const failedCount = Array.isArray(data.value) ? data.value.length : data.value;
-                        const failedElement = document.getElementById('failed-payments-value');
-                        if (failedElement) {
-                            failedElement.textContent = failedCount || '0';
-                        }
-
-                        const statsContainer = document.getElementById('failed-payments-stats');
-                        if (statsContainer && Array.isArray(data.value)) {
-                            const statValues = statsContainer.querySelectorAll('.stat-value');
-                            if (statValues.length >= 3) {
-                                statValues[0].textContent = Math.floor(failedCount / 2);
-                                statValues[1].textContent = Math.floor(failedCount / 3);
-                                statValues[2].textContent = '85%';
-                            }
+                    case 'transactions.failed': {
+                        const isSummary = data.type === 'summary';
+                        const stats  = isSummary ? data.value : null;
+                        const total  = stats ? stats.total : (data.value ?? 0);
+                        document.getElementById('failed-payments-value').textContent = total;
+                        if (stats) {
+                            const thisWeekEl = document.getElementById('failed-this-week');
+                            const lastWeekEl = document.getElementById('failed-last-week');
+                            if (thisWeekEl) thisWeekEl.textContent = stats.thisWeek;
+                            if (lastWeekEl) lastWeekEl.textContent = stats.lastWeek;
                         }
                         break;
+                    }
 
-                    case 'events.upcoming':
-                        const eventsList = document.getElementById('events-list');
+                    case 'events.upcoming': {
+                        const events     = data.type === 'list' ? data.value : [];
                         const eventsCount = document.getElementById('events-count');
-
-                        if (Array.isArray(data.value) && data.value.length > 0) {
-                            if (eventsCount) eventsCount.textContent = data.value.length;
+                        const eventsList  = document.getElementById('events-list');
+                        if (events && events.length > 0) {
+                            if (eventsCount) eventsCount.textContent = events.length;
                             if (eventsList) {
-                                eventsList.innerHTML = data.value.slice(0, 5).map(event =>
-                                    `<li class="kpi-list-item">${event}</li>`
-                                ).join('');
+                                eventsList.innerHTML = events.slice(0, 5)
+                                    .map(e => `<li class="kpi-list-item">${e}</li>`)
+                                    .join('');
                             }
                         } else {
                             if (eventsCount) eventsCount.textContent = '0';
                             if (eventsList) {
-                                eventsList.innerHTML = '<li class="kpi-list-item">' + messages.eventsNoUpcoming + '</li>';
+                                eventsList.innerHTML =
+                                    `<li class="kpi-list-item">${i18n.eventsNoUpcoming}</li>`;
                             }
                         }
                         break;
-
-                    default:
-                        console.log('Unknown KPI key:', key);
+                    }
                 }
-            } catch (error) {
-                console.error('Error updating KPI:', key, error);
+            } catch (err) {
+                console.error('KPI update failed for', key, err);
             }
         }
 
-        console.log('Initializing dashboard...');
         initRevenueChart();
         loadKPIs();
+        loadChartData();
 
-        setInterval(loadKPIs, 5 * 60 * 1000);
+        // Refresh KPIs and chart every 5 minutes
+        setInterval(() => { loadKPIs(); loadChartData(); }, 5 * 60 * 1000);
     });
 </script>
 

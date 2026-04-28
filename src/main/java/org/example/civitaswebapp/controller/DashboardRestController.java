@@ -3,6 +3,7 @@ package org.example.civitaswebapp.controller;
 import org.example.civitaswebapp.domain.UserDashboardTile;
 import org.example.civitaswebapp.dto.kpi.KpiTileDto;
 import org.example.civitaswebapp.dto.kpi.KpiValueDto;
+import org.example.civitaswebapp.dto.kpi.RevenueChartDto;
 import org.example.civitaswebapp.service.kpi.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,31 +17,33 @@ public class DashboardRestController {
     @Autowired
     private DashboardService dashboardService;
 
-    // Get all available KPI tiles (metadata)
     @GetMapping("/tiles")
     public List<KpiTileDto> getAllTiles() {
         return dashboardService.getAllTiles();
     }
 
-    // Get computed KPI values for a user
-    @GetMapping("/users/{userId}")
-    public List<KpiValueDto> getUserDashboard(@PathVariable Long userId) {
-        return dashboardService.getUserDashboard(userId);
+    @GetMapping("/me")
+    public List<KpiValueDto> getMyDashboard() {
+        return dashboardService.getMyDashboard();
     }
 
-    // Save/update user's dashboard tile preferences
-    @PutMapping("/users/{userId}")
-    public void saveUserDashboard(@PathVariable Long userId, @RequestBody List<UserDashboardTile> tiles) {
-        dashboardService.saveUserDashboard(userId, tiles);
+    @GetMapping("/chart/revenue")
+    public RevenueChartDto getRevenueChart() {
+        return dashboardService.getRevenueChart();
     }
 
-    @PostMapping("/users/{userId}/tiles/{widgetKey}")
-    public void addTile(@PathVariable Long userId, @PathVariable String widgetKey) {
-        dashboardService.addTile(userId, widgetKey);
+    @PutMapping("/me/tiles")
+    public void saveMyDashboard(@RequestBody List<UserDashboardTile> tiles) {
+        dashboardService.saveMyDashboard(tiles);
     }
 
-    @DeleteMapping("/users/{userId}/tiles/{widgetKey}")
-    public void removeTile(@PathVariable Long userId, @PathVariable String widgetKey) {
-        dashboardService.removeTile(userId, widgetKey);
+    @PostMapping("/me/tiles/{widgetKey}")
+    public void addMyTile(@PathVariable String widgetKey) {
+        dashboardService.addMyTile(widgetKey);
+    }
+
+    @DeleteMapping("/me/tiles/{widgetKey}")
+    public void removeMyTile(@PathVariable String widgetKey) {
+        dashboardService.removeMyTile(widgetKey);
     }
 }

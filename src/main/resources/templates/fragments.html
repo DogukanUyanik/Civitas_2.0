@@ -13,6 +13,9 @@
 
 <th:block th:fragment="header">
     <header class="app-header">
+        <button id="menuToggle" class="hamburger-btn" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
         <div class="logo">
             <a th:href="@{/dashboard}">Civitas</a>
         </div>
@@ -175,6 +178,7 @@
             </form>
         </div>
     </div>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
 </th:block>
 
 </body>

@@ -372,22 +372,40 @@ body {
     font-weight: 500;
 }
 
+/* Overlay behind the mobile sidebar */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
+        width: 260px;
+        z-index: 1000;
     }
 
     .sidebar.mobile-open {
         transform: translateX(0);
     }
 
-    .main-content, .members-container {
-        margin-left: 0;
+    .main-content, .members-container, .events-container,
+    .transactions-container, .notifications-container,
+    .dashboard-container {
+        margin-left: 0 !important;
     }
 
-    .main-content.sidebar-collapsed {
-        margin-left: 0;
+    .main-content.sidebar-collapsed,
+    .members-container.sidebar-collapsed {
+        margin-left: 0 !important;
     }
 }

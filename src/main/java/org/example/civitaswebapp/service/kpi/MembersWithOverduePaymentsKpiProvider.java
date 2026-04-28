@@ -1,27 +1,19 @@
 package org.example.civitaswebapp.service.kpi;
 
-import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.kpi.KpiTileDto;
 import org.example.civitaswebapp.dto.kpi.KpiValueDto;
-import org.example.civitaswebapp.dto.member.MemberSummaryDto;
 import org.example.civitaswebapp.repository.MemberRepository;
-import org.example.civitaswebapp.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.List;
 
-@Service
+@Component
 public class MembersWithOverduePaymentsKpiProvider implements KpiProvider {
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private MyUserRepository myUserRepository;
 
     @Override
     public String getKey() {
@@ -40,34 +32,14 @@ public class MembersWithOverduePaymentsKpiProvider implements KpiProvider {
     }
 
     @Override
-    public KpiValueDto computeValue(Long userId) {
-
-        MyUser user = myUserRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found for KPI calculation"));
-
-        Union currentUnion = user.getUnion();
+    public KpiValueDto computeValue(Union union) {
         LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
-
-        List<Member> overdueMembers = memberRepository.findByDateOfLastPaymentBeforeAndUnion(thirtyDaysAgo, currentUnion);
-
-        List<MemberSummaryDto> memberSummaries = overdueMembers.stream()
-                .map(m -> new MemberSummaryDto(
-                        m.getId(),
-                        m.getName(),
-                        m.getEmail(),
-                        m.getPhoneNumber(),
-                        m.getDateOfLastPayment() != null ? m.getDateOfLastPayment().toString() : "N/A"
-                ))
-                .toList();
-
-        String formattedValue = memberSummaries.size() + " overdue";
-
+        long overdueCount = memberRepository.countByDateOfLastPaymentBeforeAndUnion(thirtyDaysAgo, union);
         return KpiValueDto.builder()
                 .key(getKey())
                 .title("Members with Overdue Payments")
-                .value(memberSummaries) // safe DTO list
-                .formattedValue(formattedValue)
+                .value(overdueCount)
+                .formattedValue(overdueCount + " overdue")
                 .build();
     }
-
 }

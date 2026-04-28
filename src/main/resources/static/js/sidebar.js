@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const overlay = document.getElementById('sidebarOverlay');
     const mainContents = document.querySelectorAll('.main-content, .members-container, .events-container, .transactions-container, .notifications-container');
     const header = document.querySelector('.app-header');
 
@@ -40,12 +42,26 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('sidebarCollapsed', isCollapsed);
     }
 
-    // Mobile toggle
-    function toggleMobile() {
-        sidebar.classList.toggle('mobile-open');
+    function openMobileSidebar() {
+        sidebar.classList.add('mobile-open');
+        if (overlay) overlay.classList.add('active');
     }
 
-    // Toggle button click
+    function closeMobileSidebar() {
+        sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('active');
+    }
+
+    // Mobile toggle
+    function toggleMobile() {
+        if (sidebar.classList.contains('mobile-open')) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    }
+
+    // Toggle button click (the collapse button inside the sidebar)
     toggleBtn.addEventListener('click', function (e) {
         e.preventDefault();
 
@@ -65,12 +81,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 150);
     });
 
+    // Hamburger button in the header (mobile only)
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobile();
+        });
+    }
+
+    // Overlay click closes sidebar
+    if (overlay) {
+        overlay.addEventListener('click', closeMobileSidebar);
+    }
+
     // Close mobile sidebar when clicking outside
     document.addEventListener('click', function (e) {
         const isMobile = window.innerWidth <= 768;
         if (isMobile && sidebar.classList.contains('mobile-open')) {
-            if (!sidebar.contains(e.target) && e.target !== toggleBtn) {
-                sidebar.classList.remove('mobile-open');
+            if (!sidebar.contains(e.target) && e.target !== toggleBtn && e.target !== menuToggle) {
+                closeMobileSidebar();
             }
         }
     });

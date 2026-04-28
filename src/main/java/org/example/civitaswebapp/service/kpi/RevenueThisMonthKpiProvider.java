@@ -1,27 +1,25 @@
 package org.example.civitaswebapp.service.kpi;
 
-import com.stripe.Stripe;
-import com.stripe.model.Charge;
-import com.stripe.param.ChargeListParams;
+import org.example.civitaswebapp.domain.TransactionStatus;
+import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.kpi.KpiTileDto;
 import org.example.civitaswebapp.dto.kpi.KpiValueDto;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.example.civitaswebapp.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.LocalDateTime;
 
-@Service
+@Component
 public class RevenueThisMonthKpiProvider implements KpiProvider {
 
-    public RevenueThisMonthKpiProvider(@Value("${stripe.secret.key}") String stripeApiKey) {
-        Stripe.apiKey = stripeApiKey;
-    }
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Override
     public String getKey() {
-        return "stripe.totalRevenueMonth";
+        return "revenue.this.month";
     }
 
     @Override
@@ -29,54 +27,28 @@ public class RevenueThisMonthKpiProvider implements KpiProvider {
         return KpiTileDto.builder()
                 .key(getKey())
                 .title("Revenue This Month")
-                .description("Total revenue collected from Stripe this month")
+                .description("Total revenue from succeeded transactions this month")
                 .icon("fas fa-euro-sign")
                 .defaultEnabled(true)
                 .build();
     }
 
     @Override
-    public KpiValueDto computeValue(Long userId) {
-        try {
-            LocalDate now = LocalDate.now();
-            LocalDate firstDayOfMonth = now.withDayOfMonth(1);
+    public KpiValueDto computeValue(Union union) {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
 
-            long startOfMonth = firstDayOfMonth.atStartOfDay().toEpochSecond(ZoneOffset.UTC);
-            long nowTimestamp = Instant.now().getEpochSecond();
+        Double totalRevenue = transactionRepository.sumAmountByUnionAndStatusAndPeriod(
+                union, TransactionStatus.SUCCEEDED, startOfMonth, now);
 
-            ChargeListParams params = ChargeListParams.builder()
-                    .setCreated(ChargeListParams.Created.builder()
-                            .setGte(startOfMonth)
-                            .setLte(nowTimestamp)
-                            .build())
-                    .build();
+        if (totalRevenue == null) totalRevenue = 0.0;
 
-            long totalCents = 0;
-            // Auto-pagination iterates through all charges for the period
-            for (Charge c : Charge.list(params).autoPagingIterable()) {
-                if ("succeeded".equals(c.getStatus())) {
-                    totalCents += c.getAmount();
-                }
-            }
-
-            double totalRevenue = totalCents / 100.0;
-
-            return KpiValueDto.builder()
-                    .key(getKey())
-                    .title("Revenue This Month")
-                    .value(totalRevenue)
-                    .unit("€")
-                    .formattedValue(String.format("€%.2f", totalRevenue))
-                    .build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return KpiValueDto.builder()
-                    .key(getKey())
-                    .title("Revenue This Month")
-                    .value(0)
-                    .unit("€")
-                    .formattedValue("€0.00")
-                    .build();
-        }
+        return KpiValueDto.builder()
+                .key(getKey())
+                .title("Revenue This Month")
+                .value(totalRevenue)
+                .unit("€")
+                .formattedValue(String.format("€%.2f", totalRevenue))
+                .build();
     }
 }

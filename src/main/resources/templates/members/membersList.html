@@ -72,16 +72,16 @@
             </thead>
             <tbody>
             <tr th:each="member : ${members}">
-                <td th:text="${member.firstName}">John</td>
-                <td th:text="${member.lastName}">Doe</td>
-                <td th:text="${member.email}">john@example.com</td>
-                <td>
+                <td th:attr="data-label=#{member.firstName}" th:text="${member.firstName}">John</td>
+                <td th:attr="data-label=#{member.lastName}" th:text="${member.lastName}">Doe</td>
+                <td th:attr="data-label=#{member.email}" th:text="${member.email}">john@example.com</td>
+                <td th:attr="data-label=#{member.status}">
                     <span th:classappend="${member.memberStatus.name() == 'ACTIVE'} ? 'status-pill active' : 'status-pill inactive'"
                           th:text="#{${'member.status.' + member.memberStatus.name()}}">
                         Active
                     </span>
                 </td>
-                <td class="actions">
+                <td class="actions" th:attr="data-label=#{table.actions}">
                     <a th:href="@{/members/view/{id}(id=${member.id})}" th:title="#{table.view}">
                         <i class="fa-solid fa-eye"></i>
                     </a>

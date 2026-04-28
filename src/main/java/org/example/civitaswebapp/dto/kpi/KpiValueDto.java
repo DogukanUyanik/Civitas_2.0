@@ -10,9 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class KpiValueDto {
-    private String key;              // unique identifier for the KPI
-    private String title;            // human-readable title
-    private Object value;            // raw value (e.g. 20)
-    private String unit;             // optional (e.g. "members", "€", "%")
-    private String formattedValue;   // pre-formatted string for display
+    private String key;
+    private String title;
+    private Object value;
+    private String unit;
+    private String formattedValue;
+    /** Discriminates the shape of {@code value}: "scalar" | "list" | "summary" */
+    @Builder.Default
+    private String type = "scalar";
 }

@@ -1,12 +1,9 @@
-// Member Growth Rate KPI Provider
 package org.example.civitaswebapp.service.kpi;
 
-import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.kpi.KpiTileDto;
 import org.example.civitaswebapp.dto.kpi.KpiValueDto;
 import org.example.civitaswebapp.repository.MemberRepository;
-import org.example.civitaswebapp.repository.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +15,6 @@ public class MemberGrowthKpiProvider implements KpiProvider {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private MyUserRepository myUserRepository;
-
     @Override
     public String getKey() {
         return "members.growth.month";
@@ -31,35 +25,25 @@ public class MemberGrowthKpiProvider implements KpiProvider {
         return KpiTileDto.builder()
                 .key(getKey())
                 .title("Monthly Growth")
-                .description("New members this month")
+                .description("New members added this month")
                 .icon("trending-up")
                 .defaultEnabled(true)
                 .build();
     }
 
     @Override
-    public KpiValueDto computeValue(Long userId) {
-        MyUser user = myUserRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found for KPI calculation"));
+    public KpiValueDto computeValue(Union union) {
+        LocalDateTime startOfMonth = LocalDateTime.now()
+                .withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
 
-        Union currentUnion = user.getUnion();
-        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-        long newMembersThisMonth = memberRepository.countByCreatedAtAfterAndUnion(startOfMonth, currentUnion);
-
-        double growthPercentage = calculateGrowthPercentage(newMembersThisMonth);
+        long newMembersThisMonth = memberRepository.countByCreatedAtAfterAndUnion(startOfMonth, union);
 
         return KpiValueDto.builder()
-                .key("members.growth.month")
+                .key(getKey())
                 .title("Monthly Growth")
                 .value(newMembersThisMonth)
-                .unit("%")
-                .formattedValue("+" + String.format("%.1f%%", growthPercentage))
+                .unit("new")
+                .formattedValue("+" + newMembersThisMonth)
                 .build();
-    }
-
-    private double calculateGrowthPercentage(long newMembers) {
-        long totalMembers = memberRepository.count();
-        if (totalMembers == 0) return 0;
-        return ((double) newMembers / totalMembers) * 100;
     }
 }

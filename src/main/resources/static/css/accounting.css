@@ -213,3 +213,28 @@
 }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content.dual-pane {
+        flex-direction: column;
+        width: calc(100% - 2rem);
+        height: 90vh;
+        margin: 1rem auto;
+    }
+
+    .modal-left {
+        flex: none;
+        height: 45%;
+        min-height: 180px;
+    }
+
+    .modal-right {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+    }
+}

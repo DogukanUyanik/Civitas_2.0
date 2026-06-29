@@ -36,8 +36,10 @@
                         <span th:text="#{notifications.dropdown.header}">Recent Notifications</span>
                     </div>
 
-                    <ul id="notificationList">
-                        <li style="text-align:center; padding:15px; color:#9ca3af;">Loading...</li>
+                    <ul id="notificationList"
+                        th:data-loading="#{notifications.dropdown.loading}"
+                        th:data-empty="#{notifications.dropdown.empty}">
+                        <li style="text-align:center; padding:15px; color:#9ca3af;" th:text="#{notifications.dropdown.loading}">Loading...</li>
                     </ul>
 
                     <div class="dropdown-footer" style="padding: 10px; text-align: center; border-top: 1px solid #f1f5f9;">

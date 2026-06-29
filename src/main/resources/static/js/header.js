@@ -74,7 +74,11 @@ function loadRecentNotifications() {
     const list = document.getElementById('notificationList');
     if (!list) return;
 
-    list.innerHTML = '<li style="text-align:center; padding:15px; color:#9ca3af;">Loading...</li>';
+    // Localized strings are provided by Thymeleaf via data attributes (static JS cannot read #{...}).
+    const loadingText = list.dataset.loading || 'Loading...';
+    const emptyText = list.dataset.empty || 'No new notifications';
+
+    list.innerHTML = `<li style="text-align:center; padding:15px; color:#9ca3af;">${loadingText}</li>`;
 
     fetch('/api/notifications/recent')
         .then(response => response.json())
@@ -83,7 +87,7 @@ function loadRecentNotifications() {
             list.innerHTML = '';
 
             if (data.length === 0) {
-                list.innerHTML = '<li style="text-align:center; padding:15px; color:#9ca3af;">No new notifications</li>';
+                list.innerHTML = `<li style="text-align:center; padding:15px; color:#9ca3af;">${emptyText}</li>`;
                 return;
             }
 

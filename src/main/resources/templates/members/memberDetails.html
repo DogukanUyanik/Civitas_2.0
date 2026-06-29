@@ -94,7 +94,11 @@
                     <div class="modal-overlay hidden" id="paymentModal">
                         <div class="modal-content">
                             <h3 th:text="#{payment.send}">Send Payment</h3>
-                            <form id="paymentForm">
+                            <form id="paymentForm"
+                                  th:data-msg-success="#{payment.whatsapp.success}"
+                                  th:data-msg-whatsapp-failed="#{payment.whatsapp.failed}"
+                                  th:data-msg-error="#{payment.error.generic}"
+                                  th:data-msg-validation="#{payment.validation.error}">
                                 <div class="form-group">
                                     <label for="paymentType" th:text="#{payment.type}">Payment Type:</label>
                                     <select id="paymentType" name="paymentType" required>

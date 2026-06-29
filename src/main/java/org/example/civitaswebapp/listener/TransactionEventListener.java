@@ -32,10 +32,11 @@ public class TransactionEventListener {
                 myUserRepository.findById(dto.createdByUserId()).ifPresent(user -> {
                     notificationService.createNotification(
                             user,
-                            "Transaction Created",
-                            "Generated a payment link for " + dto.firstName() + " " + dto.lastName(),
+                            "notification.transaction.created.title",
+                            "notification.transaction.created.message",
+                            List.of(dto.firstName() + " " + dto.lastName()),
                             NotificationType.TRANSACTION,
-                            "/transactions/"
+                            "/transactions"
                     );
                 });
             }
@@ -52,10 +53,11 @@ public class TransactionEventListener {
             for (MyUser admin : allAdmins) {
                 notificationService.createNotification(
                         admin,
-                        "Transaction Update",
-                        "Transaction " + dto.id() + " is now " + dto.newStatus(),
+                        "notification.transaction.statusChanged.title",
+                        "notification.transaction.statusChanged.message",
+                        List.of(String.valueOf(dto.id()), String.valueOf(dto.newStatus())),
                         NotificationType.TRANSACTION,
-                        "/transactions/"
+                        "/transactions"
                 );
             }
         } catch (Exception e) {

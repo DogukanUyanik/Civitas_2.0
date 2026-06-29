@@ -37,13 +37,11 @@ public class EventNotificationListener {
         MyUser user = myUserRepository.findById(dto.createdByUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        String action = dto.isNew() ? "aangemaakt" : "aangepast";
-        String message = "Event " + dto.title() + " om " + dto.start() + " tot " + dto.end() + " " + action;
-
         notificationService.createNotification(
                 user,
-                dto.isNew() ? "Nieuw event" : "Event aangepast",
-                message,
+                dto.isNew() ? "notification.event.created.title" : "notification.event.updated.title",
+                dto.isNew() ? "notification.event.created.message" : "notification.event.updated.message",
+                java.util.List.of(dto.title()),
                 NotificationType.EVENT,
                 "/events/" + dto.eventId()
         );

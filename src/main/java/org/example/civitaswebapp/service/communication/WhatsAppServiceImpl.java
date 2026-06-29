@@ -27,6 +27,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
     @Override
     public void sendPaymentLink(String toNumber, String stripeLink) {
+        validatePhoneNumber(toNumber);
         Message message = Message.creator(
                 new PhoneNumber("whatsapp:" + toNumber),
                 new PhoneNumber(fromNumber),
@@ -52,6 +53,25 @@ public class WhatsAppServiceImpl implements WhatsAppService {
         ).create();
 
         System.out.println("WhatsApp sent to " + toNumber + " with SID: " + message.getSid());
+    }
+
+    /**
+     * Guards against unroutable numbers before we ever hit Twilio. WhatsApp/Twilio require an
+     * E.164 international number (e.g. {@code +32470123456}); a local format such as
+     * {@code 0470123456} is rejected by Twilio at runtime. Failing fast here turns that into a
+     * deterministic, catchable error that the controller can surface to the UI.
+     *
+     * @throws IllegalArgumentException if the number is missing or not in international format
+     */
+    private void validatePhoneNumber(String toNumber) {
+        if (toNumber == null || toNumber.isBlank()) {
+            throw new IllegalArgumentException("Phone number is missing.");
+        }
+        if (!toNumber.trim().startsWith("+")) {
+            throw new IllegalArgumentException(
+                    "Invalid phone number format: '" + toNumber
+                            + "'. Use international format, e.g. +32470123456.");
+        }
     }
 
 }

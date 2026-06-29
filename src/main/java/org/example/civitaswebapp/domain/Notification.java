@@ -7,8 +7,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.example.civitaswebapp.util.StringListConverter;
 
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Data
@@ -34,9 +36,14 @@ public class Notification {
     // optional: link to page
     private String url;
 
-    private String title;
+    // i18n: notifications store message-bundle keys (+ runtime args), never literal text, so the
+    // title/body can be rendered in the *viewer's* locale at display time via MessageSource.
+    private String titleKey;
 
-    private String message;
+    private String messageKey;
+
+    @Convert(converter = StringListConverter.class)
+    private List<String> messageArgs;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;

@@ -317,6 +317,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Localized messages provided by Thymeleaf via data attributes (static JS cannot read #{...}).
+        const messages = {
+            success: paymentForm.dataset.msgSuccess || 'Payment link sent via WhatsApp.',
+            whatsappFailed: paymentForm.dataset.msgWhatsappFailed || 'Could not send the WhatsApp message. Please check the phone number format.',
+            error: paymentForm.dataset.msgError || 'Something went wrong. Please try again.',
+            validation: paymentForm.dataset.msgValidation || 'Please fill in all required fields correctly.'
+        };
+
         // Submit form
         paymentForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -328,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const note = document.getElementById('note').value.trim();
 
             if (!memberId || isNaN(amount) || amount <= 0 || !paymentType) {
-                alert('Please fill in all required fields correctly.');
+                alert(messages.validation);
                 return;
             }
 
@@ -355,18 +363,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     if (data.success) {
                         paymentModal.classList.add('hidden');
-                        if (paymentResult && paymentLink) {
-                            paymentResult.classList.remove('hidden');
-                            paymentResult.querySelector('p').textContent = '✅ Payment link sent to the user via WhatsApp!';
-                            paymentLink.style.display = 'none';
+
+                        // The transaction was created either way. Auto-refresh so the new
+                        // transaction appears in the history table without a manual F5.
+                        if (data.whatsappSuccess === false) {
+                            // Twilio actually failed to deliver (e.g. a local "04..." number
+                            // instead of "+32..."): do NOT claim success. The alert blocks until
+                            // dismissed, then we reload to surface the new transaction.
+                            alert(messages.whatsappFailed);
+                            window.location.reload();
+                        } else {
+                            if (paymentResult && paymentLink) {
+                                paymentResult.classList.remove('hidden');
+                                paymentResult.querySelector('p').textContent = messages.success;
+                                paymentLink.style.display = 'none';
+                            }
+                            // Let the confirmation show briefly, then refresh the table.
+                            setTimeout(() => window.location.reload(), 1500);
                         }
                     } else {
-                        alert('Error: ' + data.message);
+                        alert(messages.error + (data.message ? ' (' + data.message + ')' : ''));
                     }
                 })
                 .catch(err => {
                     console.error('Fetch error:', err);
-                    alert('Something went wrong!');
+                    alert(messages.error);
                 });
         });
     }

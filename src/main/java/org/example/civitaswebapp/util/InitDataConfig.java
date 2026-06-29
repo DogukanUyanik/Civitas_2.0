@@ -140,9 +140,9 @@ public class InitDataConfig implements CommandLineRunner {
 
         List<Notification> notifications = new ArrayList<>();
 
-        Notification n1 = Notification.builder().user(admin1).url("/members/view/1").title("Nieuw lid").message("Lid Ali Khan is toegevoegd.").type(NotificationType.MEMBER).status(NotificationStatus.UNREAD).createdAt(java.time.Instant.now()).build();
-        Notification n2 = Notification.builder().user(admin2).url("/events").title("Nieuwe activiteit").message("Nieuw evenement: Board Meeting.").type(NotificationType.EVENT).status(NotificationStatus.UNREAD).createdAt(java.time.Instant.now()).build();
-        Notification n3 = Notification.builder().user(admin1).url("/transactions").title("Betaling ontvangen").message("Fatima heeft betaald.").type(NotificationType.TRANSACTION).status(NotificationStatus.READ).createdAt(java.time.Instant.now().minusSeconds(3600)).build();
+        Notification n1 = Notification.builder().user(admin1).url("/members/view/1").titleKey("notification.member.created.title").messageKey("notification.member.created.message").messageArgs(List.of("Ali Khan")).type(NotificationType.MEMBER).status(NotificationStatus.UNREAD).createdAt(java.time.Instant.now()).build();
+        Notification n2 = Notification.builder().user(admin2).url("/events").titleKey("notification.event.created.title").messageKey("notification.event.created.message").messageArgs(List.of("Board Meeting")).type(NotificationType.EVENT).status(NotificationStatus.UNREAD).createdAt(java.time.Instant.now()).build();
+        Notification n3 = Notification.builder().user(admin1).url("/transactions").titleKey("notification.transaction.created.title").messageKey("notification.transaction.created.message").messageArgs(List.of("Fatima")).type(NotificationType.TRANSACTION).status(NotificationStatus.READ).createdAt(java.time.Instant.now().minusSeconds(3600)).build();
 
         notificationRepository.saveAll(Arrays.asList(n1, n2, n3));
 

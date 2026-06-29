@@ -11,7 +11,14 @@ import java.util.List;
 
 public interface NotificationService {
 
-    Notification createNotification(MyUser user, String title, String message, NotificationType type, String url);
+    /**
+     * Creates a notification from i18n message-bundle keys plus runtime arguments. The literal
+     * text is never stored — it is resolved in the viewer's locale at display time. Pass
+     * {@code messageArgs} for the values substituted into {@code messageKey} (e.g. a member name);
+     * use {@code null} or an empty list when the message takes no arguments.
+     */
+    Notification createNotification(MyUser user, String titleKey, String messageKey,
+                                    List<String> messageArgs, NotificationType type, String url);
 
      Page<Notification> getAllNotifications(MyUser user, Pageable pageable);
 

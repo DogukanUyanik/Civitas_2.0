@@ -61,18 +61,24 @@ public class TransactionRestController {
 
             String paymentLink = transactionService.generateStripePaymentLink(transaction);
 
+            // The transaction itself is created regardless of WhatsApp delivery. Track delivery
+            // separately so the UI can avoid showing a false "success" toast when Twilio fails
+            // (e.g. an unroutable local "04..." number instead of an international "+32...").
+            boolean whatsappSuccess = false;
             try {
-                if (member.getPhoneNumber() != null && !member.getPhoneNumber().isEmpty()) {
+                if (member.getPhoneNumber() != null && !member.getPhoneNumber().isBlank()) {
                     whatsAppService.sendPaymentLink(member.getPhoneNumber(), paymentLink);
+                    whatsappSuccess = true;
+                } else {
+                    response.put("whatsapp_error", "Member has no phone number on file.");
                 }
             } catch (Exception wa) {
-
                 System.err.println("WhatsApp failed: " + wa.getMessage());
                 response.put("whatsapp_error", "Message could not be sent: " + wa.getMessage());
             }
 
-
             response.put("success", true);
+            response.put("whatsappSuccess", whatsappSuccess);
             response.put("paymentLink", paymentLink);
             response.put("transactionId", transaction.getId());
             return ResponseEntity.ok(response);

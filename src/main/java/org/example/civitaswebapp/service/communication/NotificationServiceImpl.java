@@ -24,12 +24,14 @@ public class NotificationServiceImpl implements NotificationService {
     private NotificationRepository notificationRepository;
 
     @Override
-    public Notification createNotification(MyUser user, String title, String message, NotificationType type, String url) {
+    public Notification createNotification(MyUser user, String titleKey, String messageKey,
+                                           List<String> messageArgs, NotificationType type, String url) {
         System.out.println("📢 createNotification called for user: " + user.getId());
         Notification notification = Notification.builder()
                 .user(user)
-                .title(title)
-                .message(message)
+                .titleKey(titleKey)
+                .messageKey(messageKey)
+                .messageArgs(messageArgs == null ? List.of() : messageArgs)
                 .type(type)
                 .url(url)
                 .status(NotificationStatus.UNREAD)

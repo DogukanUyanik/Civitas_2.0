@@ -24,19 +24,22 @@ public class MemberEventListener {
         MyUser user = myUserRepository.findById(dto.createdByUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        String fullName = dto.firstName() + " " + dto.lastName();
         if (dto.isNew()) {
             notificationService.createNotification(
                     user,
-                    "Nieuw lid toegevoegd",
-                    "Lid " + dto.firstName() + " " + dto.lastName() + " is toegevoegd.",
+                    "notification.member.created.title",
+                    "notification.member.created.message",
+                    java.util.List.of(fullName),
                     NotificationType.MEMBER,
                     "/members/view/" + dto.memberId()
             );
         } else {
             notificationService.createNotification(
                     user,
-                    "Lid geupdate",
-                    "Lid " + dto.firstName() + " " + dto.lastName() + " is geupdate",
+                    "notification.member.updated.title",
+                    "notification.member.updated.message",
+                    java.util.List.of(fullName),
                     NotificationType.MEMBER,
                     "/members/view/" + dto.memberId()
             );

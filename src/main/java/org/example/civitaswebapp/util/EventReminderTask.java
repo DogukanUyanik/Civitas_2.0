@@ -2,6 +2,7 @@ package org.example.civitaswebapp.util;
 
 import org.example.civitaswebapp.domain.Event;
 import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.dto.events.EventMessageDetails;
 import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.service.communication.WhatsAppService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,8 +39,17 @@ public class EventReminderTask {
 
             if (attendees == null || attendees.isEmpty()) continue;
 
+            EventMessageDetails messageDetails = new EventMessageDetails(
+                    event.getTitle(),
+                    event.getEventType() != null ? event.getEventType().name() : null,
+                    event.getStart(),
+                    event.getEnd(),
+                    event.getLocation(),
+                    event.getDescription()
+            );
+
             for (Member member : attendees){
-                whatsAppService.sendEventNotification(member.getPhoneNumber(), event);
+                whatsAppService.sendEventNotification(member.getPhoneNumber(), messageDetails);
             }
         }
     }

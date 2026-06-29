@@ -73,8 +73,8 @@ public class InitDataConfig implements CommandLineRunner {
 
         // 3. CREATE USERS (Linked to Union) 👤
         MyUser admin1 = MyUser.builder()
-                .username("apo")
-                .password(passwordEncoder.encode("apo"))
+                .username("testUser")
+                .password(passwordEncoder.encode("testUser"))
                 .role(MyUserRole.ADMIN)
                 .union(testUnion) // <--- LINKED
                 .build();

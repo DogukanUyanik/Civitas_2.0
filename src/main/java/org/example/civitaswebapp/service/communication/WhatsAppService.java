@@ -1,9 +1,9 @@
 package org.example.civitaswebapp.service.communication;
 
-import org.example.civitaswebapp.domain.Event;
+import org.example.civitaswebapp.dto.events.EventMessageDetails;
 
 public interface WhatsAppService {
     void sendPaymentLink(String toNumber, String stripeLink);
-    public void sendEventNotification(String toNumber, Event event);
 
-    }
+    void sendEventNotification(String toNumber, EventMessageDetails event);
+}

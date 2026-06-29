@@ -13,10 +13,16 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
+
+    // Eagerly fetch transactions for the member-details view. With open-in-view disabled the session
+    // is closed before rendering, so this association must be initialized within the query.
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.transactions WHERE m.id = :id")
+    Optional<Member> findByIdWithTransactions(@Param("id") Long id);
 
     Page<Member> findAllByUnion(Union union, Pageable pageable);
     List<Member> findAllByUnion(Union union);

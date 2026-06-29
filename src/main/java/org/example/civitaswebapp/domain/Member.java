@@ -15,6 +15,12 @@ import java.util.Set;
 
 @Entity
 @Data
+// id-only equals/hashCode/toString. NEVER include the bidirectional collections (events) or
+// associations: Lombok's default @Data walks every field, so hashCode()/toString() on Member would
+// recurse through events -> Event -> attendees -> Member..., lazily initializing collections during
+// Hibernate's own collection load and throwing ConcurrentModificationException in injectLoadedState.
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"email", "union_id"}) // <--- Unique combination
 })
@@ -25,16 +31,21 @@ public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @NotBlank(message = "{member.firstName.required}")
+    @ToString.Include
     private String firstName;
 
     @NotBlank(message = "{member.lastName.required}")
+    @ToString.Include
     private String lastName;
 
     @Email(message = "{member.email.valid}")
     @NotBlank(message = "{member.email.required}")
+    @ToString.Include
     private String email;
 
     @NotBlank(message = "{member.phone.required}")

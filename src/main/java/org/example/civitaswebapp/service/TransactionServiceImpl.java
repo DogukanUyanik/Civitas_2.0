@@ -34,13 +34,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
+    @Autowired
+    private MyUserService myUserService;
+
     // 👇 SECURITY HELPER
     private Union getCurrentUserUnion() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof MyUser) {
-            return ((MyUser) principal).getUnion();
-        }
-        throw new RuntimeException("No user logged in or user is not of type MyUser");
+        // Reload a fresh, request-scoped Union rather than reading it off the shared session
+        // principal — the principal no longer carries a managed entity graph (see MyUserPrincipal).
+        return myUserService.getLoggedInUser().getUnion();
     }
 
     @Transactional
@@ -145,6 +146,25 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionStatus oldStatus = transaction.getStatus();
         transaction.setStatus(status);
         transactionRepository.save(transaction); // Union is already set, so safe to save
+
+        TransactionStatusChangedDto dto = new TransactionStatusChangedDto(
+                transactionId,
+                transaction.getMember().getId(),
+                oldStatus,
+                status
+        );
+        eventPublisher.publishEvent(dto);
+    }
+
+    @Transactional
+    @Override
+    public void updateTransactionStatusAsSystem(Long transactionId, TransactionStatus status) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found: " + transactionId));
+
+        TransactionStatus oldStatus = transaction.getStatus();
+        transaction.setStatus(status);
+        transactionRepository.save(transaction);
 
         TransactionStatusChangedDto dto = new TransactionStatusChangedDto(
                 transactionId,

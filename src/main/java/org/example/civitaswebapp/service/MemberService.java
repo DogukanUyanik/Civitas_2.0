@@ -24,6 +24,8 @@ public interface MemberService {
 
     Optional<Member> findById(Long id);
 
+    Optional<Member> findByIdWithTransactions(Long id);
+
     Member getIdForPdf(Long id);
 
     BulkImportResultDto bulkImport(MultipartFile file, MyUser currentUser);

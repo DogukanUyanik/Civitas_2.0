@@ -5,9 +5,9 @@ import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.dto.member.BulkImportResultDto;
 import org.example.civitaswebapp.dto.member.MemberDto;
 import org.example.civitaswebapp.service.MemberService;
+import org.example.civitaswebapp.service.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +25,9 @@ public class MemberRestController {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private MyUserService myUserService;
+
     @GetMapping
     public List<MemberDto> getAllMembers() {
         return memberService.getAllMembers().stream()
@@ -34,8 +37,8 @@ public class MemberRestController {
 
     @PostMapping("/import")
     public ResponseEntity<BulkImportResultDto> importMembers(
-            @RequestParam("file") MultipartFile file,
-            @AuthenticationPrincipal MyUser currentUser) {
+            @RequestParam("file") MultipartFile file) {
+        MyUser currentUser = myUserService.getLoggedInUser();
         BulkImportResultDto result = memberService.bulkImport(file, currentUser);
         return ResponseEntity.ok(result);
     }

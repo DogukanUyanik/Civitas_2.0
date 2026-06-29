@@ -12,6 +12,7 @@ public interface TransactionService {
     void handleStripeWebhook(String payload, String sigHeader);
     List<Transaction> getTransactionsByMember(Member member);
     void updateTransactionStatus(Long transactionId, TransactionStatus status);
+    void updateTransactionStatusAsSystem(Long transactionId, TransactionStatus status);
 
     Page<Transaction> getTransactions(Pageable pageable, String search, TransactionStatus status, TransactionType type);
 

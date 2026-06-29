@@ -116,7 +116,9 @@ public class MemberController {
 
     @GetMapping("/view/{id}")
     public String showMemberDetails(@PathVariable Long id, Model model) {
-        Member member = memberService.findById(id)
+        // Fetch-join transactions: the details view renders member.transactions and open-in-view
+        // is disabled, so the association must be initialized inside the service transaction.
+        Member member = memberService.findByIdWithTransactions(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid id"));
         model.addAttribute("member", member);
         return "members/memberDetails";

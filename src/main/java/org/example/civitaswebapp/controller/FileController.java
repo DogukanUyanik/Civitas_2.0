@@ -1,8 +1,8 @@
 package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.Invoice;
-import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.repository.InvoiceRepository;
+import org.example.civitaswebapp.service.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -10,7 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,18 +25,20 @@ import java.util.Optional;
 public class FileController {
 
     private final InvoiceRepository invoiceRepository;
+    private final MyUserService myUserService;
 
-    // We don't need UserService anymore, we get the user directly from the controller method
     @Autowired
-    public FileController(InvoiceRepository invoiceRepository) {
+    public FileController(InvoiceRepository invoiceRepository, MyUserService myUserService) {
         this.invoiceRepository = invoiceRepository;
+        this.myUserService = myUserService;
     }
 
     @GetMapping("/invoices/{filename}")
-    public ResponseEntity<Resource> downloadInvoice(@PathVariable String filename,
-                                                    @AuthenticationPrincipal MyUser currentUser) {
+    public ResponseEntity<Resource> downloadInvoice(@PathVariable String filename) {
 
-        Optional<Invoice> invoice = invoiceRepository.findByFileUrlAndUnion(filename, currentUser.getUnion());
+        // Reload a fresh, request-scoped Union instead of using the shared session principal.
+        Optional<Invoice> invoice = invoiceRepository.findByFileUrlAndUnion(
+                filename, myUserService.getLoggedInUser().getUnion());
 
         if (invoice.isEmpty() && invoiceRepository.existsByFileUrl(filename)) {
             // File is confirmed and saved, but belongs to a different union

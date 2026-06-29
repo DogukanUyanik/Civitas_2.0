@@ -2,7 +2,7 @@ package org.example.civitaswebapp.service.communication;
 
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import org.example.civitaswebapp.domain.Event;
+import org.example.civitaswebapp.dto.events.EventMessageDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +37,13 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     }
 
     @Override
-    public void sendEventNotification(String toNumber, Event event) {
-        String messageText = "📅 New Event: " + event.getTitle() + "\n" +
-                "Type: " + event.getEventType() + "\n" +
-                "Start: " + event.getStart() + "\n" +
-                "End: " + event.getEnd() + "\n" +
-                "Location: " + event.getLocation() + "\n" +
-                (event.getDescription() != null ? "Description: " + event.getDescription() : "");
+    public void sendEventNotification(String toNumber, EventMessageDetails event) {
+        String messageText = "📅 New Event: " + event.title() + "\n" +
+                "Type: " + event.eventType() + "\n" +
+                "Start: " + event.start() + "\n" +
+                "End: " + event.end() + "\n" +
+                "Location: " + event.location() + "\n" +
+                (event.description() != null ? "Description: " + event.description() : "");
 
         Message message = Message.creator(
                 new PhoneNumber("whatsapp:" + toNumber),

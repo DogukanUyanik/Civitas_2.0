@@ -1,12 +1,12 @@
 package org.example.civitaswebapp.controller;
 
-import org.example.civitaswebapp.domain.Event;
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.dto.events.EventRequest;
+import org.example.civitaswebapp.dto.events.EventResponseDto;
 import org.example.civitaswebapp.service.EventService;
+import org.example.civitaswebapp.service.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,14 +18,18 @@ public class EventRestController {
     @Autowired
     private EventService eventService;
 
+    @Autowired
+    private MyUserService myUserService;
+
     @GetMapping
-    public List<Event> getEvents() {
+    public List<EventResponseDto> getEvents() {
         return eventService.getEvents(Pageable.unpaged()).getContent();
     }
 
     @PostMapping
-    public Event createEvent(@RequestBody EventRequest event, @AuthenticationPrincipal MyUser user) {
-        Event savedEvent = eventService.saveEvent(event, user);
-        return savedEvent;
+    public EventResponseDto createEvent(@RequestBody EventRequest event) {
+        // Reload a fresh, request-scoped MyUser instead of using the shared session principal.
+        MyUser user = myUserService.getLoggedInUser();
+        return eventService.saveEvent(event, user);
     }
 }

@@ -45,14 +45,14 @@ public class MemberServiceImpl implements MemberService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private MyUserService myUserService;
 
 
     private Union getCurrentUserUnion() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof MyUser) {
-            return ((MyUser) principal).getUnion();
-        }
-        throw new RuntimeException("No user logged in or user is not of type MyUser");
+        // Reload a fresh, request-scoped Union rather than reading it off the shared session
+        // principal — the principal no longer carries a managed entity graph (see MyUserPrincipal).
+        return myUserService.getLoggedInUser().getUnion();
     }
 
     @Override
@@ -134,6 +134,22 @@ public class MemberServiceImpl implements MemberService {
                 verifyMemberBelongsToUnion(memberOpt.get());
             } catch (AccessDeniedException e) {
                 return Optional.empty(); // Treat "Unauthorized" as "Not Found" to hide data
+            }
+        }
+        return memberOpt;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Member> findByIdWithTransactions(Long id) {
+        // Used by the member-details view: transactions are fetch-joined so they are initialized
+        // before the session closes (open-in-view is disabled). Same union guard as findById.
+        Optional<Member> memberOpt = memberRepository.findByIdWithTransactions(id);
+        if (memberOpt.isPresent()) {
+            try {
+                verifyMemberBelongsToUnion(memberOpt.get());
+            } catch (AccessDeniedException e) {
+                return Optional.empty();
             }
         }
         return memberOpt;

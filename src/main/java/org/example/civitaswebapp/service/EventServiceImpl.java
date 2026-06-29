@@ -2,6 +2,7 @@ package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.*;
 import org.example.civitaswebapp.dto.events.EventRequest;
+import org.example.civitaswebapp.dto.events.EventResponseDto;
 import org.example.civitaswebapp.dto.events.EventSavedEventDto;
 import org.example.civitaswebapp.repository.EventRepository;
 import org.example.civitaswebapp.repository.MemberRepository;
@@ -35,9 +36,12 @@ public class EventServiceImpl implements EventService {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private MyUserService myUserService;
+
     @Override
-    public Page<Event> getEvents(Pageable pageable) {
-        return eventRepository.findAllByUnion(getCurrentUserUnion(), pageable);
+    public Page<EventResponseDto> getEvents(Pageable pageable) {
+        return eventRepository.findAllByUnion(getCurrentUserUnion(), pageable).map(this::toResponseDto);
     }
 
     @Override
@@ -49,7 +53,7 @@ public class EventServiceImpl implements EventService {
 
     @Transactional
     @Override
-    public Event saveEvent(EventRequest eventRequest, MyUser user) {
+    public EventResponseDto saveEvent(EventRequest eventRequest, MyUser user) {
         boolean isNew = eventRequest.getId() == null;
         Event event;
 
@@ -71,8 +75,9 @@ public class EventServiceImpl implements EventService {
         event.setEventType(eventRequest.getEventType() != null ? eventRequest.getEventType() : EventType.GENERAL);
 
 
+        List<Member> potentialAttendees = List.of();
         if (eventRequest.getAttendees() != null && !eventRequest.getAttendees().isEmpty()) {
-            List<Member> potentialAttendees = memberRepository.findAllById(eventRequest.getAttendees());
+            potentialAttendees = memberRepository.findAllById(eventRequest.getAttendees());
 
             // 🛡️ Security Check: Are all these members in my union?
             // If someone hacked the request to add Member ID 999 (from another union), this stops them.
@@ -86,19 +91,42 @@ public class EventServiceImpl implements EventService {
 
         Event savedEvent = eventRepository.save(event);
 
-        // ... Event Publisher code ...
+        // Capture the attendee phone numbers HERE, on the request thread, while the members are
+        // already loaded (phoneNumber is a scalar column — no collection load). The async listener
+        // then never reloads the event or its attendees PersistentSet, so the two threads can never
+        // race on the same Hibernate collection.
+        List<String> attendeePhoneNumbers = potentialAttendees.stream()
+                .map(Member::getPhoneNumber)
+                .filter(phone -> phone != null && !phone.isBlank())
+                .toList();
+
         EventSavedEventDto dto = new EventSavedEventDto(
                 savedEvent.getId(),
                 savedEvent.getTitle(),
                 savedEvent.getDescription(),
                 savedEvent.getStart(),
                 savedEvent.getEnd(),
+                savedEvent.getLocation(),
+                savedEvent.getEventType() != null ? savedEvent.getEventType().name() : EventType.GENERAL.name(),
                 user.getId(), // Use the user passed in
-                isNew
+                isNew,
+                attendeePhoneNumbers
         );
         eventPublisher.publishEvent(dto);
 
-        return savedEvent;
+        return toResponseDto(savedEvent);
+    }
+
+    private EventResponseDto toResponseDto(Event event) {
+        return new EventResponseDto(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getStart(),
+                event.getEnd(),
+                event.getLocation(),
+                event.getEventType() != null ? event.getEventType().name() : "GENERAL"
+        );
     }
 
 
@@ -111,11 +139,9 @@ public class EventServiceImpl implements EventService {
 
 
     private Union getCurrentUserUnion() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof MyUser) {
-            return ((MyUser) principal).getUnion();
-        }
-        throw new RuntimeException("No user logged in or user is not of type MyUser");
+        // Reload a fresh, request-scoped Union rather than reading it off the shared session
+        // principal — the principal no longer carries a managed entity graph (see MyUserPrincipal).
+        return myUserService.getLoggedInUser().getUnion();
     }
 
     private void verifyMemberBelongsToUnion(Member member) {

@@ -6,7 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,9 @@ import java.util.UUID;
 
 @Entity
 @Data
+// id-only identity, consistent with the other entities — see [[lombok-data-jpa-entities]].
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -22,10 +27,13 @@ public class Union {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private UUID id;
 
 
     @NotBlank(message = "Union name is required")
+    @ToString.Include
     @Column(nullable = false)
     private String name;
 

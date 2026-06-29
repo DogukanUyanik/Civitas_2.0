@@ -92,7 +92,7 @@ public class StripeWebhookController {
             String transactionIdStr = session.getMetadata().get("transactionId");
             if (transactionIdStr != null && !transactionIdStr.isEmpty()) {
                 Long transactionId = Long.parseLong(transactionIdStr);
-                transactionService.updateTransactionStatus(transactionId, TransactionStatus.SUCCEEDED);
+                transactionService.updateTransactionStatusAsSystem(transactionId, TransactionStatus.SUCCEEDED);
                 logger.info("Transaction {} marked as SUCCEEDED for session {}", transactionId, session.getId());
             } else {
                 logger.warn("No transactionId found in session metadata for session {}", session.getId());
@@ -137,7 +137,7 @@ public class StripeWebhookController {
                     Long transactionId = Long.parseLong(transactionIdStr);
                     logger.info("Found transactionId {} in PaymentIntent metadata", transactionId);
 
-                    transactionService.updateTransactionStatus(transactionId, TransactionStatus.FAILED);
+                    transactionService.updateTransactionStatusAsSystem(transactionId, TransactionStatus.FAILED);
                     logger.info("Transaction {} marked as FAILED for payment intent {}", transactionId, failedIntent.getId());
                 } catch (NumberFormatException e) {
                     logger.error("Invalid transactionId format in metadata: {}", transactionIdStr, e);

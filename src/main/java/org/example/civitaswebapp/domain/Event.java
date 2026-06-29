@@ -1,6 +1,5 @@
 package org.example.civitaswebapp.domain;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -16,16 +17,25 @@ import java.util.Set;
 
 @Entity
 @Data
+// id-only equals/hashCode/toString. NEVER include the bidirectional collections (attendees) or
+// associations: Lombok's default @Data walks every field, so hashCode()/toString() on Event would
+// recurse through attendees -> Member -> events -> Event..., lazily initializing collections during
+// Hibernate's own collection load and throwing ConcurrentModificationException in injectLoadedState.
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @NotBlank(message = "{event.title.required}")
     @Size(max = 100, message = "{event.title.size}")
+    @ToString.Include
     private String title;
 
     @Size(max = 500, message = "{event.description.size}")
@@ -46,7 +56,6 @@ public class Event {
     private EventType eventType = EventType.GENERAL; // Default to GENERAL
 
     @ManyToMany
-    @JsonManagedReference
     @JoinTable(
             name = "event_members",
             joinColumns = @JoinColumn(name = "event_id"),

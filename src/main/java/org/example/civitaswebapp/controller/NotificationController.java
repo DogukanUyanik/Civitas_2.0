@@ -1,10 +1,10 @@
 package org.example.civitaswebapp.controller;
 
 import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.service.MyUserService;
 import org.example.civitaswebapp.service.communication.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,14 +19,17 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private MyUserService myUserService;
+
     @GetMapping
     public String showNotificationsList(
             Model model,
-            @AuthenticationPrincipal MyUser currentLoggedInUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
 
+        MyUser currentLoggedInUser = myUserService.getLoggedInUser();
         var notificationPage = notificationService.getAllNotifications(currentLoggedInUser, PageRequest.of(page, size));
 
         model.addAttribute("notifications", notificationPage.getContent());
@@ -40,8 +43,8 @@ public class NotificationController {
     }
 
     @PostMapping("/mark-all-read")
-    public String markAllAsRead(@AuthenticationPrincipal MyUser currentLoggedInUser) {
-        notificationService.markAllAsRead(currentLoggedInUser);
+    public String markAllAsRead() {
+        notificationService.markAllAsRead(myUserService.getLoggedInUser());
         return "redirect:/notifications";
     }
 }

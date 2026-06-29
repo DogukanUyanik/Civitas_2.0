@@ -1,10 +1,9 @@
 package org.example.civitaswebapp.validator;
 
 import org.example.civitaswebapp.domain.Member;
-import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.repository.MemberRepository;
+import org.example.civitaswebapp.service.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -15,6 +14,9 @@ public class MemberEmailValidator implements Validator {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private MyUserService myUserService;
+
     @Override
     public boolean supports(Class<?> clazz) {
         return Member.class.equals(clazz);
@@ -24,11 +26,9 @@ public class MemberEmailValidator implements Validator {
     public void validate(Object target, Errors errors) {
         Member member = (Member) target;
 
-        MyUser currentUser = (MyUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         boolean exists = memberRepository.existsByEmailAndUnionAndIdNot(
                 member.getEmail(),
-                currentUser.getUnion(),
+                myUserService.getLoggedInUser().getUnion(),
                 member.getId() == null ? -1L : member.getId()
         );
 

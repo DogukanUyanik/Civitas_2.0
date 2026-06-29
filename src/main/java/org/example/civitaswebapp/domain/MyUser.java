@@ -15,6 +15,10 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+// id-only identity: never let equals/hashCode/toString walk collections (notifications,
+// dashboardTiles) or associations (union) — see [[lombok-data-jpa-entities]].
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(onlyExplicitlyIncluded = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,9 +27,12 @@ public class MyUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
+    @EqualsAndHashCode.Include
+    @ToString.Include
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @ToString.Include
     private String username;
 
     @Column(nullable = false)
@@ -33,6 +40,7 @@ public class MyUser implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @ToString.Include
     private MyUserRole role;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

@@ -34,10 +34,13 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private org.example.civitaswebapp.service.MyUserService myUserService;
+
     private MyUser getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof MyUser user) return user;
-        throw new RuntimeException("No authenticated user in security context");
+        // Reload a fresh, request-scoped MyUser rather than reading the shared session principal —
+        // the principal is now a detached, collection-free value object (see MyUserPrincipal).
+        return myUserService.getLoggedInUser();
     }
 
     @Override

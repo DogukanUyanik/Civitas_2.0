@@ -143,6 +143,51 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Subscription summary -->
+            <div class="panel subscription-info">
+                <h3 class="section-title">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <span th:text="#{subscription.summary.title}">Subscription</span>
+                </h3>
+
+                <!-- No active subscription -->
+                <p th:if="${member.subscriptionFrequency == null or member.subscriptionFrequency.name() == 'NONE'}"
+                   class="subscription-empty"
+                   th:text="#{subscription.summary.none}">No active subscription</p>
+
+                <!-- Active subscription -->
+                <div th:unless="${member.subscriptionFrequency == null or member.subscriptionFrequency.name() == 'NONE'}">
+                    <div class="detail-item">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <span class="detail-label" th:text="#{subscription.frequency}">Frequency:</span>
+                        <span class="detail-value"
+                              th:text="#{${'subscription.frequency.' + member.subscriptionFrequency.name()}}">Monthly</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <i class="bi bi-cash-coin"></i>
+                        <span class="detail-label" th:text="#{subscription.amount}">Amount:</span>
+                        <span class="detail-value"
+                              th:text="${member.subscriptionAmount != null ? '€ ' + #numbers.formatDecimal(member.subscriptionAmount, 1, 2) : '—'}">€ 10.00</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <i class="bi bi-calendar-event"></i>
+                        <span class="detail-label" th:text="#{subscription.nextBilling}">Next Billing Date:</span>
+                        <span class="detail-value"
+                              th:text="${member.nextBillingDate != null ? #temporals.format(member.nextBillingDate, 'dd MMM, yyyy') : '—'}">01 Jul, 2026</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <i class="bi bi-broadcast-pin"></i>
+                        <span class="detail-label" th:text="#{subscription.status}">Status:</span>
+                        <span class="subscription-badge"
+                              th:classappend="${member.subscriptionStatus != null ? member.subscriptionStatus.name() : 'ACTIVE'}"
+                              th:text="#{${'subscription.status.' + (member.subscriptionStatus != null ? member.subscriptionStatus.name() : 'ACTIVE')}}">Active</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Panel -->
@@ -172,6 +217,7 @@
                             <select class="filter-select" id="statusFilter">
                                 <option value="all" th:text="#{filter.status.all}">All Status</option>
                                 <option value="SUCCEEDED" th:text="#{transaction.status.SUCCEEDED}">Succeeded</option>
+                                <option value="PAID_MANUALLY" th:text="#{transaction.status.PAID_MANUALLY}">Paid (Cash)</option>
                                 <option value="PENDING" th:text="#{transaction.status.PENDING}">Pending</option>
                                 <option value="FAILED" th:text="#{transaction.status.FAILED}">Failed</option>
                                 <option value="EXPIRED" th:text="#{transaction.status.EXPIRED}">Expired</option>
@@ -198,7 +244,8 @@
                 </div>
 
                 <div class="table-container">
-                    <table class="transactions-table" id="transactionsTable">
+                    <table class="transactions-table" id="transactionsTable"
+                           th:data-msg-error="#{payment.error.generic}">
                         <thead>
                         <tr>
                             <th class="sortable" data-column="date">
@@ -221,6 +268,10 @@
                                 <i class="bi bi-check-circle"></i>
                                 <span th:text="#{transaction.status}">Status</span>
                             </th>
+                            <th>
+                                <i class="bi bi-gear"></i>
+                                <span th:text="#{table.actions}">Actions</span>
+                            </th>
                         </tr>
                         </thead>
                         <tbody id="transactionsBody">
@@ -234,9 +285,19 @@
                                       th:class="'status-pill ' + ${tx.status}"
                                       th:data-status="${tx.status}">Succeeded</span>
                                                         </td>
+                            <td class="action-cell">
+                                <button th:if="${tx.status.name() == 'PENDING'}"
+                                        type="button"
+                                        class="mark-cash-btn"
+                                        th:data-tx-id="${tx.id}"
+                                        th:title="#{transaction.markCash}">
+                                    <i class="bi bi-cash-coin"></i>
+                                    <span th:text="#{transaction.markCash}">Mark as Cash</span>
+                                </button>
+                            </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(member.transactions)}" class="no-data-row">
-                            <td colspan="5" class="text-center">
+                            <td colspan="6" class="text-center">
                                 <i class="bi bi-inbox" style="font-size: 2rem; color: #cbd5e0; margin-bottom: 0.5rem;"></i><br>
                                 <span th:text="#{transaction.none}">No transactions found</span>
                             </td>

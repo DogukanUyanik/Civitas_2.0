@@ -82,6 +82,9 @@ public class MemberController {
                              BindingResult result,
                              Model model,
                              RedirectAttributes redirectAttributes,
+                             @RequestParam(value = "subscriptionStartDate", required = false)
+                             @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
+                             java.time.LocalDate subscriptionStartDate,
                              Principal principal) {
 
         memberEmailValidator.validate(member, result);
@@ -93,7 +96,7 @@ public class MemberController {
         boolean isNew = member.getId() == null;
 
         MyUser createdByUser = myUserService.getLoggedInUser();
-        memberService.saveMember(member, createdByUser);
+        memberService.saveMember(member, createdByUser, subscriptionStartDate);
 
         if (isNew) {
             String message = messageSource.getMessage(

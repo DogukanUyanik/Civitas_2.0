@@ -75,7 +75,7 @@ public class DashboardServiceImpl implements DashboardService {
         LocalDateTime start = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay();
 
-        List<Object[]> rows = transactionRepository.revenueByDayInPeriod(union, TransactionStatus.SUCCEEDED, start, end);
+        List<Object[]> rows = transactionRepository.revenueByDayInPeriod(union, TransactionStatus.revenueStatuses(), start, end);
 
         Map<Integer, Double> dayRevenue = new LinkedHashMap<>();
         for (Object[] row : rows) {

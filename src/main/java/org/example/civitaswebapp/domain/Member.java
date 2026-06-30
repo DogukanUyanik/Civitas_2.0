@@ -6,6 +6,7 @@ import lombok.*;
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -63,6 +64,20 @@ public class Member {
     @NotNull(message = "{member.status.required}")
     @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus;
+
+    // --- Recurring subscription (membership fee) configuration ---
+    // Scalars only: never add these to id-only equals/hashCode/toString (see class comment).
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private SubscriptionFrequency subscriptionFrequency = SubscriptionFrequency.NONE;
+
+    private BigDecimal subscriptionAmount;
+
+    private LocalDate nextBillingDate;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MemberSubscriptionStatus subscriptionStatus = MemberSubscriptionStatus.ACTIVE;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Transaction> transactions = new ArrayList<>();

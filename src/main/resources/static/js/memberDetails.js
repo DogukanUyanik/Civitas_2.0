@@ -391,4 +391,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     }
+
+    // --- Mark as Cash: settle a PENDING transaction manually (no Stripe) ---
+    const txTable = document.getElementById('transactionsTable');
+    const markCashError = (txTable && txTable.dataset.msgError) || 'Something went wrong. Please try again.';
+
+    document.querySelectorAll('.mark-cash-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const txId = btn.dataset.txId;
+            if (!txId) return;
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            btn.disabled = true;
+
+            fetch(`/transactions/${txId}/mark-cash`, {
+                method: 'POST',
+                headers: { [csrfHeader]: csrfToken }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Refresh so the row's status flips to its paid state instantly.
+                        window.location.reload();
+                    } else {
+                        alert(markCashError + (data.message ? ' (' + data.message + ')' : ''));
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    console.error('Mark-as-cash error:', err);
+                    alert(markCashError);
+                    btn.disabled = false;
+                });
+        });
+    });
 });

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.criteria.Predicate;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,38 @@ public class TransactionServiceImpl implements TransactionService {
                 createdByUser.getId()
         );
         eventPublisher.publishEvent(dto);
+        return tx;
+    }
+
+    @Transactional
+    @Override
+    public Transaction createSubscriptionTransaction(Member member, double amount) {
+        // System context (scheduler): no logged-in user, so stamp the union from the member itself.
+        LocalDateTime now = LocalDateTime.now();
+        Transaction tx = Transaction.builder()
+                .member(member)
+                .union(member.getUnion())
+                .amount(amount)
+                .currency("EUR")
+                .status(TransactionStatus.PENDING)
+                .type(TransactionType.MEMBERSHIP_FEE)
+                .note("Automated subscription payment")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        transactionRepository.save(tx);
+
+        // createdByUserId is null: a system-generated charge has no acting admin, so the
+        // TransactionCreatedDto listener (which only notifies a specific creator) is a no-op here.
+        eventPublisher.publishEvent(new TransactionCreatedDto(
+                tx.getId(),
+                member.getId(),
+                member.getFirstName(),
+                member.getLastName(),
+                tx.getAmount(),
+                tx.getCreatedAt(),
+                null));
         return tx;
     }
 
@@ -154,6 +187,43 @@ public class TransactionServiceImpl implements TransactionService {
                 status
         );
         eventPublisher.publishEvent(dto);
+    }
+
+    @Transactional
+    @Override
+    public void markTransactionAsCash(Long transactionId) {
+        // Union-scoped lookup: an admin can only settle their own union's transactions.
+        Transaction transaction = transactionRepository.findByIdAndUnion(transactionId, getCurrentUserUnion())
+                .orElseThrow(() -> new RuntimeException("Transaction not found or access denied"));
+
+        if (transaction.getStatus() != TransactionStatus.PENDING) {
+            throw new IllegalStateException("Only pending transactions can be marked as cash.");
+        }
+
+        TransactionStatus oldStatus = transaction.getStatus();
+        transaction.setStatus(TransactionStatus.PAID_MANUALLY);
+        transaction.setUpdatedAt(LocalDateTime.now());
+
+        String cashNote = "Marked as cash/manual payment";
+        String existingNote = transaction.getNote();
+        transaction.setNote(existingNote == null || existingNote.isBlank()
+                ? cashNote
+                : existingNote + " | " + cashNote);
+
+        transactionRepository.save(transaction);
+
+        // Record the manual payment on the member (last payment date) — managed entity, flushed on commit.
+        Member member = transaction.getMember();
+        if (member != null) {
+            member.setDateOfLastPayment(LocalDate.now());
+        }
+
+        eventPublisher.publishEvent(new TransactionStatusChangedDto(
+                transactionId,
+                member != null ? member.getId() : null,
+                oldStatus,
+                TransactionStatus.PAID_MANUALLY
+        ));
     }
 
     @Transactional

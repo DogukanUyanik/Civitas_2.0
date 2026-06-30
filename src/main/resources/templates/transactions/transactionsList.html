@@ -34,6 +34,7 @@
                         <option value="" th:text="#{filter.status.all}">All Status</option>
                         <option value="PENDING" th:selected="${status == 'PENDING'}" th:text="#{transaction.status.PENDING}">Pending</option>
                         <option value="SUCCEEDED" th:selected="${status == 'SUCCEEDED'}" th:text="#{transaction.status.SUCCEEDED}">Succeeded</option>
+                        <option value="PAID_MANUALLY" th:selected="${status == 'PAID_MANUALLY'}" th:text="#{transaction.status.PAID_MANUALLY}">Paid (Cash)</option>
                         <option value="FAILED" th:selected="${status == 'FAILED'}" th:text="#{transaction.status.FAILED}">Failed</option>
                         <option value="EXPIRED" th:selected="${status == 'EXPIRED'}" th:text="#{transaction.status.EXPIRED}">Expired</option>
                     </select>
@@ -104,8 +105,9 @@
                 </td>
                 <td th:attr="data-label=#{transaction.table.status}">
                     <span th:classappend="${transaction.status.name() == 'SUCCEEDED'} ? 'status-pill succeeded' :
+                                         (${transaction.status.name() == 'PAID_MANUALLY'} ? 'status-pill paid-manually' :
                                          (${transaction.status.name() == 'PENDING'} ? 'status-pill pending' :
-                                         (${transaction.status.name() == 'FAILED'} ? 'status-pill failed' : 'status-pill expired'))"
+                                         (${transaction.status.name() == 'FAILED'} ? 'status-pill failed' : 'status-pill expired')))"
                           th:text="#{${'transaction.status.' + transaction.status.name()}}">Succeeded</span>
                 </td>
                 <td class="date" th:attr="data-label=#{transaction.table.date}">

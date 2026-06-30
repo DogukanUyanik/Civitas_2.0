@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,22 +35,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             TransactionStatus status, Union union, LocalDateTime start, LocalDateTime end);
 
     @Query("SELECT COALESCE(SUM(t.amount), 0.0) FROM Transaction t " +
-           "WHERE t.union = :union AND t.status = :status " +
+           "WHERE t.union = :union AND t.status IN :statuses " +
            "AND t.createdAt >= :start AND t.createdAt < :end")
-    Double sumAmountByUnionAndStatusAndPeriod(
+    Double sumAmountByUnionAndStatusesAndPeriod(
             @Param("union") Union union,
-            @Param("status") TransactionStatus status,
+            @Param("statuses") Collection<TransactionStatus> statuses,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
 
     @Query("SELECT FUNCTION('DAY', t.createdAt), SUM(t.amount) " +
            "FROM Transaction t " +
-           "WHERE t.union = :union AND t.status = :status " +
+           "WHERE t.union = :union AND t.status IN :statuses " +
            "AND t.createdAt >= :start AND t.createdAt < :end " +
            "GROUP BY FUNCTION('DAY', t.createdAt) ORDER BY FUNCTION('DAY', t.createdAt)")
     List<Object[]> revenueByDayInPeriod(
             @Param("union") Union union,
-            @Param("status") TransactionStatus status,
+            @Param("statuses") Collection<TransactionStatus> statuses,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
 }

@@ -77,6 +77,40 @@
             </select>
         </div>
 
+        <!-- Subscription Settings -->
+        <div class="subscription-card">
+            <div class="subscription-card-header">
+                <i class="fa-solid fa-rotate"></i>
+                <span th:text="#{subscription.settings.title}">Subscription Settings</span>
+            </div>
+            <p class="subscription-card-hint" th:text="#{subscription.settings.hint}">
+                Configure an automatic recurring membership fee.
+            </p>
+
+            <div class="subscription-grid">
+                <div class="form-group">
+                    <label for="subscriptionFrequency" th:text="#{subscription.frequency}">Billing Frequency</label>
+                    <select id="subscriptionFrequency" th:field="*{subscriptionFrequency}">
+                        <option th:value="NONE" th:text="#{subscription.frequency.NONE}">None</option>
+                        <option th:value="MONTHLY" th:text="#{subscription.frequency.MONTHLY}">Monthly</option>
+                        <option th:value="YEARLY" th:text="#{subscription.frequency.YEARLY}">Yearly</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subscriptionAmount" th:text="#{subscription.amount}">Amount (€)</label>
+                    <input type="number" id="subscriptionAmount" th:field="*{subscriptionAmount}"
+                           step="0.01" min="0" th:placeholder="#{subscription.amount.placeholder}" />
+                </div>
+
+                <div class="form-group">
+                    <label for="subscriptionStartDate" th:text="#{subscription.startDate}">Start Date</label>
+                    <input type="date" id="subscriptionStartDate" name="subscriptionStartDate"
+                           th:value="${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}" />
+                </div>
+            </div>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn-save">
                 <i class="fa-solid fa-floppy-disk"></i>

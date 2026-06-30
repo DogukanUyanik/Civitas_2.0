@@ -7,7 +7,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MemberStatus;
+import org.example.civitaswebapp.domain.MemberSubscriptionStatus;
 import org.example.civitaswebapp.domain.MyUser;
+import org.example.civitaswebapp.domain.SubscriptionFrequency;
 import org.example.civitaswebapp.domain.Union;
 import org.example.civitaswebapp.dto.member.BulkImportResultDto;
 import org.example.civitaswebapp.dto.member.MemberSavedEventDto;
@@ -91,7 +93,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public void saveMember(Member member, MyUser createdByUser) {
+    public void saveMember(Member member, MyUser createdByUser, LocalDate subscriptionStartDate) {
         member.setUnion(createdByUser.getUnion());
 
         boolean exists = memberRepository.existsByEmailAndUnionAndIdNot(
@@ -104,6 +106,8 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalArgumentException("Email already exists in this Union.");
         }
 
+        applySubscriptionScheduling(member, subscriptionStartDate);
+
         boolean isNew = member.getId() == null;
         memberRepository.save(member);
 
@@ -115,6 +119,38 @@ public class MemberServiceImpl implements MemberService {
                 isNew
         );
         eventPublisher.publishEvent(dto);
+    }
+
+    /**
+     * Initializes recurring-billing scheduling on the member.
+     * <ul>
+     *   <li>Frequency NONE (or null): clears any schedule — no recurring billing.</li>
+     *   <li>Enabling a subscription (no {@code nextBillingDate} yet): derives the first
+     *       {@code nextBillingDate} from the start date (default today) and the frequency.</li>
+     *   <li>Already-scheduled members: leaves {@code nextBillingDate} untouched so unrelated edits
+     *       never silently shift the billing cycle.</li>
+     * </ul>
+     */
+    private void applySubscriptionScheduling(Member member, LocalDate subscriptionStartDate) {
+        SubscriptionFrequency frequency = member.getSubscriptionFrequency();
+
+        if (frequency == null || frequency == SubscriptionFrequency.NONE) {
+            member.setSubscriptionFrequency(SubscriptionFrequency.NONE);
+            member.setNextBillingDate(null);
+            member.setSubscriptionAmount(null);
+            return;
+        }
+
+        if (member.getSubscriptionStatus() == null) {
+            member.setSubscriptionStatus(MemberSubscriptionStatus.ACTIVE);
+        }
+
+        // Only (re)compute when there is no active schedule yet — i.e. the subscription is being
+        // enabled. Editing an already-subscribed member must not reset the cycle.
+        if (member.getNextBillingDate() == null) {
+            LocalDate start = subscriptionStartDate != null ? subscriptionStartDate : LocalDate.now();
+            member.setNextBillingDate(frequency.nextBillingDate(start));
+        }
     }
 
     @Override

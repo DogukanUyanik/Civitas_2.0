@@ -26,10 +26,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/stripe/webhook")
+                        // The webhook is called by Stripe; the admin trigger is a non-browser
+                        // (curl/Postman) operational endpoint already locked down to ROLE_ADMIN.
+                        .ignoringRequestMatchers("/stripe/webhook", "/api/admin/subscriptions/trigger-job")
                         .csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/", "/login**", "/css/**", "/js/**", "/error", "/stripe/webhook").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

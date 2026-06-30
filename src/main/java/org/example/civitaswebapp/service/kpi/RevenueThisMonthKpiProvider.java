@@ -38,8 +38,8 @@ public class RevenueThisMonthKpiProvider implements KpiProvider {
         LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
         LocalDateTime now = LocalDateTime.now();
 
-        Double totalRevenue = transactionRepository.sumAmountByUnionAndStatusAndPeriod(
-                union, TransactionStatus.SUCCEEDED, startOfMonth, now);
+        Double totalRevenue = transactionRepository.sumAmountByUnionAndStatusesAndPeriod(
+                union, TransactionStatus.revenueStatuses(), startOfMonth, now);
 
         if (totalRevenue == null) totalRevenue = 0.0;
 

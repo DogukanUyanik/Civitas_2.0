@@ -91,5 +91,27 @@ public class TransactionRestController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
+    /**
+     * Settles a PENDING transaction as a manual/cash payment, bypassing Stripe. Union scoping and
+     * the pending-state guard live in the service layer.
+     */
+    @PostMapping("/{id}/mark-cash")
+    public ResponseEntity<Map<String, Object>> markAsCash(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            transactionService.markTransactionAsCash(id);
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 }
 

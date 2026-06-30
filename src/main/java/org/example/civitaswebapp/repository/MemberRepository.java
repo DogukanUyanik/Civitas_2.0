@@ -2,6 +2,8 @@ package org.example.civitaswebapp.repository;
 
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MemberStatus;
+import org.example.civitaswebapp.domain.MemberSubscriptionStatus;
+import org.example.civitaswebapp.domain.SubscriptionFrequency;
 import org.example.civitaswebapp.domain.Union;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -60,4 +62,17 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     long countByDateOfLastPaymentBeforeAndUnion(LocalDate date, Union union);
 
     List<Member> findByDateOfLastPaymentBeforeAndUnion(LocalDate date, Union union);
+
+    /**
+     * Members due for automated subscription billing across ALL unions (system-level query, not
+     * union-scoped — it is only invoked by the trusted background scheduler). Returns active
+     * subscribers with a real cadence whose next billing date has arrived.
+     */
+    @Query("SELECT m FROM Member m WHERE m.subscriptionStatus = :status " +
+            "AND m.subscriptionFrequency <> :excludedFrequency " +
+            "AND m.nextBillingDate IS NOT NULL " +
+            "AND m.nextBillingDate <= :date")
+    List<Member> findDueSubscriptions(@Param("status") MemberSubscriptionStatus status,
+                                      @Param("excludedFrequency") SubscriptionFrequency excludedFrequency,
+                                      @Param("date") LocalDate date);
 }

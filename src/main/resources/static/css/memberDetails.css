@@ -515,6 +515,12 @@
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
+.status-pill.PAID_MANUALLY {
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+    color: white;
+    box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+}
+
 .status-pill.PENDING {
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
@@ -846,4 +852,68 @@ textarea {
     background: linear-gradient(135deg, #722ca0, #047452);
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* --- Mark as Cash action --- */
+.action-cell {
+    text-align: center;
+    white-space: nowrap;
+}
+
+.mark-cash-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #047857;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.mark-cash-btn:hover {
+    background: #d1fae5;
+    border-color: #6ee7b7;
+}
+
+.mark-cash-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Subscription summary card --- */
+.subscription-info {
+    margin-top: 1.5rem;
+}
+
+.subscription-empty {
+    margin: 0.5rem 0 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.subscription-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white;
+}
+
+.subscription-badge.ACTIVE {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.subscription-badge.PAUSED {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }

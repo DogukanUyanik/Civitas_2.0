@@ -1,0 +1,31 @@
+name: Deploy Civitas to Lenovo Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: 1. Nieuwste code ophalen van GitHub
+        uses: actions/checkout@v4
+
+      - name: 2. Civitas bouwen met Maven
+        run: ./mvnw clean package -DskipTests
+
+      - name: 3. Oude versie van de app stoppen (indien actief)
+        run: pkill -f CivitasWebApp-0.0.1-SNAPSHOT.jar || true
+
+      - name: 4. De nieuwe versie verhuizen naar de home-folder
+        run: cp target/CivitasWebApp-0.0.1-SNAPSHOT.jar /home/dogukan/
+
+      - name: 5. De app geruisloos opstarten op de achtergrond
+        run: |
+          nohup java -jar /home/dogukan/CivitasWebApp-0.0.1-SNAPSHOT.jar \
+            --spring.datasource.url=jdbc:mysql://localhost:3306/civitas_db \
+            --spring.datasource.username=civitas_user \
+            --spring.datasource.password=root \
+            --spring.jpa.hibernate.ddl-auto=update > /home/dogukan/app.log 2>&1 &

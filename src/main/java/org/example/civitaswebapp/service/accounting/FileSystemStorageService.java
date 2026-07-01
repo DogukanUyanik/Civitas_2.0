@@ -14,7 +14,7 @@ import java.util.UUID;
 @Service
 public class FileSystemStorageService implements StorageService {
 
-    private final Path rootLocation = Paths.get("uploads/invoices");
+    private final Path rootLocation = Paths.get(System.getProperty("user.home") + "/uploads");
 
     public FileSystemStorageService() {
         try {

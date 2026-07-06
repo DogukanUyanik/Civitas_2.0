@@ -67,7 +67,7 @@ public class TransactionRestController {
             boolean whatsappSuccess = false;
             try {
                 if (member.getPhoneNumber() != null && !member.getPhoneNumber().isBlank()) {
-                    whatsAppService.sendPaymentLink(member.getPhoneNumber(), paymentLink);
+                    whatsAppService.sendPaymentLink(member, paymentLink);
                     whatsappSuccess = true;
                 } else {
                     response.put("whatsapp_error", "Member has no phone number on file.");

@@ -48,7 +48,7 @@ class TransactionRestControllerTest {
     @InjectMocks
     private TransactionRestController controller;
 
-    private void stubHappyTransactionPath(String phoneNumber) {
+    private Member stubHappyTransactionPath(String phoneNumber) {
         Member member = new Member();
         member.setId(1L);
         member.setPhoneNumber(phoneNumber);
@@ -61,6 +61,7 @@ class TransactionRestControllerTest {
         when(transactionService.createTransaction(any(), any(Double.class), any(TransactionType.class), any()))
                 .thenReturn(transaction);
         when(transactionService.generateStripePaymentLink(transaction)).thenReturn("https://pay.example/abc");
+        return member;
     }
 
     @SuppressWarnings("unchecked")
@@ -70,7 +71,7 @@ class TransactionRestControllerTest {
 
     @Test
     void sendPayment_reportsWhatsappSuccess_whenDeliverySucceeds() {
-        stubHappyTransactionPath("+32470123456");
+        Member member = stubHappyTransactionPath("+32470123456");
 
         ResponseEntity<Map<String, Object>> response =
                 controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
@@ -78,14 +79,14 @@ class TransactionRestControllerTest {
         Map<String, Object> body = bodyOf(response);
         assertThat(body.get("success")).isEqualTo(true);
         assertThat(body.get("whatsappSuccess")).isEqualTo(true);
-        verify(whatsAppService).sendPaymentLink("+32470123456", "https://pay.example/abc");
+        verify(whatsAppService).sendPaymentLink(member, "https://pay.example/abc");
     }
 
     @Test
     void sendPayment_reportsWhatsappFailure_whenTwilioThrows() {
         stubHappyTransactionPath("0470123456");
         doThrow(new IllegalArgumentException("Invalid phone number format"))
-                .when(whatsAppService).sendPaymentLink(anyString(), anyString());
+                .when(whatsAppService).sendPaymentLink(any(Member.class), anyString());
 
         ResponseEntity<Map<String, Object>> response =
                 controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);

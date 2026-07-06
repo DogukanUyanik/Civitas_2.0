@@ -1,6 +1,7 @@
 package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.*;
+import org.example.civitaswebapp.dto.events.EventAttendeeContact;
 import org.example.civitaswebapp.dto.events.EventRequest;
 import org.example.civitaswebapp.dto.events.EventResponseDto;
 import org.example.civitaswebapp.dto.events.EventSavedEventDto;
@@ -91,13 +92,13 @@ public class EventServiceImpl implements EventService {
 
         Event savedEvent = eventRepository.save(event);
 
-        // Capture the attendee phone numbers HERE, on the request thread, while the members are
-        // already loaded (phoneNumber is a scalar column — no collection load). The async listener
-        // then never reloads the event or its attendees PersistentSet, so the two threads can never
-        // race on the same Hibernate collection.
-        List<String> attendeePhoneNumbers = potentialAttendees.stream()
-                .map(Member::getPhoneNumber)
-                .filter(phone -> phone != null && !phone.isBlank())
+        // Capture the attendees' contact details HERE, on the request thread, while the members are
+        // already loaded (these are scalar columns — no collection load). The async listener then
+        // never reloads the event or its attendees PersistentSet, so the two threads can never race
+        // on the same Hibernate collection.
+        List<EventAttendeeContact> attendeeContacts = potentialAttendees.stream()
+                .filter(m -> m.getPhoneNumber() != null && !m.getPhoneNumber().isBlank())
+                .map(m -> new EventAttendeeContact(m.getPhoneNumber(), m.getName(), m.getLanguage()))
                 .toList();
 
         EventSavedEventDto dto = new EventSavedEventDto(
@@ -110,7 +111,7 @@ public class EventServiceImpl implements EventService {
                 savedEvent.getEventType() != null ? savedEvent.getEventType().name() : EventType.GENERAL.name(),
                 user.getId(), // Use the user passed in
                 isNew,
-                attendeePhoneNumbers
+                attendeeContacts
         );
         eventPublisher.publishEvent(dto);
 

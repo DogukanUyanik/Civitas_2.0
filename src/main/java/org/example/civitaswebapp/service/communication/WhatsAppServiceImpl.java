@@ -1,15 +1,25 @@
 package org.example.civitaswebapp.service.communication;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
+import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MemberLanguage;
 import org.example.civitaswebapp.dto.events.EventMessageDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class WhatsAppServiceImpl implements WhatsAppService {
+
+    private static final String STRIPE_CHECKOUT_BASE_URL = "https://checkout.stripe.com/";
 
     @Value("${twilio.account-sid}")
     private String accountSid;
@@ -20,39 +30,75 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     @Value("${twilio.whatsapp-number}")
     private String fromNumber;
 
+    @Autowired
+    private EventMessageFormatter eventMessageFormatter;
+
+    @Autowired
+    private WhatsAppTemplateResolver templateResolver;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @PostConstruct
     public void init() {
         com.twilio.Twilio.init(accountSid, authToken);
     }
 
     @Override
-    public void sendPaymentLink(String toNumber, String stripeLink) {
-        validatePhoneNumber(toNumber);
-        Message message = Message.creator(
-                new PhoneNumber("whatsapp:" + toNumber),
-                new PhoneNumber(fromNumber),
-                "Hi! Here’s your payment link: " + stripeLink
-        ).create();
-
-        System.out.println("WhatsApp message sent with SID: " + message.getSid());
+    public void sendPaymentLink(Member member, String stripeCheckoutUrl) {
+        validatePhoneNumber(member.getPhoneNumber());
+        String urlRemainder = stripeCheckoutUrl.startsWith(STRIPE_CHECKOUT_BASE_URL)
+                ? stripeCheckoutUrl.substring(STRIPE_CHECKOUT_BASE_URL.length())
+                : stripeCheckoutUrl;
+        String contentSid = templateResolver.resolve("payment-link", member.getLanguage());
+        sendTemplate(member.getPhoneNumber(), contentSid, List.of(member.getName(), urlRemainder));
     }
 
     @Override
-    public void sendEventNotification(String toNumber, EventMessageDetails event) {
-        String messageText = "📅 New Event: " + event.title() + "\n" +
-                "Type: " + event.eventType() + "\n" +
-                "Start: " + event.start() + "\n" +
-                "End: " + event.end() + "\n" +
-                "Location: " + event.location() + "\n" +
-                (event.description() != null ? "Description: " + event.description() : "");
+    public void sendPaymentSuccess(Member member) {
+        validatePhoneNumber(member.getPhoneNumber());
+        String contentSid = templateResolver.resolve("payment-success", member.getLanguage());
+        sendTemplate(member.getPhoneNumber(), contentSid, List.of(member.getName()));
+    }
 
-        Message message = Message.creator(
-                new PhoneNumber("whatsapp:" + toNumber),
-                new PhoneNumber(fromNumber),
-                messageText
-        ).create();
+    @Override
+    public void sendPaymentFailed(Member member) {
+        validatePhoneNumber(member.getPhoneNumber());
+        String contentSid = templateResolver.resolve("payment-failed", member.getLanguage());
+        sendTemplate(member.getPhoneNumber(), contentSid, List.of(member.getName()));
+    }
 
-        System.out.println("WhatsApp sent to " + toNumber + " with SID: " + message.getSid());
+    @Override
+    public void sendEventPlanned(String toNumber, String memberName, MemberLanguage language, EventMessageDetails event) {
+        validatePhoneNumber(toNumber);
+        String dateAndExtras = eventMessageFormatter.formatDateAndExtras(event, language);
+        String contentSid = templateResolver.resolve("event-planned", language);
+        sendTemplate(toNumber, contentSid, List.of(memberName, event.title(), dateAndExtras));
+    }
+
+    /**
+     * Sends a Twilio Content API template message. Variables are 1-indexed per Twilio's convention
+     * ({{1}}, {{2}}, ...). Phone validation happens in the calling method, before the ContentSid is
+     * resolved, so a bad number fails fast without needing template config.
+     */
+    private void sendTemplate(String toNumber, String contentSid, List<String> variables) {
+        Map<String, String> variableMap = new LinkedHashMap<>();
+        for (int i = 0; i < variables.size(); i++) {
+            variableMap.put(String.valueOf(i + 1), variables.get(i));
+        }
+
+        try {
+            Message message = Message.creator(
+                    new PhoneNumber("whatsapp:" + toNumber),
+                    new PhoneNumber(fromNumber),
+                    ""
+            ).setContentSid(contentSid)
+             .setContentVariables(objectMapper.writeValueAsString(variableMap))
+             .create();
+
+            System.out.println("WhatsApp template " + contentSid + " sent to " + toNumber + " with SID: " + message.getSid());
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize WhatsApp template variables", e);
+        }
     }
 
     /**

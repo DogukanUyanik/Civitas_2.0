@@ -65,6 +65,12 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus;
 
+    // TODO: expose this in the admin member-edit form; for now it's set programmatically/seed data
+    // only. Defaults to NL since Civitas targets Flanders (civitas.vlaanderen).
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MemberLanguage language = MemberLanguage.NL;
+
     // --- Recurring subscription (membership fee) configuration ---
     // Scalars only: never add these to id-only equals/hashCode/toString (see class comment).
     @Enumerated(EnumType.STRING)

@@ -1,5 +1,6 @@
 package org.example.civitaswebapp.service.communication;
 
+import org.example.civitaswebapp.domain.Member;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,22 +19,26 @@ class WhatsAppServiceImplTest {
 
     private final WhatsAppServiceImpl service = new WhatsAppServiceImpl();
 
+    private Member memberWithPhone(String phone) {
+        return Member.builder().firstName("Test").lastName("Member").phoneNumber(phone).build();
+    }
+
     @Test
     void sendPaymentLink_rejectsLocalNumberFormat() {
-        assertThatThrownBy(() -> service.sendPaymentLink("0470123456", "https://pay.example/abc"))
+        assertThatThrownBy(() -> service.sendPaymentLink(memberWithPhone("0470123456"), "https://pay.example/abc"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("international");
     }
 
     @Test
     void sendPaymentLink_rejectsNullNumber() {
-        assertThatThrownBy(() -> service.sendPaymentLink(null, "https://pay.example/abc"))
+        assertThatThrownBy(() -> service.sendPaymentLink(memberWithPhone(null), "https://pay.example/abc"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void sendPaymentLink_rejectsBlankNumber() {
-        assertThatThrownBy(() -> service.sendPaymentLink("   ", "https://pay.example/abc"))
+        assertThatThrownBy(() -> service.sendPaymentLink(memberWithPhone("   "), "https://pay.example/abc"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -44,7 +49,7 @@ class WhatsAppServiceImplTest {
         // Twilio/network failure is a different exception type and acceptable here.
         assertThatCode(() -> {
             try {
-                service.sendPaymentLink("+32470123456", "https://pay.example/abc");
+                service.sendPaymentLink(memberWithPhone("+32470123456"), "https://pay.example/abc");
             } catch (IllegalArgumentException validationError) {
                 throw validationError; // re-throw only validation failures
             } catch (RuntimeException twilioOrNetwork) {

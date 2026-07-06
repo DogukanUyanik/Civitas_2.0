@@ -49,7 +49,7 @@ public class EventReminderTask {
             );
 
             for (Member member : attendees){
-                whatsAppService.sendEventNotification(member.getPhoneNumber(), messageDetails);
+                whatsAppService.sendEventPlanned(member.getPhoneNumber(), member.getName(), member.getLanguage(), messageDetails);
             }
         }
     }

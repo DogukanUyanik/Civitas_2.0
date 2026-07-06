@@ -72,7 +72,7 @@ class SubscriptionBillingProcessorTest {
 
         verify(transactionService).createSubscriptionTransaction(member, 25.0);
         verify(transactionService).generateStripePaymentLink(tx);
-        verify(whatsAppService).sendPaymentLink("+32470123456", "https://pay.example/abc");
+        verify(whatsAppService).sendPaymentLink(member, "https://pay.example/abc");
         assertThat(member.getNextBillingDate()).isEqualTo(LocalDate.of(2026, 7, 30));
         verify(memberRepository).save(member);
     }
@@ -89,7 +89,7 @@ class SubscriptionBillingProcessorTest {
         processor.processDueMember(7L);
 
         assertThat(member.getNextBillingDate()).isEqualTo(LocalDate.of(2027, 6, 30));
-        verify(whatsAppService).sendPaymentLink("+32470123456", "https://pay.example/xyz");
+        verify(whatsAppService).sendPaymentLink(member, "https://pay.example/xyz");
     }
 
     @Test

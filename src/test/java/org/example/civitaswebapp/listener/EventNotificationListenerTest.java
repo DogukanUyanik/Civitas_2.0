@@ -1,7 +1,9 @@
 package org.example.civitaswebapp.listener;
 
+import org.example.civitaswebapp.domain.MemberLanguage;
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.NotificationType;
+import org.example.civitaswebapp.dto.events.EventAttendeeContact;
 import org.example.civitaswebapp.dto.events.EventMessageDetails;
 import org.example.civitaswebapp.dto.events.EventSavedEventDto;
 import org.example.civitaswebapp.repository.EventRepository;
@@ -48,7 +50,7 @@ class EventNotificationListenerTest {
     @InjectMocks
     private EventNotificationListener listener;
 
-    private EventSavedEventDto dtoWithAttendees(List<String> phones) {
+    private EventSavedEventDto dtoWithAttendees(List<EventAttendeeContact> attendees) {
         return new EventSavedEventDto(
                 7L,
                 "Kickoff",
@@ -59,14 +61,16 @@ class EventNotificationListenerTest {
                 "GENERAL",
                 1L,
                 true,
-                phones
+                attendees
         );
     }
 
     @Test
     void handleEventSaved_messagesEachAttendeeFromDto_withoutLoadingTheEvent() {
         when(myUserRepository.findById(1L)).thenReturn(Optional.of(new MyUser()));
-        EventSavedEventDto dto = dtoWithAttendees(List.of("+32470000001", "+32470000002"));
+        EventSavedEventDto dto = dtoWithAttendees(List.of(
+                new EventAttendeeContact("+32470000001", "Alice", MemberLanguage.NL),
+                new EventAttendeeContact("+32470000002", "Bob", MemberLanguage.EN)));
 
         listener.handleEventSaved(dto);
 
@@ -79,13 +83,15 @@ class EventNotificationListenerTest {
                 eq(NotificationType.EVENT),
                 eq("/events/7"));
 
-        // One WhatsApp per phone carried in the DTO — message details built from scalars, no entity.
+        // One WhatsApp per attendee carried in the DTO — message details built from scalars, no entity.
         ArgumentCaptor<String> phoneCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<EventMessageDetails> detailsCaptor = ArgumentCaptor.forClass(EventMessageDetails.class);
         verify(whatsAppService, org.mockito.Mockito.times(2))
-                .sendEventNotification(phoneCaptor.capture(), detailsCaptor.capture());
+                .sendEventPlanned(phoneCaptor.capture(), nameCaptor.capture(), any(), detailsCaptor.capture());
 
         assertThat(phoneCaptor.getAllValues()).containsExactly("+32470000001", "+32470000002");
+        assertThat(nameCaptor.getAllValues()).containsExactly("Alice", "Bob");
         assertThat(detailsCaptor.getValue().title()).isEqualTo("Kickoff");
         assertThat(detailsCaptor.getValue().location()).isEqualTo("Ghent");
     }

@@ -53,7 +53,7 @@ public class SubscriptionBillingProcessor {
 
         // 3. Deliver the link over WhatsApp. An invalid/unroutable number throws here, which rolls
         //    back this member's transaction so nothing half-finished is left behind.
-        whatsAppService.sendPaymentLink(member.getPhoneNumber(), paymentLink);
+        whatsAppService.sendPaymentLink(member, paymentLink);
 
         // 4. Advance the billing clock from the CURRENT nextBillingDate (not "today"), so cycles
         //    stay anchored to the original schedule even if a run is late.

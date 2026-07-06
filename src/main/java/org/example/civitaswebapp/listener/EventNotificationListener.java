@@ -2,6 +2,7 @@ package org.example.civitaswebapp.listener;
 
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.NotificationType;
+import org.example.civitaswebapp.dto.events.EventAttendeeContact;
 import org.example.civitaswebapp.dto.events.EventMessageDetails;
 import org.example.civitaswebapp.dto.events.EventSavedEventDto;
 import org.example.civitaswebapp.repository.MyUserRepository;
@@ -58,11 +59,11 @@ public class EventNotificationListener {
                 dto.description()
         );
 
-        for (String phoneNumber : dto.attendeePhoneNumbers()) {
+        for (EventAttendeeContact contact : dto.attendees()) {
             try {
-                whatsAppService.sendEventNotification(phoneNumber, messageDetails);
+                whatsAppService.sendEventPlanned(contact.phoneNumber(), contact.name(), contact.language(), messageDetails);
             } catch (Exception e) {
-                System.err.println("Failed to WhatsApp " + phoneNumber + ": " + e.getMessage());
+                System.err.println("Failed to WhatsApp " + contact.phoneNumber() + ": " + e.getMessage());
             }
         }
     }

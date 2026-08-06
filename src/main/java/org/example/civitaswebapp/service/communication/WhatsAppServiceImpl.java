@@ -80,24 +80,48 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * ({{1}}, {{2}}, ...). Phone validation happens in the calling method, before the ContentSid is
      * resolved, so a bad number fails fast without needing template config.
      */
+    /**
+     * Sends a Twilio Content API template message. Variables are 1-indexed per Twilio's convention
+     * ({{1}}, {{2}}, ...). Phone validation happens in the calling method, before the ContentSid is
+     * resolved, so a bad number fails fast without needing template config.
+     */
     private void sendTemplate(String toNumber, String contentSid, List<String> variables) {
-        Map<String, String> variableMap = new LinkedHashMap<>();
-        for (int i = 0; i < variables.size(); i++) {
-            variableMap.put(String.valueOf(i + 1), variables.get(i));
-        }
-
         try {
-            Message message = Message.creator(
-                    new PhoneNumber("whatsapp:" + toNumber),
-                    new PhoneNumber(fromNumber),
-                    ""
-            ).setContentSid(contentSid)
-             .setContentVariables(objectMapper.writeValueAsString(variableMap))
-             .create();
+            Message message;
 
-            System.out.println("WhatsApp template " + contentSid + " sent to " + toNumber + " with SID: " + message.getSid());
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to serialize WhatsApp template variables", e);
+            // Als het een echte, goedgekeurde Twilio code is (begint met HX, en is geen 'test' of 'x' placeholder)
+            if (contentSid.startsWith("HX") && !contentSid.contains("x") && !contentSid.contains("test")) {
+
+                Map<String, String> variableMap = new LinkedHashMap<>();
+                for (int i = 0; i < variables.size(); i++) {
+                    variableMap.put(String.valueOf(i + 1), variables.get(i));
+                }
+
+                message = Message.creator(
+                                new PhoneNumber("whatsapp:" + toNumber),
+                                new PhoneNumber(fromNumber),
+                                ""
+                        ).setContentSid(contentSid)
+                        .setContentVariables(objectMapper.writeValueAsString(variableMap))
+                        .create();
+
+            } else {
+                // LOKAAL / SANDBOX MODUS: Twilio accepteert lokaal geen nep-templates.
+                // We vallen terug op een standaard tekstbericht.
+                // Let op: Dit werkt in de Sandbox alleen als je een 24-uurs sessie hebt geopend!
+                String fallbackText = "🔔 [Sandbox Testbericht]\nActie uitgevoerd voor: " + variables.get(0) + "\nDetails: " + String.join(" | ", variables);
+
+                message = Message.creator(
+                        new PhoneNumber("whatsapp:" + toNumber),
+                        new PhoneNumber(fromNumber),
+                        fallbackText
+                ).create();
+            }
+
+            System.out.println("WhatsApp bericht verstuurd naar " + toNumber + " met SID: " + message.getSid());
+
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to send WhatsApp message: " + e.getMessage(), e);
         }
     }
 

@@ -121,14 +121,7 @@
                             <span class="tooltip" th:text="#{sidebar.dashboard}">Dashboard</span>
                         </a>
                     </li>
-                    <li>
-                        <a th:href="@{/reports}" th:classappend="${currentUri == '/reports'} ? 'active' : ''"
-                           th:title="#{sidebar.reports}">
-                            <i class="fa-solid fa-chart-bar"></i>
-                            <span class="link-text" th:text="#{sidebar.reports}">Reports</span>
-                            <span class="tooltip" th:text="#{sidebar.reports}">Reports</span>
-                        </a>
-                    </li>
+
                     <li>
                         <a th:href="@{/accounting}" th:classappend="${currentUri == '/accounting'} ? 'active' : ''"
                            th:title="#{sidebar.accounting}">

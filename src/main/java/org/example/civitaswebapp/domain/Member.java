@@ -65,8 +65,10 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus;
 
-    // TODO: expose this in the admin member-edit form; for now it's set programmatically/seed data
-    // only. Defaults to NL since Civitas targets Flanders (civitas.vlaanderen).
+    // Language the member is contacted in (WhatsApp templates, event reminders). Defaults to NL
+    // since Civitas targets Flanders (civitas.vlaanderen). The column is left nullable on purpose:
+    // rows predating it can hold NULL, which the send path tolerates via MemberLanguage.orDefault.
+    @NotNull(message = "{member.language.required}")
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private MemberLanguage language = MemberLanguage.NL;

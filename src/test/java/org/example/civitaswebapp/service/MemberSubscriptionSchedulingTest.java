@@ -1,6 +1,7 @@
 package org.example.civitaswebapp.service;
 
 import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MemberLanguage;
 import org.example.civitaswebapp.domain.MemberStatus;
 import org.example.civitaswebapp.domain.MemberSubscriptionStatus;
 import org.example.civitaswebapp.domain.MyUser;
@@ -16,9 +17,11 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Verifies the Phase-1 subscription scheduling contract in {@code MemberServiceImpl.saveMember}:
@@ -107,15 +110,67 @@ class MemberSubscriptionSchedulingTest {
     @Test
     void existingSchedule_isNotReshuffledOnEdit() {
         LocalDate existing = LocalDate.of(2026, 8, 15);
-        Member member = baseMember()
-                .id(42L) // existing member
+        MyUser user = user();
+
+        // The edit form does not render nextBillingDate, so the bound entity never carries it. The
+        // schedule has to be read back from the persisted row — which is the only reason this
+        // guarantee can hold at all.
+        Member persisted = baseMember()
+                .id(42L)
                 .subscriptionFrequency(SubscriptionFrequency.MONTHLY)
                 .nextBillingDate(existing)
+                .union(user.getUnion())
+                .build();
+        when(myUserService.getLoggedInUser()).thenReturn(user);
+        when(memberRepository.findById(42L)).thenReturn(Optional.of(persisted));
+
+        Member formSubmission = baseMember()
+                .id(42L)
+                .subscriptionFrequency(SubscriptionFrequency.MONTHLY)
                 .build();
 
         // Editing with a different start date must NOT move the existing billing cycle.
-        memberService.saveMember(member, user(), LocalDate.of(2026, 6, 30));
+        memberService.saveMember(formSubmission, user, LocalDate.of(2026, 6, 30));
 
-        assertThat(member.getNextBillingDate()).isEqualTo(existing);
+        assertThat(persisted.getNextBillingDate()).isEqualTo(existing);
+    }
+
+    @Test
+    void editing_preservesFieldsTheFormDoesNotRender() {
+        // Saving the detached form entity wholesale used to null every unrendered column: the
+        // member's last payment date vanished and their language silently reverted to NL.
+        LocalDate lastPayment = LocalDate.of(2026, 5, 1);
+        MyUser user = user();
+
+        Member persisted = baseMember()
+                .id(42L)
+                .dateOfLastPayment(lastPayment)
+                .subscriptionStatus(MemberSubscriptionStatus.PAUSED)
+                .union(user.getUnion())
+                .build();
+        when(myUserService.getLoggedInUser()).thenReturn(user);
+        when(memberRepository.findById(42L)).thenReturn(Optional.of(persisted));
+
+        Member formSubmission = baseMember().id(42L).address("2 New St").build();
+
+        memberService.saveMember(formSubmission, user, null);
+
+        assertThat(persisted.getAddress()).isEqualTo("2 New St");
+        assertThat(persisted.getDateOfLastPayment()).isEqualTo(lastPayment);
+        assertThat(persisted.getSubscriptionStatus()).isEqualTo(MemberSubscriptionStatus.PAUSED);
+    }
+
+    @Test
+    void editing_appliesTheSelectedLanguageToThePersistedMember() {
+        MyUser user = user();
+        Member persisted = baseMember().id(42L).language(MemberLanguage.NL).union(user.getUnion()).build();
+        when(myUserService.getLoggedInUser()).thenReturn(user);
+        when(memberRepository.findById(42L)).thenReturn(Optional.of(persisted));
+
+        Member formSubmission = baseMember().id(42L).language(MemberLanguage.TR).build();
+
+        memberService.saveMember(formSubmission, user, null);
+
+        assertThat(persisted.getLanguage()).isEqualTo(MemberLanguage.TR);
     }
 }

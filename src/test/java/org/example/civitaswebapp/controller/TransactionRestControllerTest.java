@@ -1,5 +1,7 @@
 package org.example.civitaswebapp.controller;
 
+import com.twilio.exception.ApiConnectionException;
+import com.twilio.exception.ApiException;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MyUser;
 import org.example.civitaswebapp.domain.Transaction;
@@ -13,8 +15,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,6 +36,12 @@ import static org.mockito.Mockito.when;
  * transaction is created regardless of delivery, but the response must expose a truthful
  * {@code whatsappSuccess} flag so the UI never shows a false "sent via WhatsApp" toast when Twilio
  * actually rejected the number (e.g. a local {@code 04...} instead of {@code +32...}).
+ *
+ * <p>It also guards the <em>classification</em> of that failure. The admin used to be told to check
+ * the phone number no matter what actually went wrong, so each cause must map to its own
+ * {@code whatsapp_error_code}. Assertions target the code and the message key, never the translated
+ * prose — {@link MessageSource} is stubbed to echo the key back so rewording a translation cannot
+ * break these tests.
  */
 @ExtendWith(MockitoExtension.class)
 class TransactionRestControllerTest {
@@ -44,9 +54,25 @@ class TransactionRestControllerTest {
     private WhatsAppService whatsAppService;
     @Mock
     private MyUserService myUserService;
+    @Mock
+    private MessageSource messageSource;
 
     @InjectMocks
     private TransactionRestController controller;
+
+    /** Makes {@code whatsapp_error} carry the message key, so assertions stay translation-agnostic. */
+    private void stubMessageSourceEchoingKeys() {
+        when(messageSource.getMessage(anyString(), any(), any(Locale.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void assertWhatsappFailure(Map<String, Object> body, String expectedCode, String expectedKey) {
+        // The transaction was still created, but delivery must NOT be reported as successful.
+        assertThat(body.get("success")).isEqualTo(true);
+        assertThat(body.get("whatsappSuccess")).isEqualTo(false);
+        assertThat(body.get("whatsapp_error_code")).isEqualTo(expectedCode);
+        assertThat(body.get("whatsapp_error")).isEqualTo(expectedKey);
+    }
 
     private Member stubHappyTransactionPath(String phoneNumber) {
         Member member = new Member();
@@ -83,32 +109,85 @@ class TransactionRestControllerTest {
     }
 
     @Test
-    void sendPayment_reportsWhatsappFailure_whenTwilioThrows() {
+    void sendPayment_reportsPhoneInvalid_whenNumberIsNotInternational() {
         stubHappyTransactionPath("0470123456");
+        stubMessageSourceEchoingKeys();
         doThrow(new IllegalArgumentException("Invalid phone number format"))
                 .when(whatsAppService).sendPaymentLink(any(Member.class), anyString());
 
         ResponseEntity<Map<String, Object>> response =
                 controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
 
-        Map<String, Object> body = bodyOf(response);
-        // The transaction was still created, but delivery must NOT be reported as successful.
-        assertThat(body.get("success")).isEqualTo(true);
-        assertThat(body.get("whatsappSuccess")).isEqualTo(false);
-        assertThat(body.get("whatsapp_error")).asString().contains("could not be sent");
+        assertWhatsappFailure(bodyOf(response), "PHONE_INVALID", "payment.whatsapp.error.phoneInvalid");
     }
 
     @Test
-    void sendPayment_reportsWhatsappFailure_whenMemberHasNoPhone() {
+    void sendPayment_reportsPhoneMissing_whenMemberHasNoPhone() {
         stubHappyTransactionPath(null);
+        stubMessageSourceEchoingKeys();
 
         ResponseEntity<Map<String, Object>> response =
                 controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
 
-        Map<String, Object> body = bodyOf(response);
-        assertThat(body.get("success")).isEqualTo(true);
-        assertThat(body.get("whatsappSuccess")).isEqualTo(false);
+        assertWhatsappFailure(bodyOf(response), "PHONE_MISSING", "payment.whatsapp.error.phoneMissing");
         verify(whatsAppService, never()).sendPaymentLink(any(), any());
+    }
+
+    @Test
+    void sendPayment_reportsTwilioRejected_whenProviderRefusesTheMessage() {
+        stubHappyTransactionPath("+32470123456");
+        stubMessageSourceEchoingKeys();
+        doThrow(new ApiException("Invalid To number", 21211, null, 400, null))
+                .when(whatsAppService).sendPaymentLink(any(Member.class), anyString());
+
+        ResponseEntity<Map<String, Object>> response =
+                controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
+
+        assertWhatsappFailure(bodyOf(response), "TWILIO_REJECTED", "payment.whatsapp.error.provider");
+    }
+
+    @Test
+    void sendPayment_reportsTwilioRejected_whenProviderIsUnreachable() {
+        // A network failure is still an external problem, not a misconfiguration — it must not be
+        // reported to the admin as one.
+        stubHappyTransactionPath("+32470123456");
+        stubMessageSourceEchoingKeys();
+        doThrow(new ApiConnectionException("Connection refused"))
+                .when(whatsAppService).sendPaymentLink(any(Member.class), anyString());
+
+        ResponseEntity<Map<String, Object>> response =
+                controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
+
+        assertWhatsappFailure(bodyOf(response), "TWILIO_REJECTED", "payment.whatsapp.error.provider");
+    }
+
+    @Test
+    void sendPayment_reportsSystemError_whenTemplateIsNotConfigured() {
+        stubHappyTransactionPath("+32470123456");
+        stubMessageSourceEchoingKeys();
+        doThrow(new IllegalStateException("No Twilio content SID configured for template 'payment-link'"))
+                .when(whatsAppService).sendPaymentLink(any(Member.class), anyString());
+
+        ResponseEntity<Map<String, Object>> response =
+                controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
+
+        assertWhatsappFailure(bodyOf(response), "SYSTEM_ERROR", "payment.whatsapp.error.system");
+    }
+
+    @Test
+    void sendPayment_reportsSystemError_whenFailureIsUnexpected() {
+        // The catch-all backstop must still keep whatsappSuccess false rather than 500-ing the
+        // request: the transaction itself was created successfully.
+        stubHappyTransactionPath("+32470123456");
+        stubMessageSourceEchoingKeys();
+        doThrow(new RuntimeException("boom"))
+                .when(whatsAppService).sendPaymentLink(any(Member.class), anyString());
+
+        ResponseEntity<Map<String, Object>> response =
+                controller.sendPayment(1L, 50.0, "EUR", "MEMBERSHIP_FEE", null);
+
+        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+        assertWhatsappFailure(bodyOf(response), "SYSTEM_ERROR", "payment.whatsapp.error.system");
     }
 
     @Test

@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.civitaswebapp.domain.Member;
+import org.example.civitaswebapp.domain.MemberLanguage;
 import org.example.civitaswebapp.domain.MemberStatus;
 import org.example.civitaswebapp.domain.MemberSubscriptionStatus;
 import org.example.civitaswebapp.domain.MyUser;
@@ -106,19 +107,52 @@ public class MemberServiceImpl implements MemberService {
             throw new IllegalArgumentException("Email already exists in this Union.");
         }
 
-        applySubscriptionScheduling(member, subscriptionStartDate);
-
         boolean isNew = member.getId() == null;
-        memberRepository.save(member);
+        Member toSave = isNew ? member : applyFormFieldsToPersisted(member);
+
+        applySubscriptionScheduling(toSave, subscriptionStartDate);
+        memberRepository.save(toSave);
 
         var dto = new MemberSavedEventDto(
-                member.getId(),
-                member.getFirstName(),
-                member.getLastName(),
+                toSave.getId(),
+                toSave.getFirstName(),
+                toSave.getLastName(),
                 createdByUser.getId(),
                 isNew
         );
         eventPublisher.publishEvent(dto);
+    }
+
+    /**
+     * Copies the edit form's fields onto the persisted member and returns that managed instance.
+     *
+     * <p>{@code MemberController.saveMember} binds a fresh, <em>detached</em> {@code Member} from the
+     * form, so saving it directly overwrote every column — including the ones the form has no input
+     * for. That silently cleared {@code dateOfLastPayment}, reset {@code language} to the field
+     * default, and nulled {@code nextBillingDate}, which in turn made
+     * {@link #applySubscriptionScheduling}'s "unrelated edits never shift the billing cycle"
+     * guarantee unreachable. Copying in this direction means an unrendered field is simply left
+     * alone, so adding a column to the entity can no longer silently break editing.
+     *
+     * <p>Reads through {@link #findById} so a forged id belonging to another union is treated as
+     * not-found instead of being absorbed into the caller's union.
+     */
+    private Member applyFormFieldsToPersisted(Member member) {
+        Member persisted = findById(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Member not found: " + member.getId()));
+
+        persisted.setFirstName(member.getFirstName());
+        persisted.setLastName(member.getLastName());
+        persisted.setEmail(member.getEmail());
+        persisted.setPhoneNumber(member.getPhoneNumber());
+        persisted.setAddress(member.getAddress());
+        persisted.setDateOfBirth(member.getDateOfBirth());
+        persisted.setMemberStatus(member.getMemberStatus());
+        persisted.setLanguage(member.getLanguage());
+        persisted.setSubscriptionFrequency(member.getSubscriptionFrequency());
+        persisted.setSubscriptionAmount(member.getSubscriptionAmount());
+
+        return persisted;
     }
 
     /**
@@ -229,6 +263,7 @@ public class MemberServiceImpl implements MemberService {
 
             int colFirstName   = -1, colLastName  = -1, colEmail    = -1;
             int colPhone       = -1, colAddress   = -1, colDob      = -1, colStatus = -1;
+            int colLanguage    = -1;
 
             for (int c = 0; c < headerRow.getLastCellNum(); c++) {
                 String header = cellAsString(headerRow.getCell(c)).toLowerCase().trim();
@@ -239,6 +274,7 @@ public class MemberServiceImpl implements MemberService {
                 else if (matches(header, "adres", "address", "street"))                                 colAddress   = c;
                 else if (matches(header, "geboortedatum", "birthday", "birth", "doğum"))                colDob       = c;
                 else if (matches(header, "status"))                                                     colStatus    = c;
+                else if (matches(header, "taal", "language", "dil"))                                    colLanguage  = c;
             }
 
             // Log the discovered column map for debugging
@@ -250,6 +286,7 @@ public class MemberServiceImpl implements MemberService {
             colMap.put("address",   colAddress);
             colMap.put("dob",       colDob);
             colMap.put("status",    colStatus);
+            colMap.put("language",  colLanguage);
             log.info("Detected columns: {}", colMap);
 
             // Validate required headers
@@ -278,12 +315,13 @@ public class MemberServiceImpl implements MemberService {
                 String address     = colAddress >= 0 ? cellAsString(row.getCell(colAddress)) : "";
                 String dobRaw      = colDob     >= 0 ? cellAsString(row.getCell(colDob))     : "";
                 String statusRaw   = colStatus  >= 0 ? cellAsString(row.getCell(colStatus))  : "";
+                String languageRaw = colLanguage >= 0 ? cellAsString(row.getCell(colLanguage)) : "";
 
                 // Skip completely empty rows
                 if (firstName.isBlank() && lastName.isBlank() && email.isBlank()) continue;
 
-                log.debug("Row {}: firstName='{}' lastName='{}' email='{}' phone='{}' address='{}' dob='{}' status='{}'",
-                        i + 1, firstName, lastName, email, phoneNumber, address, dobRaw, statusRaw);
+                log.debug("Row {}: firstName='{}' lastName='{}' email='{}' phone='{}' address='{}' dob='{}' status='{}' language='{}'",
+                        i + 1, firstName, lastName, email, phoneNumber, address, dobRaw, statusRaw, languageRaw);
 
                 // Validate required fields
                 if (firstName.isBlank() || lastName.isBlank()) {
@@ -329,6 +367,11 @@ public class MemberServiceImpl implements MemberService {
                     try { status = MemberStatus.valueOf(statusRaw.toUpperCase()); } catch (IllegalArgumentException ignored) {}
                 }
 
+                MemberLanguage language = MemberLanguage.DEFAULT;
+                if (!languageRaw.isBlank()) {
+                    try { language = MemberLanguage.valueOf(languageRaw.trim().toUpperCase()); } catch (IllegalArgumentException ignored) {}
+                }
+
                 validMembers.add(Member.builder()
                         .firstName(firstName)
                         .lastName(lastName)
@@ -337,6 +380,7 @@ public class MemberServiceImpl implements MemberService {
                         .address(address)
                         .dateOfBirth(dateOfBirth)
                         .memberStatus(status)
+                        .language(language)
                         .union(union)
                         .build());
             }

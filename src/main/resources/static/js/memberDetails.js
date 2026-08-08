@@ -367,10 +367,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         // The transaction was created either way. Auto-refresh so the new
                         // transaction appears in the history table without a manual F5.
                         if (data.whatsappSuccess === false) {
-                            // Twilio actually failed to deliver (e.g. a local "04..." number
-                            // instead of "+32..."): do NOT claim success. The alert blocks until
-                            // dismissed, then we reload to surface the new transaction.
-                            alert(messages.whatsappFailed);
+                            // Delivery failed: do NOT claim success. The server already resolved
+                            // whatsapp_error in the user's locale and named the actual cause (bad
+                            // number, Twilio rejection, misconfiguration) — prefer it over the
+                            // generic fallback. The alert blocks until dismissed, then we reload
+                            // to surface the new transaction.
+                            alert(data.whatsapp_error || messages.whatsappFailed);
                             window.location.reload();
                         } else {
                             if (paymentResult && paymentLink) {

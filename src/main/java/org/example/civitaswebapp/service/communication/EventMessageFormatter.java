@@ -2,6 +2,8 @@ package org.example.civitaswebapp.service.communication;
 
 import org.example.civitaswebapp.domain.MemberLanguage;
 import org.example.civitaswebapp.dto.events.EventMessageDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ import java.util.Locale;
 @Component
 public class EventMessageFormatter {
 
+    private static final Logger log = LoggerFactory.getLogger(EventMessageFormatter.class);
+
     private final MessageSource messageSource;
 
     public EventMessageFormatter(MessageSource messageSource) {
@@ -26,8 +30,14 @@ public class EventMessageFormatter {
     }
 
     public String formatDateAndExtras(EventMessageDetails event, MemberLanguage language) {
-        Locale locale = toLocale(language);
-        StringBuilder sb = new StringBuilder(formatDateTime(event.start(), language, locale));
+        MemberLanguage effective = MemberLanguage.orDefault(language);
+        if (language == null) {
+            log.warn("Event attendee has no language set; formatting '{}' in {}",
+                    event.title(), MemberLanguage.DEFAULT);
+        }
+
+        Locale locale = toLocale(effective);
+        StringBuilder sb = new StringBuilder(formatDateTime(event.start(), effective, locale));
 
         if (event.location() != null && !event.location().isBlank()) {
             sb.append("\n").append(messageSource.getMessage(

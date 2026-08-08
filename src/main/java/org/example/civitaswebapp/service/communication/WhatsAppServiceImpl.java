@@ -7,6 +7,8 @@ import com.twilio.type.PhoneNumber;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MemberLanguage;
 import org.example.civitaswebapp.dto.events.EventMessageDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.Map;
 
 @Service
 public class WhatsAppServiceImpl implements WhatsAppService {
+
+    private static final Logger log = LoggerFactory.getLogger(WhatsAppServiceImpl.class);
 
     private static final String STRIPE_CHECKOUT_BASE_URL = "https://checkout.stripe.com/";
 
@@ -79,11 +83,10 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * Sends a Twilio Content API template message. Variables are 1-indexed per Twilio's convention
      * ({{1}}, {{2}}, ...). Phone validation happens in the calling method, before the ContentSid is
      * resolved, so a bad number fails fast without needing template config.
-     */
-    /**
-     * Sends a Twilio Content API template message. Variables are 1-indexed per Twilio's convention
-     * ({{1}}, {{2}}, ...). Phone validation happens in the calling method, before the ContentSid is
-     * resolved, so a bad number fails fast without needing template config.
+     *
+     * <p>Twilio's own exceptions are deliberately <em>not</em> caught here: callers distinguish a
+     * provider rejection ({@link com.twilio.exception.ApiException}) from a configuration problem
+     * ({@link IllegalStateException}), which is impossible once everything is wrapped in one type.
      */
     private void sendTemplate(String toNumber, String contentSid, List<String> variables) {
         try {
@@ -118,10 +121,11 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                 ).create();
             }
 
-            System.out.println("WhatsApp bericht verstuurd naar " + toNumber + " met SID: " + message.getSid());
+            log.info("WhatsApp message sent to {} (SID {})", toNumber, message.getSid());
 
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to send WhatsApp message: " + e.getMessage(), e);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(
+                    "Failed to serialize WhatsApp template variables for ContentSid " + contentSid, e);
         }
     }
 

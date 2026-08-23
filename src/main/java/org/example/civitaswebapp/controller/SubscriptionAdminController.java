@@ -26,4 +26,14 @@ public class SubscriptionAdminController {
     public ResponseEntity<SubscriptionBillingResult> triggerBillingJob() {
         return ResponseEntity.ok(billingService.runDueSubscriptions());
     }
+
+    /**
+     * One-off cleanup for members left with duplicate outstanding PENDING membership-fee charges
+     * (e.g. from before the duplicate-billing guard existed). Idempotent — safe to call more than
+     * once. Returns the number of transactions expired.
+     */
+    @PostMapping("/cleanup-duplicate-pending")
+    public ResponseEntity<Integer> cleanupDuplicatePending() {
+        return ResponseEntity.ok(billingService.cleanupDuplicatePendingSubscriptionTransactions());
+    }
 }

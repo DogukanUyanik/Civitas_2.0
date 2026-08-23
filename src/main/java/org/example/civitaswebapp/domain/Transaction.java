@@ -50,6 +50,11 @@ public class Transaction {
 
     private LocalDateTime updatedAt;
 
+    // Only set for automated subscription reminders (see SubscriptionBillingProcessor) — tracks
+    // when a payment-link reminder was last resent for a still-unpaid PENDING transaction, so
+    // reminders are throttled to a cooldown window instead of firing on every scheduler run.
+    private LocalDateTime lastReminderSentAt;
+
     private String note;
 
     @ManyToOne

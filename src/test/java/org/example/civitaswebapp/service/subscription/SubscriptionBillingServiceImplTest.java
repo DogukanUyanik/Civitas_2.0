@@ -3,8 +3,12 @@ package org.example.civitaswebapp.service.subscription;
 import org.example.civitaswebapp.domain.Member;
 import org.example.civitaswebapp.domain.MemberSubscriptionStatus;
 import org.example.civitaswebapp.domain.SubscriptionFrequency;
+import org.example.civitaswebapp.domain.Transaction;
+import org.example.civitaswebapp.domain.TransactionStatus;
+import org.example.civitaswebapp.domain.TransactionType;
 import org.example.civitaswebapp.dto.subscription.SubscriptionBillingResult;
 import org.example.civitaswebapp.repository.MemberRepository;
+import org.example.civitaswebapp.repository.TransactionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +37,8 @@ class SubscriptionBillingServiceImplTest {
 
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private TransactionRepository transactionRepository;
     @Mock
     private SubscriptionBillingProcessor processor;
 
@@ -83,5 +91,50 @@ class SubscriptionBillingServiceImplTest {
         assertThat(result.due()).isEqualTo(3);
         assertThat(result.succeeded()).isEqualTo(2);
         assertThat(result.failed()).isEqualTo(1);
+    }
+
+    private Transaction pendingTx(long id, Member member, LocalDateTime createdAt) {
+        return Transaction.builder()
+                .id(id).member(member).status(TransactionStatus.PENDING).createdAt(createdAt)
+                .build();
+    }
+
+    @Test
+    void cleanup_expiresAllButTheMostRecentPendingChargePerMember() {
+        Member ada = member(1);
+        Member bob = member(2);
+        // Repository contract: ordered by member id asc, createdAt desc within each member.
+        Transaction adaNewest = pendingTx(10L, ada, LocalDateTime.now().minusDays(1));
+        Transaction adaOlder1 = pendingTx(11L, ada, LocalDateTime.now().minusDays(5));
+        Transaction adaOlder2 = pendingTx(12L, ada, LocalDateTime.now().minusDays(9));
+        Transaction bobOnly = pendingTx(20L, bob, LocalDateTime.now().minusDays(2));
+
+        when(transactionRepository.findAllByTypeAndStatusOrderByMemberIdAscCreatedAtDesc(
+                eq(TransactionType.MEMBERSHIP_FEE), eq(TransactionStatus.PENDING)))
+                .thenReturn(List.of(adaNewest, adaOlder1, adaOlder2, bobOnly));
+
+        int expired = billingService.cleanupDuplicatePendingSubscriptionTransactions();
+
+        assertThat(expired).isEqualTo(2);
+        assertThat(adaNewest.getStatus()).isEqualTo(TransactionStatus.PENDING); // kept
+        assertThat(adaOlder1.getStatus()).isEqualTo(TransactionStatus.EXPIRED);
+        assertThat(adaOlder2.getStatus()).isEqualTo(TransactionStatus.EXPIRED);
+        assertThat(bobOnly.getStatus()).isEqualTo(TransactionStatus.PENDING); // only one, untouched
+        verify(transactionRepository).save(adaOlder1);
+        verify(transactionRepository).save(adaOlder2);
+        verify(transactionRepository, never()).save(adaNewest);
+        verify(transactionRepository, never()).save(bobOnly);
+    }
+
+    @Test
+    void cleanup_isNoOpWhenNoMemberHasDuplicates() {
+        Member ada = member(1);
+        when(transactionRepository.findAllByTypeAndStatusOrderByMemberIdAscCreatedAtDesc(any(), any()))
+                .thenReturn(List.of(pendingTx(10L, ada, LocalDateTime.now())));
+
+        int expired = billingService.cleanupDuplicatePendingSubscriptionTransactions();
+
+        assertThat(expired).isZero();
+        verify(transactionRepository, never()).save(any());
     }
 }

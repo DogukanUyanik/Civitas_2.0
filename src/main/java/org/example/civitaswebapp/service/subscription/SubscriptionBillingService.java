@@ -10,4 +10,12 @@ public interface SubscriptionBillingService {
      * run. Returns a summary of the run.
      */
     SubscriptionBillingResult runDueSubscriptions();
+
+    /**
+     * One-off cleanup for members left with more than one outstanding PENDING membership-fee
+     * charge (e.g. from before the duplicate-billing guard existed): keeps each member's most
+     * recent PENDING charge and marks the rest EXPIRED. Idempotent — safe to run repeatedly.
+     * Returns the number of transactions expired.
+     */
+    int cleanupDuplicatePendingSubscriptionTransactions();
 }

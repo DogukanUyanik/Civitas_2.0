@@ -35,6 +35,9 @@ public class TransactionServiceImpl implements TransactionService {
     @Value("${stripe.secret.key}")
     private String stripeApiKey;
 
+    @Value("${app.base-url}")
+    private String appBaseUrl;
+
     @Autowired
     private MyUserService myUserService;
 
@@ -123,8 +126,8 @@ public class TransactionServiceImpl implements TransactionService {
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
-                    .setSuccessUrl("http://localhost:8080/payment-success?transactionId=" + transaction.getId())
-                    .setCancelUrl("http://localhost:8080/payment-cancel")
+                    .setSuccessUrl(appBaseUrl + "/payment-success?transactionId=" + transaction.getId())
+                    .setCancelUrl(appBaseUrl + "/payment-cancel")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setQuantity(1L)

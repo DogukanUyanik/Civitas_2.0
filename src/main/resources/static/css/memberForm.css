@@ -286,17 +286,6 @@
     border-bottom: 2px solid #e5e7eb;
 }
 
-/* Two-column layout for larger forms */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-}
-
-.form-row .form-group {
-    margin-bottom: 1.5rem;
-}
-
 /* Responsive design */
 @media (max-width: 768px) {
     .members-container {
@@ -321,11 +310,6 @@
     .btn-save,
     .btn-cancel {
         width: 100%;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
     }
 }
 

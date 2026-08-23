@@ -63,6 +63,7 @@
         </div>
 
         <div id="tab-income" class="tab-content active">
+            <div class="data-table-wrapper">
             <table class="data-table">
                 <thead>
                 <tr>
@@ -75,11 +76,11 @@
                 </thead>
                 <tbody>
                 <tr th:each="inv : ${incomes}">
-                    <td th:text="${inv.invoiceDate}">2025-01-01</td>
-                    <td th:text="${inv.counterparty}">Sponsor A</td>
-                    <td th:text="${inv.category}">Sponsorship</td>
-                    <td class="amount-positive" th:text="${'€ ' + inv.totalAmount}">€ 100</td>
-                    <td>
+                    <td th:text="${inv.invoiceDate}" th:attr="data-label=#{accounting.table.date}">2025-01-01</td>
+                    <td th:text="${inv.counterparty}" th:attr="data-label=#{accounting.table.counterparty}">Sponsor A</td>
+                    <td th:text="${inv.category}" th:attr="data-label=#{accounting.table.category}">Sponsorship</td>
+                    <td class="amount-positive" th:text="${'€ ' + inv.totalAmount}" th:attr="data-label=#{accounting.table.amount}">€ 100</td>
+                    <td th:attr="data-label=#{accounting.table.action}">
                         <a th:href="@{'/api/files/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" th:title="#{accounting.action.viewPdf}">
                             <i class="fa-solid fa-file-pdf"></i>
                         </a>
@@ -90,9 +91,11 @@
                 </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <div id="tab-expense" class="tab-content">
+            <div class="data-table-wrapper">
             <table class="data-table">
                 <thead>
                 <tr>
@@ -105,11 +108,11 @@
                 </thead>
                 <tbody>
                 <tr th:each="inv : ${expenses}">
-                    <td th:text="${inv.invoiceDate}">2025-01-01</td>
-                    <td th:text="${inv.counterparty}">Hosting</td>
-                    <td th:text="${inv.category}">Infra</td>
-                    <td class="amount-negative" th:text="${'€ ' + inv.totalAmount}">€ 50</td>
-                    <td>
+                    <td th:text="${inv.invoiceDate}" th:attr="data-label=#{accounting.table.date}">2025-01-01</td>
+                    <td th:text="${inv.counterparty}" th:attr="data-label=#{accounting.table.counterparty}">Hosting</td>
+                    <td th:text="${inv.category}" th:attr="data-label=#{accounting.table.category}">Infra</td>
+                    <td class="amount-negative" th:text="${'€ ' + inv.totalAmount}" th:attr="data-label=#{accounting.table.amount}">€ 50</td>
+                    <td th:attr="data-label=#{accounting.table.action}">
                         <a th:href="@{'/api/files/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" th:title="#{accounting.action.viewPdf}">
                             <i class="fa-solid fa-file-pdf"></i>
                         </a>
@@ -120,6 +123,7 @@
                 </tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 </main>

@@ -164,6 +164,7 @@ html, body {
     top: 32px; /* below the bell */
     right: 0;
     width: 250px;
+    max-width: calc(100vw - 32px);
     max-height: 300px;
     overflow-y: auto;
     background: white;

@@ -6,20 +6,6 @@
     <title th:text="#{login.title}">Login Page</title>
     <link rel="stylesheet" th:href="@{/css/login.css}" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* Position the toggle eye inside input */
-        .input-with-icon {
-            position: relative;
-        }
-        .input-with-icon .toggle-password {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #555;
-        }
-    </style>
 </head>
 <body>
 
@@ -31,14 +17,16 @@
             <p class="subtitle" th:text="#{login.subtitle}">Please enter your credentials</p>
         </div>
 
-        <div th:if="${error}" class="alert alert-error">
+        <div th:if="${errorKey}" class="alert alert-error" id="loginAlertError">
             <i class="fas fa-exclamation-circle"></i>
-            <span th:text="${error}">Error message</span>
+            <span th:text="#{${errorKey}}">Error message</span>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
         </div>
 
-        <div th:if="${msg}" class="alert alert-success">
+        <div th:if="${logoutKey}" class="alert alert-success" id="loginAlertSuccess">
             <i class="fas fa-check-circle"></i>
-            <span th:text="${msg}">Success message</span>
+            <span th:text="#{${logoutKey}}">Success message</span>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
         </div>
 
         <form th:action="@{/login}" method="post" class="login-form">
@@ -48,7 +36,8 @@
                     <span class="input-left-icon">
                         <i class="fas fa-user"></i>
                     </span>
-                    <input type="text" id="username" name="username" th:placeholder="#{login.username.placeholder}" required>
+                    <input type="text" id="username" name="username" th:placeholder="#{login.username.placeholder}"
+                           autocomplete="username" autofocus required>
                 </div>
             </div>
 
@@ -58,7 +47,8 @@
                     <span class="input-left-icon">
                         <i class="fas fa-lock"></i>
                     </span>
-                    <input type="password" id="password" name="password" th:placeholder="#{login.password.placeholder}" required>
+                    <input type="password" id="password" name="password" th:placeholder="#{login.password.placeholder}"
+                           autocomplete="current-password" required>
                     <span class="input-right-icon">
                         <i id="togglePassword" class="fas fa-eye"></i>
                     </span>
@@ -72,12 +62,6 @@
 
             <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
         </form>
-
-        <div class="login-footer">
-            <a href="#" th:text="#{login.link.forgot}">Forgot password?</a>
-            <span class="divider">|</span>
-            <a href="#" th:text="#{login.link.register}">Create account</a>
-        </div>
     </div>
 </main>
 

@@ -31,7 +31,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/stripe/webhook", "/api/admin/subscriptions/trigger-job")
                         .csrfTokenRepository(new HttpSessionCsrfTokenRepository()))
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/", "/login**", "/css/**", "/js/**", "/error", "/stripe/webhook").permitAll()
+                        .requestMatchers("/", "/login**", "/css/**", "/js/**", "/error", "/stripe/webhook", "/payment-success", "/payment-cancel").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

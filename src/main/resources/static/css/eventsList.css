@@ -639,7 +639,7 @@
     }
 
     .fc {
-        padding: 1rem;
+        padding: 0.5rem;
     }
 
     .fc .fc-col-header-cell {
@@ -648,13 +648,21 @@
     }
 
     .fc .fc-daygrid-day-number {
-        font-size: 12px;
-        padding: 0.25rem;
+        font-size: 11px;
+        padding: 0.2rem;
     }
 
     .fc-event {
-        font-size: 11px;
-        padding: 0.125rem 0.25rem;
+        font-size: 10px;
+        padding: 0.1rem 0.2rem;
+    }
+
+    #calendar {
+        min-height: 320px;
+    }
+
+    .fc-dayGridMonth-view .fc-daygrid-day {
+        min-height: 55px;
     }
 }
 

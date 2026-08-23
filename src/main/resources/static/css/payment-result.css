@@ -1,0 +1,61 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6; /* Tailwind's gray-100 */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-result-container {
+    width: 90%;
+    max-width: 420px;
+    margin: 1.5rem auto;
+    padding: 2.5rem 2rem;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .payment-result-container {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .payment-result-icon {
+        font-size: 3rem;
+    }
+
+    .payment-result-container h1 {
+        font-size: 1.3rem;
+    }
+}
+
+.payment-result-icon {
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+}
+
+.payment-result-icon-success {
+    color: #16a34a; /* Tailwind's green-600 */
+}
+
+.payment-result-icon-cancel {
+    color: #dc2626; /* Tailwind's red-600 */
+}
+
+.payment-result-container h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 0 0.75rem;
+    color: #111827; /* Tailwind's gray-900 */
+}
+
+.payment-result-container p {
+    margin: 0;
+    color: #374151; /* Tailwind's gray-700 */
+}

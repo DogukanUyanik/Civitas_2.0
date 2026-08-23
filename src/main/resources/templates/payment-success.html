@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{payment.success.title}">Payment received</title>
+    <link rel="stylesheet" th:href="@{/css/payment-result.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="payment-result-container">
+    <i class="fa-solid fa-circle-check payment-result-icon payment-result-icon-success"></i>
+    <h1 th:text="#{payment.success.title}">Payment received</h1>
+    <p th:text="#{payment.success.message}">Thank you, your payment was received.</p>
+</div>
+
+</body>
+</html>

@@ -388,6 +388,7 @@
 
 .transactions-table {
     width: 100%;
+    min-width: 700px;
     border-collapse: collapse;
     font-size: 0.95rem;
 }
@@ -591,8 +592,11 @@
     border-radius: 16px;
     width: 400px;
     max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     gap: 1rem;
+    box-sizing: border-box;
 }
 
 .modal-content input,
@@ -766,19 +770,75 @@ textarea {
 
     .table-container {
         padding: 0 1.5rem 1.5rem;
-    }
-
-    .transactions-table {
-        font-size: 0.85rem;
-    }
-
-    .transactions-table thead th,
-    .transactions-table tbody td {
-        padding: 0.75rem 0.5rem;
+        overflow-x: visible;
     }
 
     .transactions-title {
         font-size: 1.3rem;
+    }
+
+    /* Card view — table restacks into per-row cards on narrow screens */
+    .transactions-table,
+    .transactions-table tbody {
+        display: block;
+        min-width: 0;
+    }
+
+    .transactions-table thead {
+        display: none;
+    }
+
+    .transactions-table tbody tr {
+        display: block;
+        background: white;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        padding: 0.25rem 0;
+    }
+
+    .transactions-table tbody tr:hover {
+        transform: none;
+    }
+
+    .transactions-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+        font-size: 0.85rem;
+        min-width: 0;
+        text-align: right;
+    }
+
+    .transactions-table tbody td:last-child {
+        border-bottom: none;
+    }
+
+    .transactions-table tbody td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+        margin-right: 1rem;
+    }
+
+    .transactions-table tbody tr:last-child td:first-child,
+    .transactions-table tbody tr:last-child td:last-child {
+        border-radius: 0;
+    }
+
+    .no-data-row td {
+        display: block;
+        text-align: center;
+    }
+
+    .no-data-row td::before {
+        content: none;
     }
 
     .filter-controls {

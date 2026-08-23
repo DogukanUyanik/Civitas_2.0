@@ -14,10 +14,10 @@ public class LoginController {
     public String login(String error, String logout, Model model) {
 
         if (error != null) {
-            model.addAttribute("error", "Invalid username and password!");
+            model.addAttribute("errorKey", "login.error.invalid");
         }
         if (logout != null) {
-            model.addAttribute("msg", "You've been logged out successfully.");
+            model.addAttribute("logoutKey", "login.logout.success");
         }
         return "loginForm";
     }

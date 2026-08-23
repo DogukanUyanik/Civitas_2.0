@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{payment.cancel.title}">Payment cancelled</title>
+    <link rel="stylesheet" th:href="@{/css/payment-result.css}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="payment-result-container">
+    <i class="fa-solid fa-circle-xmark payment-result-icon payment-result-icon-cancel"></i>
+    <h1 th:text="#{payment.cancel.title}">Payment cancelled</h1>
+    <p th:text="#{payment.cancel.message}">Your payment was cancelled. No charge was made.</p>
+</div>
+
+</body>
+</html>

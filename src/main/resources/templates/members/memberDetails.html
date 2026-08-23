@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:text="#{member.details.title}">Member Details</title>
@@ -276,16 +277,16 @@
                         </thead>
                         <tbody id="transactionsBody">
                         <tr th:each="tx : ${member.transactions}">
-                            <td class="date-cell" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                            <td class="type-cell" th:text="#{${'transaction.type.' + tx.type}}" th:data-type="${tx.type}">Membership Fee</td>
-                            <td class="amount-cell" th:text="${tx.amount}"></td>
-                            <td class="currency-cell" th:text="${tx.currency}"></td>
-                            <td class="status-cell">
+                            <td class="date-cell" th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}" th:attr="data-label=#{transaction.date}"></td>
+                            <td class="type-cell" th:text="#{${'transaction.type.' + tx.type}}" th:data-type="${tx.type}" th:attr="data-label=#{transaction.type}">Membership Fee</td>
+                            <td class="amount-cell" th:text="${tx.amount}" th:attr="data-label=#{transaction.amount}"></td>
+                            <td class="currency-cell" th:text="${tx.currency}" th:attr="data-label=#{transaction.currency}"></td>
+                            <td class="status-cell" th:attr="data-label=#{transaction.status}">
                                 <span th:text="#{${'transaction.status.' + tx.status}}"
                                       th:class="'status-pill ' + ${tx.status}"
                                       th:data-status="${tx.status}">Succeeded</span>
                                                         </td>
-                            <td class="action-cell">
+                            <td class="action-cell" th:attr="data-label=#{table.actions}">
                                 <button th:if="${tx.status.name() == 'PENDING'}"
                                         type="button"
                                         class="mark-cash-btn"

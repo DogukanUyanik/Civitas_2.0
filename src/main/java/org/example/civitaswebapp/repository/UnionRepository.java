@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface UnionRepository extends JpaRepository<Union, UUID> {
+    boolean existsByName(String name);
 }

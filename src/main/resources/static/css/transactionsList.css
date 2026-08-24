@@ -492,6 +492,11 @@
         text-align: center;
     }
 
+    .title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
     .transactions-header {
         flex-direction: column;
         align-items: stretch;

@@ -590,6 +590,11 @@
         text-align: center;
     }
 
+    .calendar-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
     .events-header {
         flex-direction: column;
         gap: 1rem;

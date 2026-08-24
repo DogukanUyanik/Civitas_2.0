@@ -299,6 +299,11 @@
         text-align: center;
     }
 
+    .dashboard-title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
         grid-template-areas:

@@ -376,6 +376,11 @@
         text-align: center;
     }
 
+    .title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
     .members-header {
         flex-direction: column;
         gap: 0.75rem;

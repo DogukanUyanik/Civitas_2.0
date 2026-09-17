@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+Civitas is a multi-tenant SaaS platform for managing associations and unions ("verenigingen").
+Core focus: strict data isolation between tenants ("unions") at every layer of the application.
+
 ## Commands
 
 ```bash
@@ -19,6 +24,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Run a single test method
 ./mvnw test -Dtest=ClassName#methodName
+
+# Compile only (run after any change)
+./mvnw compile
 ```
 
 ## Tech Stack
@@ -52,9 +60,9 @@ validator/           — Custom Bean Validation (e.g. MemberEmailValidator)
 config/              — SecurityConfig
 ```
 
-### Multi-Tenancy Pattern
+### Multi-Tenancy Pattern (read this before touching any service or repository)
 
-Every tenant-scoped entity has a `@ManyToOne Union union` field. **All data access is manually scoped in the service layer** — there is no global filter.
+Every tenant-scoped entity has a `@ManyToOne Union union` field. **All data access is manually scoped in the service layer** — there is no global filter, so this must be applied by hand, every time.
 
 The pattern used in every service:
 
@@ -66,10 +74,16 @@ private Union getCurrentUserUnion() {
 }
 ```
 
-Rules that must hold for every service method:
+Rules that must hold for every service method, with no exceptions:
 1. **Read**: query with `findAllByUnion(getCurrentUserUnion(), ...)` — never query without union scope.
 2. **Create**: stamp new entity with `entity.setUnion(createdByUser.getUnion())` before saving.
 3. **Update/Delete**: call `verifyXxxBelongsToUnion(entity)` before mutating. Treat `AccessDeniedException` as "not found" to avoid information leakage (see `MemberServiceImpl.findById`).
+
+**Adding a new tenant-scoped entity — follow this checklist every time:**
+1. Add `@ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "union_id", nullable = false) private Union union;`
+2. Repository methods must all accept `Union union` as a filter parameter.
+3. Service create method: `entity.setUnion(getCurrentUserUnion())`.
+4. Service read/update/delete: call a `verifyXxxBelongsToUnion()` guard before any mutation.
 
 ### Event-Driven Notifications
 
@@ -91,45 +105,14 @@ Each dashboard tile is a `KpiProvider` implementation (in `service/kpi/`). `Dash
 
 - All routes require authentication except `/`, `/login**`, `/css/**`, `/js/**`, `/error`, `/stripe/webhook`
 - CSRF enabled everywhere except `/stripe/webhook`
-- No `@PreAuthorize` annotations — union authorization is done manually in service methods
-
-## Adding a New Tenant-Scoped Entity
-
-1. Add `@ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "union_id", nullable = false) private Union union;`
-2. Repository methods must all accept `Union union` as a filter parameter
-3. Service create method: `entity.setUnion(getCurrentUserUnion())`
-4. Service read/delete: call a `verifyXxxBelongsToUnion()` guard before any mutation
-
-# Civitas Project Guide
-
-## Project Overview
-Civitas is een Multi-Tenant SaaS platform voor het beheer van verenigingen en vakbonden.
-- **Kernfocus:** Strikte data-isolatie tussen unies (multi-tenancy).
-- **Tech Stack:** Java 21, Spring Boot 3, Hibernate/JPA, MySQL, Spring Security, Stripe, i18n.
+- No `@PreAuthorize` annotations — union authorization is done manually in service methods (see Multi-Tenancy Pattern above)
 
 ## Development Rules
-- **Taal:** Code en comments in het Engels. Gebruikers-interface en properties in NL/EN/TR.
-- **Architectuur:** Respecteer altijd de `UnionId` filters in repositories en services voor security.
-- **Testing:** Schrijf JUnit 5/Mockito tests voor elke bugfix of nieuwe feature.
-- **Workflow:** Toon altijd een plan voordat je bestanden wijzigt. Draai `./mvnw compile` na wijzigingen.
 
-## Active TODO List
-### i18n & UX
-- [x] Notificaties vertalen naar Turks en Engels (messages_tr.properties, messages_en.properties).
-- [x] Accounting page vertalen naar Turks en Engels.
-- [x] Pagetitle toevoegen op de Accounting page.
-- [x] Transactions page: Filter direct toepassen bij selectie (geen enter nodig).
+- **Language:** Code, comments, and this file are in English. User-facing UI text and `messages*.properties` are NL/EN/TR.
+- **Testing:** Write JUnit 5/Mockito tests for every bugfix or new feature.
+- **Workflow:** Show a plan before modifying files. Run `./mvnw compile` after changes.
 
-### Bugfixes
-- [x] Transactions pagination bug oplossen.
-- [x] Invoice upload debuggen: Geuploade factuur verschijnt niet in de image preview.
-- [x] 'Mark all notifications as read' 404 error fixen http://localhost:8080/notifications/mark-all-read.
+## Active Work
 
-### New Features & Scaling
-- [x] Bulk member import: Excel upload functionaliteit implementeren.
-- [ ] Recurring payments onderzoek en implementatie (Stripe subs).
-- [ ] Security audit: Validatie van alle betalings-flows en data-isolatie.
-
-### Production Prep
-- [ ] Voorbereiding hosting (Railway/Docker).
-- [ ] Twilio & Stripe productie-configuratie.
+The current task list lives in `TODO.md`, not here — check it separately when picking up work; it is not reloaded automatically with this file.

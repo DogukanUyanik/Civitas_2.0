@@ -29,6 +29,7 @@ Working task list, separate from CLAUDE.md. Reference this manually when picking
 - [ ] Accounting: "download all documents for category X as zip" per quarter
 - [ ] Automated, regular database backups
 - [ ] Backup restore test — an untested backup is an unproven backup
+- [ ] Introduce Flyway for database migrations, replacing `ddl-auto=update` — current setting works but risks silent data loss on schema changes (e.g. column renames); becomes more important as the accounting categories and role features add schema complexity
 
 ## Production prep
 

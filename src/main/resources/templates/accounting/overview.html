@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,9 +54,9 @@
                 <button class="tab-btn" onclick="switchTab('expense')" th:text="#{accounting.tab.expenses}">Expenses</button>
             </div>
 
-            <input type="file" id="fileUpload" style="display: none" accept=".pdf, .png, .jpg" onchange="handleFileUpload(this)">
+            <input type="file" id="fileUpload" style="display: none" accept=".pdf, .png, .jpg" onchange="handleFileUpload(this)" sec:authorize="hasRole('ADMIN')">
 
-            <button class="add-btn" onclick="document.getElementById('fileUpload').click()">
+            <button class="add-btn" sec:authorize="hasRole('ADMIN')" onclick="document.getElementById('fileUpload').click()">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span th:text="#{accounting.button.uploadInvoice}">Upload Invoice</span>
             </button>
@@ -84,7 +84,7 @@
                         <a th:href="@{'/api/files/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" th:title="#{accounting.action.viewPdf}">
                             <i class="fa-solid fa-file-pdf"></i>
                         </a>
-                        <button type="button" class="icon-btn danger" th:title="#{accounting.action.delete}" th:onclick="'deleteInvoice(' + ${inv.id} + ')'">
+                        <button type="button" class="icon-btn danger" sec:authorize="hasRole('ADMIN')" th:title="#{accounting.action.delete}" th:onclick="'deleteInvoice(' + ${inv.id} + ')'">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -116,7 +116,7 @@
                         <a th:href="@{'/api/files/invoices/' + ${inv.fileUrl}}" target="_blank" class="icon-btn" th:title="#{accounting.action.viewPdf}">
                             <i class="fa-solid fa-file-pdf"></i>
                         </a>
-                        <button type="button" class="icon-btn danger" th:title="#{accounting.action.delete}" th:onclick="'deleteInvoice(' + ${inv.id} + ')'">
+                        <button type="button" class="icon-btn danger" sec:authorize="hasRole('ADMIN')" th:title="#{accounting.action.delete}" th:onclick="'deleteInvoice(' + ${inv.id} + ')'">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </td>
@@ -128,7 +128,7 @@
     </div>
 </main>
 
-<div id="reviewModal" class="modal">
+<div id="reviewModal" class="modal" sec:authorize="hasRole('ADMIN')">
     <div class="modal-content dual-pane">
 
         <div class="modal-left">

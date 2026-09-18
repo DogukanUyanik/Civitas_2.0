@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,14 +44,14 @@
                 </div>
             </form>
 
-            <input type="file" id="bulkImportInput" style="display:none" accept=".xlsx"
+            <input type="file" id="bulkImportInput" style="display:none" accept=".xlsx" sec:authorize="hasRole('ADMIN')"
                    onchange="handleBulkImport(this)">
-            <button class="import-member-btn" onclick="document.getElementById('bulkImportInput').click()">
+            <button class="import-member-btn" sec:authorize="hasRole('ADMIN')" onclick="document.getElementById('bulkImportInput').click()">
                 <i class="fas fa-file-excel"></i>
                 <span th:text="#{members.import.button}">Import Excel</span>
             </button>
 
-            <button class="add-member-btn" onclick="window.location.href='/members/add'">
+            <button class="add-member-btn" sec:authorize="hasRole('ADMIN')" onclick="window.location.href='/members/add'">
                 <i class="fas fa-plus"></i>
                 <span th:text="#{members.add.button}">Add Member</span>
             </button>
@@ -85,7 +85,7 @@
                     <a th:href="@{/members/view/{id}(id=${member.id})}" th:title="#{table.view}">
                         <i class="fa-solid fa-eye"></i>
                     </a>
-                    <a th:href="@{/members/edit/{id}(id=${member.id})}" th:title="#{table.edit}">
+                    <a th:href="@{/members/edit/{id}(id=${member.id})}" th:title="#{table.edit}" sec:authorize="hasRole('ADMIN')">
                         <i class="fa-solid fa-pencil"></i>
                     </a>
                 </td>

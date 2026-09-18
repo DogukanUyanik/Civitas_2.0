@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -42,6 +43,7 @@ public class TransactionRestController {
     private MessageSource messageSource;
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/send-payment")
     public ResponseEntity<Map<String, Object>> sendPayment(
             @RequestParam Long memberId,
@@ -140,6 +142,7 @@ public class TransactionRestController {
      * Settles a PENDING transaction as a manual/cash payment, bypassing Stripe. Union scoping and
      * the pending-state guard live in the service layer.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/mark-cash")
     public ResponseEntity<Map<String, Object>> markAsCash(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();

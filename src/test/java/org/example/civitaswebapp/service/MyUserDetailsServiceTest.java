@@ -87,6 +87,31 @@ class MyUserDetailsServiceTest {
     }
 
     @Test
+    void loadUserByUsername_mapsViewerRoleToRoleViewerAuthority() {
+        MyUser viewer = buildManagedUser();
+        viewer.setRole(MyUserRole.VIEWER);
+        when(myUserRepository.findByUsername("apo")).thenReturn(viewer);
+
+        MyUserPrincipal principal = (MyUserPrincipal) myUserDetailsService.loadUserByUsername("apo");
+
+        assertThat(principal.getRole()).isEqualTo(MyUserRole.VIEWER);
+        assertThat(principal.getAuthorities())
+                .extracting("authority")
+                .containsExactly("ROLE_VIEWER");
+    }
+
+    @Test
+    void principalEqualityIsByUserId_soSessionRegistryGroupsRepeatLogins() {
+        UUID unionId = UUID.randomUUID();
+        MyUserPrincipal firstLogin = new MyUserPrincipal(7L, "apo", "hash", MyUserRole.ADMIN, unionId);
+        MyUserPrincipal secondLogin = new MyUserPrincipal(7L, "apo", "hash", MyUserRole.ADMIN, unionId);
+        MyUserPrincipal someoneElse = new MyUserPrincipal(8L, "eve", "hash", MyUserRole.ADMIN, unionId);
+
+        assertThat(firstLogin).isEqualTo(secondLogin).hasSameHashCodeAs(secondLogin);
+        assertThat(firstLogin).isNotEqualTo(someoneElse);
+    }
+
+    @Test
     void loadUserByUsername_throwsWhenUserMissing() {
         when(myUserRepository.findByUsername("ghost")).thenReturn(null);
 

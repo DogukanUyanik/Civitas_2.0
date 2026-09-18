@@ -1,0 +1,142 @@
+/* Users & Roles screen. Layout, title and table styling come from membersList.css. */
+
+.flash {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.flash-success {
+    color: #065f46;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.flash-error {
+    color: #b91c1c;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.role-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: white;
+}
+
+.role-pill.admin {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.role-pill.viewer {
+    background: linear-gradient(135deg, #64748b, #475569);
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+}
+
+.role-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.role-form select,
+.add-user-card input,
+.add-user-card select {
+    padding: 0.6rem 0.9rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #374151;
+    background: #f9fafb;
+}
+
+.role-form select:focus,
+.add-user-card input:focus,
+.add-user-card select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.12);
+}
+
+.role-save-btn {
+    padding: 0.6rem 1.1rem;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.role-form select:disabled,
+.role-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.add-user-card {
+    max-width: 520px;
+    margin-top: 2rem;
+    padding: 1.75rem 2rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.add-user-card h2 {
+    margin: 0 0 1.25rem;
+    font-size: 1.25rem;
+    color: #1f2937;
+}
+
+.add-user-card .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1.1rem;
+}
+
+.add-user-card label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.add-user-card .hint {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.field-error {
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .role-form {
+        flex-wrap: wrap;
+    }
+
+    .add-user-card {
+        padding: 1.25rem;
+    }
+}

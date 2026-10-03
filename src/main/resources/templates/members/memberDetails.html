@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -87,12 +87,12 @@
                         <span class="detail-value" th:text="${#temporals.format(member.createdAt, 'dd MMM, yyyy')}"></span>
                     </div>
 
-                    <button class="send-payment-btn" id="sendPaymentBtn" th:data-member-id="${member.id}">
+                    <button class="send-payment-btn" id="sendPaymentBtn" th:data-member-id="${member.id}" sec:authorize="hasRole('ADMIN')">
                         <i class="bi bi-cash-stack"></i> <span th:text="#{button.sendPayment}">Send Payment</span>
                     </button>
 
                     <!-- Payment Modal -->
-                    <div class="modal-overlay hidden" id="paymentModal">
+                    <div class="modal-overlay hidden" id="paymentModal" sec:authorize="hasRole('ADMIN')">
                         <div class="modal-content">
                             <h3 th:text="#{payment.send}">Send Payment</h3>
                             <form id="paymentForm"
@@ -287,7 +287,7 @@
                                       th:data-status="${tx.status}">Succeeded</span>
                                                         </td>
                             <td class="action-cell" th:attr="data-label=#{table.actions}">
-                                <button th:if="${tx.status.name() == 'PENDING'}"
+                                <button th:if="${tx.status.name() == 'PENDING'}" sec:authorize="hasRole('ADMIN')"
                                         type="button"
                                         class="mark-cash-btn"
                                         th:data-tx-id="${tx.id}"

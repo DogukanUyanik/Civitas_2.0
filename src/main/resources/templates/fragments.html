@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
@@ -132,6 +132,21 @@
                     </li>
                 </ul>
             </div>
+
+            <!-- Settings: user & role management is ADMIN-only -->
+            <div class="nav-section" sec:authorize="hasRole('ADMIN')">
+                <div class="nav-title" th:text="#{sidebar.section.settings}">Settings</div>
+                <ul class="sidebar-links">
+                    <li>
+                        <a th:href="@{/settings/users}" th:classappend="${currentUri == '/settings/users'} ? 'active' : ''"
+                           th:title="#{sidebar.users}">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span class="link-text" th:text="#{sidebar.users}">Users &amp; Roles</span>
+                            <span class="tooltip" th:text="#{sidebar.users}">Users &amp; Roles</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </nav>
 
         <div class="sidebar-footer" th:if="${username != null and username != ''}">
@@ -141,7 +156,7 @@
                 </div>
                 <div class="user-details">
                     <span class="user-name" th:text="${username}">Username</span>
-                    <span class="user-role" th:text="#{sidebar.user.role}">Admin Manager</span>
+                    <span class="user-role" th:text="#{${'sidebar.role.' + role}}">Admin</span>
                 </div>
             </div>
             <form th:action="@{/logout}" method="post">

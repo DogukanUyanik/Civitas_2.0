@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -63,12 +64,14 @@ public class MemberController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/add")
     public String showAddMemberForm(Model model) {
         model.addAttribute("member", new Member());
         return "members/memberForm";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/edit/{id}")
     public String showEditMemberForm(@PathVariable Long id, Model model) {
         Member member = memberService.findById(id)
@@ -77,6 +80,7 @@ public class MemberController {
         return "members/memberForm";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public String saveMember(@Valid @ModelAttribute("member") Member member,
                              BindingResult result,

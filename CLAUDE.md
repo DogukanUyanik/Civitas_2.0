@@ -98,7 +98,7 @@ Each dashboard tile is a `KpiProvider` implementation (in `service/kpi/`). `Dash
 `spring.jpa.hibernate.ddl-auto=create-drop` — schema is **dropped and recreated on every startup**. There is no migration tool. `InitDataConfig` (`CommandLineRunner`) seeds two test unions and demo data on each start.
 
 **Local dev credentials** (in `application.properties`):
-- DB: `jdbc:mysql://localhost:3306/civitas_db2`, user `springuser2` / `Spring123!`
+- DB: `jdbc:mysql://localhost:3306/civitas_db`, user `civitas_user` / `root`
 - Login: `apo` / `apo` (Civitas Demo Union), `admin_gent` / `gent123` (Student Union Ghent)
 
 ### Security

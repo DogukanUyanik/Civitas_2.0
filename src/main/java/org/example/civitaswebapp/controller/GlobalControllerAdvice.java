@@ -24,7 +24,7 @@ public class GlobalControllerAdvice {
                 .map(GrantedAuthority::getAuthority)
                 .map(role -> role.replace("ROLE_", ""))
                 .findFirst()
-                .orElse("USER");
+                .orElse("VIEWER");
     }
 
     @ModelAttribute("currentUri")

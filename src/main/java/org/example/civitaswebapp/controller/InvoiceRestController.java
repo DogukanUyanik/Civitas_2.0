@@ -6,6 +6,7 @@ import org.example.civitaswebapp.service.MyUserService;
 import org.example.civitaswebapp.service.accounting.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +20,7 @@ public class InvoiceRestController {
     @Autowired
     private MyUserService myUserService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/scan")
     public ResponseEntity<ScannedInvoiceDto> scanInvoice(@RequestParam("file") MultipartFile file) {
         try {
@@ -29,12 +31,14 @@ public class InvoiceRestController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id) {
         invoiceService.deleteInvoice(id, myUserService.getLoggedInUser().getUnion());
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/confirm")
     public ResponseEntity<Invoice> confirmInvoice(@RequestBody Invoice invoice) {
         invoice.setUnion(myUserService.getLoggedInUser().getUnion());

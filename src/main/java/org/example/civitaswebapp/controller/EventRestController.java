@@ -7,6 +7,7 @@ import org.example.civitaswebapp.service.EventService;
 import org.example.civitaswebapp.service.MyUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class EventRestController {
         return eventService.getEvents(Pageable.unpaged()).getContent();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public EventResponseDto createEvent(@RequestBody EventRequest event) {
         // Reload a fresh, request-scoped MyUser instead of using the shared session principal.

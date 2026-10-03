@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -49,6 +50,18 @@ public final class MyUserPrincipal implements UserDetails {
 
     public MyUserRole getRole() {
         return role;
+    }
+
+    // Identity is the user id only: SessionRegistry keys sessions by principal, so two logins of
+    // the same user must compare equal even though each login builds a fresh principal instance.
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MyUserPrincipal other && Objects.equals(id, other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     @Override

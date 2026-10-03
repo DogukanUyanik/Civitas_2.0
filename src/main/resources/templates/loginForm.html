@@ -23,6 +23,13 @@
             <button type="button" class="alert-dismiss" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
         </div>
 
+        <!-- Session ended because an admin changed this account's role (see UserSessionExpirer) -->
+        <div th:if="${param.expired}" class="alert alert-error" id="loginAlertExpired">
+            <i class="fas fa-info-circle"></i>
+            <span th:text="#{login.expired}">Your session has ended. Please log in again.</span>
+            <button type="button" class="alert-dismiss" aria-label="Dismiss" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+
         <div th:if="${logoutKey}" class="alert alert-success" id="loginAlertSuccess">
             <i class="fas fa-check-circle"></i>
             <span th:text="#{${logoutKey}}">Success message</span>

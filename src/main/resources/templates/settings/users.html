@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title th:text="#{users.page.title}">Users &amp; Roles</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/membersList.css}" />
+    <link rel="stylesheet" th:href="@{/css/users.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script th:src="@{/js/sidebar.js}" defer></script>
+    <script th:src="@{/js/header.js}" defer></script>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div th:replace="~{fragments :: sidebar}"></div>
+<div th:replace="~{fragments :: header}"></div>
+
+<main class="members-container">
+    <div class="members-header">
+        <h1 class="title" th:text="#{users.heading}">Users &amp; Roles</h1>
+    </div>
+
+    <div class="flash flash-success" th:if="${success}">
+        <i class="fas fa-check-circle"></i> <span th:text="${success}">Saved</span>
+    </div>
+    <div class="flash flash-error" th:if="${error}">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${error}">Error</span>
+    </div>
+
+    <!-- Users of the current union -->
+    <div class="members-table-wrapper">
+        <table class="members-table">
+            <thead>
+            <tr>
+                <th th:text="#{users.table.username}">Username</th>
+                <th th:text="#{users.table.role}">Role</th>
+                <th th:text="#{users.table.actions}">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}">
+                <td th:attr="data-label=#{users.table.username}" th:text="${u.username}">jdoe</td>
+                <td th:attr="data-label=#{users.table.role}">
+                    <span th:classappend="${u.role.name() == 'ADMIN'} ? 'role-pill admin' : 'role-pill viewer'"
+                          th:text="#{${'users.role.' + u.role.name()}}">Admin</span>
+                </td>
+                <td th:attr="data-label=#{users.table.actions}">
+                    <form th:action="@{/settings/users/{id}/role(id=${u.id})}" method="post" class="role-form">
+                        <select name="role" th:disabled="${u.id == currentUserId}"
+                                th:title="${u.id == currentUserId} ? #{users.role.self} : null">
+                            <option th:each="r : ${roles}" th:value="${r.name()}"
+                                    th:selected="${r == u.role}"
+                                    th:text="#{${'users.role.' + r.name()}}">Admin</option>
+                        </select>
+                        <button type="submit" class="role-save-btn" th:disabled="${u.id == currentUserId}"
+                                th:title="${u.id == currentUserId} ? #{users.role.self} : null"
+                                th:text="#{users.role.save}">Save</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add user -->
+    <section class="add-user-card">
+        <h2 th:text="#{users.add.heading}">Add user</h2>
+        <form th:action="@{/settings/users}" th:object="${createUserForm}" method="post" autocomplete="off">
+            <div class="form-row">
+                <label for="username" th:text="#{users.form.username}">Username</label>
+                <input type="text" id="username" th:field="*{username}" maxlength="50" autocomplete="off">
+                <div class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">error</div>
+            </div>
+            <div class="form-row">
+                <label for="password" th:text="#{users.form.password}">Temporary password</label>
+                <!-- Plain input, not th:field: the password must never be echoed back into the page -->
+                <input type="password" id="password" name="password" maxlength="72" autocomplete="new-password">
+                <small class="hint" th:text="#{users.form.password.hint}">At least 8 characters.</small>
+                <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">error</div>
+            </div>
+            <div class="form-row">
+                <label for="newRole" th:text="#{users.form.role}">Role</label>
+                <select id="newRole" th:field="*{role}">
+                    <option th:each="r : ${roles}" th:value="${r.name()}"
+                            th:text="#{${'users.role.' + r.name()}}">Admin</option>
+                </select>
+                <div class="field-error" th:if="${#fields.hasErrors('role')}" th:errors="*{role}">error</div>
+            </div>
+            <button type="submit" class="add-member-btn">
+                <i class="fas fa-user-plus"></i>
+                <span th:text="#{users.form.submit}">Add user</span>
+            </button>
+        </form>
+    </section>
+</main>
+
+</body>
+</html>

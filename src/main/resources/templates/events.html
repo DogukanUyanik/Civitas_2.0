@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +34,7 @@
     <div class="events-header">
         <h1 class="calendar-title" th:text="#{events.title}">Union Events</h1>
         <div class="header-actions">
-            <button class="add-event-btn" data-bs-toggle="modal" data-bs-target="#eventModal">
+            <button class="add-event-btn" sec:authorize="hasRole('ADMIN')" data-bs-toggle="modal" data-bs-target="#eventModal">
                 <i class="fas fa-plus"></i>
                 <span th:text="#{events.createEvent}">Create Event</span>
             </button>
@@ -63,7 +63,7 @@
 </div>
 
 <!-- Enhanced Modal for creating a new event -->
-<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true" sec:authorize="hasRole('ADMIN')">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -204,8 +204,13 @@
             cleanupModals();
         }
 
+        // The create-event modal is only rendered for ADMINs (sec:authorize). Without it the calendar
+        // must stay read-only: no date selection, no create form wiring.
+        const canCreateEvents = document.getElementById('eventModal') !== null;
+
         // Function to properly open modal
         function openEventModal() {
+            if (!canCreateEvents) return;
             // First close any existing modal
             closeExistingModal();
 
@@ -338,13 +343,14 @@
                         failureCallback(error);
                     });
             },
-            selectable: true,
+            selectable: canCreateEvents,
             selectMirror: true,
             dayMaxEvents: true,
             weekends: true,
 
             // Enhanced date click functionality
             dateClick: function(info) {
+                if (!canCreateEvents) return;
                 const startDate = new Date(info.dateStr + 'T09:00:00');
                 const endDate = new Date(info.dateStr + 'T10:00:00');
 
@@ -389,6 +395,7 @@
 
             // Enhanced select functionality for date ranges
             select: function(info) {
+                if (!canCreateEvents) return;
                 document.getElementById('start').value = info.startStr.slice(0, 16);
                 document.getElementById('end').value = info.endStr.slice(0, 16);
 
@@ -435,7 +442,8 @@
         });
 
         // Enhanced event creation form
-        document.getElementById('eventForm').addEventListener('submit', function(e) {
+        const eventFormEl = document.getElementById('eventForm');
+        if (eventFormEl) eventFormEl.addEventListener('submit', function(e) {
             e.preventDefault();
 
             const event = {
@@ -497,7 +505,8 @@
         });
 
         // Listen for modal hidden event to clean up
-        document.getElementById('eventModal').addEventListener('hidden.bs.modal', function() {
+        const eventModalEl = document.getElementById('eventModal');
+        if (eventModalEl) eventModalEl.addEventListener('hidden.bs.modal', function() {
             currentModal = null;
             document.getElementById('eventForm').reset();
             cleanupModals(); // Extra cleanup

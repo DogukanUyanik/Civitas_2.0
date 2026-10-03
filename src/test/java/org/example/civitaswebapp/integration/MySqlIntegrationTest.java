@@ -25,6 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
         "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.flyway.enabled=false",
         "spring.messages.basename=i18n/messages",
         "stripe.secret.key=sk_test_dummy",
         "stripe.webhook.secret=whsec_dummy",

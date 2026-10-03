@@ -37,3 +37,5 @@ src/main/resources/application.yml
 src/main/resources/application-local.properties
 
 *.sql
+# Flyway migrations are source code and must be committed, unlike DB dumps/backups.
+!src/main/resources/db/migration/*.sql

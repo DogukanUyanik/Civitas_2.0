@@ -95,7 +95,14 @@ Each dashboard tile is a `KpiProvider` implementation (in `service/kpi/`). `Dash
 
 ### Database
 
-`spring.jpa.hibernate.ddl-auto=create-drop` — schema is **dropped and recreated on every startup**. There is no migration tool. `InitDataConfig` (`CommandLineRunner`) seeds two test unions and demo data on each start.
+**Flyway owns the schema.** `spring.jpa.hibernate.ddl-auto=validate` — Hibernate never changes the schema, it only fails startup if the entities don't match it. `InitDataConfig` (`CommandLineRunner`) seeds two test unions and demo data on each start.
+
+- Migrations live in `src/main/resources/db/migration/`, named `V{n}__{snake_case_description}.sql` (next number in sequence, double underscore). `V1__baseline.sql` is the schema as it was when Flyway was introduced; existing DBs were baselined at version 1, so it only runs on empty DBs.
+- Any entity change that affects the schema (new field/entity, rename, type/length change, **new enum constant** — `@Enumerated(STRING)` maps to a native MySQL `ENUM`, and `validate` doesn't compare its value list) needs a new migration in the same commit.
+- Never edit a migration that has already been applied (checksum mismatch fails startup); write a new version instead. MySQL DDL isn't transactional, so keep migrations small.
+- `docs/migrations/` holds pre-Flyway, manually applied scripts — history only, already part of V1.
+- A non-empty DB without `flyway_schema_history` fails startup on purpose (`baseline-on-migrate=false`). To adopt an existing DB, start once with `SPRING_FLYWAY_BASELINE_ON_MIGRATE=true`, then remove it.
+- Testcontainers integration tests (`MySqlIntegrationTest` subclasses) use `create-drop` with Flyway disabled; `FlywayBaselineIntegrationTest` is the one test that runs the real migrations + `validate`.
 
 **Local dev credentials** (in `application.properties`):
 - DB: `jdbc:mysql://localhost:3306/civitas_db`, user `civitas_user` / `root`

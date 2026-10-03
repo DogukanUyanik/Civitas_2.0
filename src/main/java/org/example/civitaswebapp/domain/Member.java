@@ -66,8 +66,8 @@ public class Member {
     private MemberStatus memberStatus;
 
     // Language the member is contacted in (WhatsApp templates, event reminders). Defaults to NL
-    // since Civitas targets Flanders (civitas.vlaanderen). The column is left nullable on purpose:
-    // rows predating it can hold NULL, which the send path tolerates via MemberLanguage.orDefault.
+    // since Civitas targets Flanders (civitas.vlaanderen). The column is NOT NULL (enforced by
+    // V2__member_language_not_null.sql); the send path still guards with MemberLanguage.orDefault.
     @NotNull(message = "{member.language.required}")
     @Enumerated(EnumType.STRING)
     @Builder.Default
